@@ -1,0 +1,10 @@
+<resources>
+    <declare-styleable name="AppTheme">
+        <attr name="titlePageIndicatorStyle" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="BezelImageView">
+        <attr name="maskDrawable" format="reference" />
+        <attr name="borderDrawable" format="reference" />
+    </declare-styleable>
+</resources>

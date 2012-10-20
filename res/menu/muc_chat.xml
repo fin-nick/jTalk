@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/sidebar"
+        android:showAsAction="always"
+        android:icon="@drawable/ic_menu_sidebar"
+        android:title="@string/HideSidebar"/>
+    <item android:id="@+id/smile"
+        android:icon="@drawable/ic_menu_emoticons"
+          android:showAsAction="ifRoom"
+          android:title="@string/PasteSmile" />
+    <item android:id="@+id/nick"
+          android:showAsAction="never"
+          android:title="@string/PasteNick" />
+    <item android:id="@+id/templates"
+          android:showAsAction="never"
+          android:title="@string/Templates" />
+    <item android:id="@+id/subj"
+          android:showAsAction="never"
+          android:title="@string/Subject" />
+    <item android:id="@+id/invite"
+          android:showAsAction="never"
+          android:title="@string/Invite" />
+    <item android:id="@+id/search"
+          android:title="@android:string/search_go"
+          android:actionViewClass="android.widget.SearchView"
+          android:showAsAction="never|collapseActionView"/>
+    <item android:id="@+id/clear"
+          android:showAsAction="never"
+          android:title="@string/Clear"/>
+    <item android:id="@+id/leave"
+          android:showAsAction="never"
+          android:title="@string/Leave"/>
+</menu>

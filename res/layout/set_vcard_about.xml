@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    
+    <ScrollView android:id="@+id/ScrollView01"
+    	android:layout_weight="1" 
+    	android:layout_height="wrap_content" 
+    	android:layout_width="fill_parent">
+    	<LinearLayout android:orientation="vertical" 
+    		android:layout_height="wrap_content" 
+    		android:layout_width="fill_parent">
+    		
+            <TextView android:text="@string/FirstName"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            <EditText android:id="@+id/firstname" 
+            	android:singleLine="true"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+            	
+            <TextView android:text="@string/MiddleName"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            <EditText android:id="@+id/middlename" 
+            	android:singleLine="true"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+            	
+            <TextView android:text="@string/LastName"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            <EditText android:id="@+id/lastname" 
+            	android:singleLine="true"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+            	
+            <TextView android:text="@string/NickName"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            <EditText android:id="@+id/nickname" 
+            	android:singleLine="true"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+            	
+            <TextView android:text="@string/Birthday"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            <EditText android:id="@+id/bday" 
+            	android:singleLine="true"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+            	
+            <TextView android:text="@string/Url"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            <EditText android:id="@+id/url" 
+            	android:singleLine="true"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+            	
+            <TextView android:text="@string/About"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            <EditText android:id="@+id/desc" 
+            	android:lines="4"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" 
+            	android:gravity="top"/>
+   	 </LinearLayout>
+    </ScrollView>
+</LinearLayout>

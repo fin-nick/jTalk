@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/smile"
+        android:icon="@drawable/ic_menu_emoticons"
+          android:title="@string/PasteSmile"
+          android:showAsAction="ifRoom"/>
+    <item android:id="@+id/sidebar"
+        android:showAsAction="always"
+        android:icon="@drawable/ic_menu_sidebar"
+        android:title="@string/HideSidebar"/>
+    <item android:id="@+id/templates"
+          android:title="@string/Templates"
+          android:showAsAction="never"/>
+    <item android:id="@+id/info"
+          android:title="@string/Info"
+          android:showAsAction="never"/>
+    <item android:id="@+id/history"
+          android:title="@string/History"
+          android:showAsAction="never"/>
+    <item android:id="@+id/search"
+          android:title="@android:string/search_go"
+          android:actionViewClass="android.widget.SearchView"
+          android:showAsAction="never|collapseActionView"/>
+    <item android:id="@+id/clear"
+          android:title="@string/Clear"
+          android:showAsAction="never"/>
+    <item android:id="@+id/delete_history"
+          android:title="@string/DeleteHistory"
+          android:showAsAction="never"/>
+    <item android:id="@+id/close"
+          android:title="@string/Close"
+          android:showAsAction="never"/>
+</menu>

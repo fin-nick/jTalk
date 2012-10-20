@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:id="@+id/chat_linear">
+	
+	<LinearLayout android:id="@+id/linear"
+		android:layout_weight="2"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
+			<net.ustyugov.jtalk.view.MyListView android:id="@+id/chat_list"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:layout_weight="1" />
+			<LinearLayout android:id="@+id/sidebar"
+			    android:layout_weight="3"
+			    android:orientation="vertical"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent">
+			    <ListView android:id="@+id/open_chat_list"
+					android:visibility="gone"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"/>
+				<ListView android:id="@+id/muc_user_list"
+					android:visibility="gone"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"/>
+			</LinearLayout>
+	</LinearLayout>
+		
+	<LinearLayout android:layout_weight="0"
+	    android:id="@+id/InputPanel"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content">
+		
+		<EditText android:id="@+id/messageInput"
+			android:layout_height="wrap_content"
+			android:layout_width="0dip"
+			android:layout_weight="1" 
+			android:inputType="textCapSentences|textMultiLine"
+			android:maxLines="3"/>
+	   <Button android:id="@+id/SendButton"
+	       android:layout_width="wrap_content" 
+	       android:layout_height="wrap_content" 
+	       android:text="@string/Send"/>
+    </LinearLayout>
+</LinearLayout>

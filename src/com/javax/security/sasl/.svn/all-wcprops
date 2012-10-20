@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/7/trunk/src/uk/ac/napier/javax/security/sasl
+END
+SaslServerFactory.java
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/!svn/ver/7/trunk/src/uk/ac/napier/javax/security/sasl/SaslServerFactory.java
+END
+SaslException.java
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/!svn/ver/7/trunk/src/uk/ac/napier/javax/security/sasl/SaslException.java
+END
+SaslClient.java
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/7/trunk/src/uk/ac/napier/javax/security/sasl/SaslClient.java
+END
+Sasl.java
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/7/trunk/src/uk/ac/napier/javax/security/sasl/Sasl.java
+END
+AuthorizeCallback.java
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/!svn/ver/7/trunk/src/uk/ac/napier/javax/security/sasl/AuthorizeCallback.java
+END
+RealmChoiceCallback.java
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/!svn/ver/7/trunk/src/uk/ac/napier/javax/security/sasl/RealmChoiceCallback.java
+END
+SaslServer.java
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/7/trunk/src/uk/ac/napier/javax/security/sasl/SaslServer.java
+END
+SaslClientFactory.java
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/!svn/ver/7/trunk/src/uk/ac/napier/javax/security/sasl/SaslClientFactory.java
+END
+RealmCallback.java
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/!svn/ver/7/trunk/src/uk/ac/napier/javax/security/sasl/RealmCallback.java
+END
+AuthenticationException.java
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/7/trunk/src/uk/ac/napier/javax/security/sasl/AuthenticationException.java
+END

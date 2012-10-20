@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" 
+    android:padding="10dp"
+    android:id="@+id/bookmarks_dialog_linear">
+    
+    <ScrollView 
+        android:layout_height="fill_parent"
+        android:layout_width="fill_parent">
+        
+        <LinearLayout android:orientation="vertical" 
+    		android:layout_height="fill_parent" 
+    		android:layout_width="fill_parent">
+
+			<TextView android:text="@string/Name" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+   		 	<EditText android:id="@+id/bookmarks_dialog_name"
+ 				android:layout_width="fill_parent" 
+ 				android:layout_height="wrap_content"
+ 				android:singleLine="true"/> 
+    		<TextView android:text="@string/DialogJid" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+    		<EditText android:id="@+id/bookmarks_dialog_jid" 
+ 				android:layout_width="fill_parent" 
+ 				android:layout_height="wrap_content"
+ 				android:hint="group@conference.example.com" 
+ 				android:singleLine="true"/> 
+			<TextView android:text="@string/Nick" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+    		<EditText android:id="@+id/bookmarks_dialog_nick" 
+ 				android:layout_width="fill_parent" 
+ 				android:layout_height="wrap_content"
+ 				android:singleLine="true"/>
+ 			<TextView android:text="@string/DialogPassword" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+    		<EditText android:id="@+id/bookmarks_dialog_pass" 
+    			android:password="true"
+ 				android:layout_width="fill_parent" 
+ 				android:layout_height="wrap_content"
+ 				android:singleLine="true"/> 
+ 			<CheckBox android:id="@+id/auto_join" 
+    			android:layout_width="wrap_content" 
+    			android:layout_height="wrap_content" 
+    			android:text="@string/AutoJoin" /> 
+ 		</LinearLayout>
+ 	</ScrollView>
+</LinearLayout>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:id="@+id/privacy_linear"
+	android:padding="10dp"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	
+	<ScrollView 
+        android:layout_height="fill_parent"
+        android:layout_width="fill_parent">
+        
+        <LinearLayout android:orientation="vertical" 
+    		android:layout_height="fill_parent" 
+    		android:layout_width="fill_parent">
+    		
+            <TextView 
+    			android:layout_width="fill_parent"
+    			android:layout_height="wrap_content"
+    			android:text="Order" />
+            
+            <EditText android:id="@+id/order"
+                android:text="0"
+                android:numeric="integer"
+			    android:hint="order"
+    			android:layout_width="fill_parent"
+   			 	android:layout_height="wrap_content"/>
+            
+     		<TextView 
+    			android:layout_width="fill_parent"
+    			android:layout_height="wrap_content"
+    			android:text="@string/Actions" />
+
+     		<Spinner
+     		    android:id="@+id/action_spinner"
+     		    android:layout_width="match_parent"
+     		    android:layout_height="wrap_content"
+     		    android:entries="@array/privacyActions" />
+
+     		<TextView 
+    			android:layout_width="fill_parent"
+    			android:layout_height="wrap_content" 
+    			android:text="Type"/>
+     		<Spinner android:id="@+id/type_spinner"
+     		    android:layout_width="match_parent"
+     		    android:layout_height="wrap_content"
+     		    android:entries="@array/privacyTypes" /> 
+     		    
+			<EditText android:id="@+id/value_edit"
+			    android:hint="jid"
+			    android:visibility="gone"
+    			android:layout_width="fill_parent"
+   			 	android:layout_height="wrap_content"/>
+			<Spinner android:id="@+id/value_spinner"
+     		    android:visibility="gone"
+     		    android:layout_width="match_parent"
+     		    android:layout_height="wrap_content"/>
+			 
+    		<CheckBox android:id="@+id/check_iq" 
+    			android:layout_width="wrap_content" 
+    			android:layout_height="wrap_content" 
+    			android:text="IQ" />
+    		<CheckBox android:id="@+id/check_msg" 
+    			android:layout_width="wrap_content" 
+    			android:layout_height="wrap_content" 
+    			android:text="Message" />
+    		<CheckBox android:id="@+id/check_presence_in" 
+    			android:layout_width="wrap_content" 
+    			android:layout_height="wrap_content" 
+    			android:text="Presence IN" />
+    		<CheckBox android:id="@+id/check_presence_out" 
+    			android:layout_width="wrap_content" 
+    			android:layout_height="wrap_content" 
+    			android:text="Presence OUT" />
+    	</LinearLayout>
+    </ScrollView>
+</LinearLayout>

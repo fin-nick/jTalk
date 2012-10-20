@@ -1,0 +1,233 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceScreen android:title="@string/Roster">
+         <CheckBoxPreference
+           android:key="hideOffline"
+           android:title="@string/OfflineContacts"
+           android:defaultValue="false" />
+         <CheckBoxPreference
+           android:key="ShowGroups"
+           android:title="@string/ShowGroups"
+           android:defaultValue="true" />
+         <EditTextPreference
+           android:key="RosterColumns"
+           android:numeric="integer"
+           android:title="Columns"
+           android:defaultValue="1" />
+         <CheckBoxPreference
+           android:key="ShowStatuses"
+           android:title="@string/ShowStatuses"
+           android:defaultValue="false" />
+         <CheckBoxPreference
+           android:key="ShowCaps"
+           android:title="@string/ShowClientsIcons"
+           android:defaultValue="false" />
+         <CheckBoxPreference
+           android:key="LoadAvatar"
+           android:title="@string/LoadAvatars"
+           android:defaultValue="false" />
+         <EditTextPreference
+           android:key="RosterSize"
+           android:numeric="integer"
+           android:title="@string/FontSize"
+           android:defaultValue="@string/DefaultFontSize" />
+    </PreferenceScreen>
+    
+	<PreferenceScreen android:title="@string/Chat">
+         <CheckBoxPreference
+           android:key="ShowTime"
+           android:title="@string/ShowTime"
+           android:defaultValue="false" />
+         <CheckBoxPreference
+           	android:key="ShowStatus"
+           	android:title="@string/ShowStatus"
+           	android:defaultValue="false" />
+         <CheckBoxPreference
+           android:key="AutoScroll"
+           android:title="@string/Autoscroll"
+           android:defaultValue="true" />
+         <CheckBoxPreference
+           android:key="EnableCollapseMessages"
+           android:title="@string/EnableCollapseMessages"
+           android:defaultValue="true" />
+         <CheckBoxPreference
+           android:key="CollapseBigMessages"
+           android:title="@string/CollapseBigMessages"
+           android:defaultValue="false" />
+         <CheckBoxPreference
+           android:key="SendOnEnter"
+           android:title="@string/SendOnEnter"
+           android:defaultValue="false" />
+         <EditTextPreference
+           android:key="FontSize"
+           android:title="@string/FontSize"
+           android:defaultValue="@string/DefaultFontSize" 
+           android:numeric="integer"/>
+         <PreferenceScreen android:title="@string/Smiles">
+			<CheckBoxPreference
+           		android:key="ShowSmiles"
+           		android:title="@string/ShowSmiles"
+           		android:defaultValue="true" />
+         	<ListPreference 
+         		android:key="SmilesPack"
+         		android:title="@string/Smiles"/>
+         	<EditTextPreference
+           		android:key="SmilesSize"
+           		android:title="@string/Size"
+           		android:defaultValue="24" 
+           		android:numeric="integer"/>
+         	<EditTextPreference
+                android:key="SmilesColumns"
+                android:title="Columns"
+                android:summary="The number of columns in the dialog"
+                android:defaultValue="3" 
+                android:numeric="integer"/>
+		</PreferenceScreen>
+    </PreferenceScreen>
+    
+	<PreferenceScreen android:title="@string/MUC">
+        <CheckBoxPreference
+            android:key="AutoJoin"
+            android:title="@string/AutoJoin"
+            android:defaultValue="false" />
+        <EditTextPreference
+            android:key="nickSeparator"
+            android:title="Add after nick"
+            android:summary="When reply"
+            android:defaultValue=", " />
+    </PreferenceScreen>
+    
+    <PreferenceScreen android:title="@string/Notifications">		
+		<RingtonePreference android:key="ringtone"
+			android:title="@string/Ringtone"
+			android:showSilent="true"
+			android:showDefault="true"
+			android:ringtoneType="notification"	/>
+			
+		<RingtonePreference android:key="ringtone_conferences"
+			android:title="@string/RingtoneConference"
+			android:showSilent="true"
+			android:showDefault="true"
+			android:ringtoneType="notification"	/>
+			
+		<RingtonePreference android:key="ringtone_direct"
+			android:title="@string/RingtoneDirect"
+			android:showSilent="true"
+			android:showDefault="true"
+			android:ringtoneType="notification"	/>
+			
+		<ListPreference 
+		    android:defaultValue="1"
+		    android:entries="@array/vibrationArray"
+		    android:entryValues="@array/vibrationValues"
+		    android:key="vibrationMode"
+        	android:title="@string/Vibration"/>
+		<CheckBoxPreference
+            android:title="@string/MessageInNotification"
+            android:key="MessageInNotification"
+            android:defaultValue="false"/>
+		<EditTextPreference
+                android:key="MessageInNotificationCount"
+                android:numeric="integer"
+                android:title="Number of characters"
+                android:defaultValue="64" />
+	</PreferenceScreen>
+	
+    <PreferenceScreen android:title="@string/Autostatus">
+        <CheckBoxPreference
+            android:key="AutoStatus"
+            android:title="@string/Autostatus"
+            android:defaultValue="false" />
+        <EditTextPreference
+            android:key="AutoStatusAway"
+            android:numeric="integer"
+            android:title="@string/DelayAway"
+            android:defaultValue="10" />
+        <EditTextPreference
+            android:key="AutoStatusXa"
+            android:numeric="integer"
+            android:title="@string/DelayXa"
+            android:defaultValue="20" />
+        <EditTextPreference
+            android:key="AutoStatusTextAway"
+            android:title="@string/AutoStatusTextAway"
+            android:defaultValue="@string/AutoStatusTextAway" />
+        <EditTextPreference
+            android:key="AutoStatusTextXa"
+            android:title="@string/AutoStatusTextXa"
+            android:defaultValue="@string/AutoStatusTextXa" />
+        <EditTextPreference
+            android:key="AutoStatusPriorityAway"
+            android:numeric="integer"
+            android:title="Away priority"
+            android:defaultValue="5" />
+        <EditTextPreference
+            android:key="AutoStatusPriorityXa"
+            android:numeric="integer"
+            android:title="Extended Away priority"
+            android:defaultValue="3" />
+    </PreferenceScreen>
+        
+    <PreferenceScreen android:title="@string/Interface">
+        <CheckBoxPreference 
+            android:title="@string/DarkColors"
+            android:key="DarkColors"
+            android:defaultValue="false"/>
+        <ListPreference 
+            android:key="IconPack"
+            android:title="Icons"/>
+        <PreferenceScreen android:title="@string/Sidebar">
+             <CheckBoxPreference
+                android:key="CompactMode"
+                android:title="Compact in portrait mode"
+                android:defaultValue="true" />
+             <CheckBoxPreference
+                android:key="ColoredBar"
+                android:title="Use colors"
+                android:defaultValue="true" />
+             <CheckBoxPreference
+                android:key="InMUC"
+                android:title="Only in MUC"
+                android:defaultValue="false" />
+         </PreferenceScreen>
+    </PreferenceScreen>
+    
+    <PreferenceScreen android:title="Ignore-List">
+        <CheckBoxPreference
+            android:title="Auto activate" 
+            android:summary="Activate Ignore-List on start"
+            android:key="ActivateIgnoreList"
+            android:defaultValue="false"/>
+        <CheckBoxPreference 
+            android:title="Default"
+            android:summary="Ignore-List is a default list"
+            android:key="SetIgnoreListDefault"
+            android:defaultValue="false"/>
+    </PreferenceScreen>
+    
+    <PreferenceScreen android:title="Other">
+        <CheckBoxPreference 
+            android:title="Autostart on boot"
+            android:key="AUTOSTART"
+            android:defaultValue="false"/>
+    	<CheckBoxPreference 
+    		android:title="@string/DeleteHistoryOnExit"
+    		android:key="DeleteHistory"
+    		android:defaultValue="false"/>
+    	<CheckBoxPreference 
+    		android:title="Wi-Fi Lock"
+    		android:key="WifiLock"
+    		android:defaultValue="false"/>
+    </PreferenceScreen>
+    
+    <PreferenceScreen android:title="Experimental">
+        <CheckBoxPreference 
+            android:title="Locations"
+            android:key="Locations"
+            android:defaultValue="false"/>
+        <CheckBoxPreference 
+            android:title="Auto load avatars"
+            android:summary="In MUC. Attention: traffic"
+            android:key="LoadAllAvatars"
+            android:defaultValue="false"/>
+    </PreferenceScreen>
+</PreferenceScreen>

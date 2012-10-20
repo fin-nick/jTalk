@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:id="@+id/edit_contact_linear"
+	android:padding="10dp"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	
+	<ScrollView 
+        android:layout_height="fill_parent"
+        android:layout_width="fill_parent">
+        
+        <LinearLayout android:orientation="vertical" 
+    		android:layout_height="fill_parent" 
+    		android:layout_width="fill_parent">
+    		
+	  		<TextView 
+    			android:layout_width="fill_parent"
+    			android:layout_height="wrap_content" android:text="@string/JabberId"/>
+      		<EditText 
+				android:id="@+id/edit_dialog_jid_entry" 
+ 				android:layout_width="fill_parent" 
+ 				android:layout_height="wrap_content"
+ 				android:lines="1" 
+ 				android:editable="false"/>
+      		<TextView 
+    			android:layout_width="fill_parent"
+    			android:layout_height="wrap_content" android:text="@string/Name"/>
+      		<EditText android:id="@+id/edit_dialog_name_entry" 
+ 				android:layout_width="fill_parent" 
+ 				android:layout_height="wrap_content"
+ 				android:lines="1"
+				android:hint="user"/> 
+	  		<TextView
+    			android:layout_width="fill_parent"
+    			android:layout_height="wrap_content"
+    			android:text="@string/addUserDialog_groupSwitcherLabel" />
+      		<AutoCompleteTextView android:id="@+id/edit_dialog_group_entry"
+    			android:layout_width="fill_parent"
+    			android:layout_height="wrap_content" 
+    			android:completionThreshold="1"
+    			android:hint="users"/>
+    	</LinearLayout>
+    </ScrollView>
+</LinearLayout>

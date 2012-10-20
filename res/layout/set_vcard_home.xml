@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    
+    <ScrollView android:layout_height="wrap_content" android:layout_width="fill_parent">
+    	<LinearLayout android:orientation="vertical" android:layout_height="wrap_content" android:layout_width="fill_parent">
+            <TextView android:text="@string/Country"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            <EditText android:id="@+id/ctry"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" 
+            	android:singleLine="true"/>
+            	
+            <TextView android:text="@string/City"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            <EditText android:id="@+id/locality" 
+            	android:singleLine="true"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+            	
+            <TextView android:text="@string/Street"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            <EditText android:id="@+id/street" 
+            	android:singleLine="true"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+            	
+            <TextView android:text="@string/HomeMail"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            <EditText android:id="@+id/homemail" 
+            	android:singleLine="true"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+            	
+            <TextView android:text="@string/HomePhone"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            <EditText android:id="@+id/homephone" 
+            	android:singleLine="true"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+   	 </LinearLayout>
+    </ScrollView>
+</LinearLayout>

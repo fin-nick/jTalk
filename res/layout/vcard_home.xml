@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    
+    <ProgressBar android:id="@+id/progress"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:layout_height="wrap_content" 
+        android:layout_width="wrap_content" 
+        style="?android:attr/progressBarStyleLarge" />
+    
+    <ScrollView android:id="@+id/scroll" android:layout_height="wrap_content" android:layout_width="fill_parent">
+    	<LinearLayout android:orientation="vertical" android:layout_height="wrap_content" android:layout_width="fill_parent">
+            
+            <TextView 
+                android:text="@string/Country"
+                android:textStyle="bold"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            
+            <TextView 
+                android:id="@+id/ctry"
+                android:autoLink="all"
+                android:layout_marginLeft="16dip"
+                android:textIsSelectable="true"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" 
+            	android:singleLine="true"/>
+            	
+            <TextView 
+                android:text="@string/City"
+                android:textStyle="bold"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            
+            <TextView 
+                android:id="@+id/locality" 
+                android:autoLink="all"
+                android:layout_marginLeft="16dip"
+            	android:singleLine="true"
+            	android:textIsSelectable="true"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+            	
+            <TextView 
+                android:text="@string/Street"
+                android:textStyle="bold"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            
+            <TextView 
+                android:id="@+id/street" 
+                android:autoLink="all"
+                android:layout_marginLeft="16dip"
+            	android:singleLine="true"
+            	android:textIsSelectable="true"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+            	
+            <TextView 
+                android:text="@string/HomeMail"
+                android:textStyle="bold"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            
+            <TextView 
+                android:id="@+id/homemail"
+                android:autoLink="all"
+                android:layout_marginLeft="16dip" 
+            	android:singleLine="true"
+            	android:textIsSelectable="true"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+            	
+            <TextView 
+                android:text="@string/HomePhone"
+                android:textStyle="bold"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            
+            <TextView 
+                android:id="@+id/homephone" 
+                android:autoLink="all"
+                android:layout_marginLeft="16dip"
+            	android:singleLine="true"
+            	android:textIsSelectable="true"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+   	    </LinearLayout>
+    </ScrollView>
+</LinearLayout>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    
+    <ScrollView android:layout_height="wrap_content" android:layout_width="fill_parent">
+    	<LinearLayout android:orientation="vertical" android:layout_height="wrap_content" android:layout_width="fill_parent">
+            <TextView android:text="@string/Org"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            <EditText android:id="@+id/org"
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+            	
+            <TextView android:text="@string/OrgUnit"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            <EditText android:id="@+id/unit" 
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+            	
+            <TextView android:text="@string/Role"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            <EditText android:id="@+id/role" 
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+            	
+            <TextView android:text="@string/WorkMail"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            <EditText android:id="@+id/workmail" 
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+            	
+            <TextView android:text="@string/WorkPhone"
+            	android:layout_width="wrap_content" 
+            	android:layout_height="wrap_content" />
+            <EditText android:id="@+id/workphone" 
+            	android:layout_height="wrap_content" 
+            	android:layout_width="fill_parent" />
+   	 </LinearLayout>
+    </ScrollView>
+</LinearLayout>

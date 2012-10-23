@@ -19,19 +19,13 @@ package net.ustyugov.jtalk;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import net.ustyugov.jtalk.service.JTalkService;
-
 import org.jivesoftware.smack.PrivacyList;
 import org.jivesoftware.smack.PrivacyListManager;
-import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.PrivacyItem;
-
-
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 public class IgnoreList {
 	public final static String LISTNAME = "Ignore-List";
@@ -72,7 +66,7 @@ public class IgnoreList {
 				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
 				if (prefs.getBoolean("ActivateIgnoreList", false)) plm.setActiveListName(LISTNAME);
 				if (prefs.getBoolean("SetIgnoreListDefault", false)) plm.setDefaultListName(LISTNAME);
-			} catch(XMPPException e) { }
+			} catch(Exception e) { }
 		}
 	}
 	public static class UpdateIgnoreList extends AsyncTask<String, Void, Void> {
@@ -98,7 +92,7 @@ public class IgnoreList {
 				
 				items.add(item);
 				plm.updatePrivacyList(LISTNAME, items);
-			} catch (XMPPException e) { Log.e("UpdateIgnoreList", e.getLocalizedMessage()); }
+			} catch (Exception e) { }
 			return null;
 		}
 	}

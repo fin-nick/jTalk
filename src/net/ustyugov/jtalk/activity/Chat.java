@@ -340,15 +340,12 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnLo
 		}
 		service.removeMessagesCount(jid);
 		
-    	while (service.getMessagesList().contains(jid)) service.getMessagesList().remove(service.getMessagesList().indexOf(jid));
-    	while (service.getMucMessagesList().contains(jid)) service.getMucMessagesList().remove(service.getMucMessagesList().indexOf(jid));
-    	if (service.getMessagesList().isEmpty() && service.getMucMessagesList().isEmpty() && !service.getAutoStatus()) {
-			if (service.isAuthenticated()) {
-				Notify.updateNotify();
-			} else {
-				Notify.offlineNotify(service.getState());
-			}
-    	}
+    	while (service.getMessagesList().contains(jid)) service.getMessagesList().remove(jid);
+    	if (service.isAuthenticated()) {
+			Notify.updateNotify();
+		} else {
+			Notify.offlineNotify(service.getState());
+		}
 
     	updateChats();
     	updateUsers();

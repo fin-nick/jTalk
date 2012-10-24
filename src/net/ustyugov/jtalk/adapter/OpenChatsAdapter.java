@@ -142,21 +142,20 @@ public class OpenChatsAdapter extends ArrayAdapter<String> {
                 }
             }
         	
+            ImageView msg  = (ImageView) v.findViewById(R.id.msg);
+            msg.setImageBitmap(ip.getMsgBitmap());
+            
             TextView counter = (TextView) v.findViewById(R.id.msg_counter);
     		counter.setTextSize(fontSize);
             int count = service.getMessagesCount(jid);
-    		if (count > 1) {
+    		if (count > 0) {
+    			msg.setVisibility(View.VISIBLE);
     			counter.setVisibility(View.VISIBLE);
     			counter.setText(count+"");
-    		} else counter.setVisibility(View.GONE);
-    		
-            ImageView msg  = (ImageView) v.findViewById(R.id.msg);
-            msg.setImageBitmap(ip.getMsgBitmap());
-            if (service.getConferencesHash().containsKey(jid)) {
-            	msg.setVisibility(service.getMucMessagesList().contains(jid) ? View.VISIBLE : View.GONE);
-            } else {
-            	msg.setVisibility(service.getMessagesList().contains(jid) ? View.VISIBLE : View.GONE);
-            }
+    		} else {
+    			msg.setVisibility(View.GONE);
+    			counter.setVisibility(View.GONE);
+    		}
             
             if (jid.equals(service.getCurrentJid())) {
             	label.setTypeface(Typeface.DEFAULT_BOLD);

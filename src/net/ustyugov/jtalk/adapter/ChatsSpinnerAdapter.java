@@ -179,10 +179,14 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<String> implements Spinner
         	holder.status.setText(status);
         }
 		
-        if (count > 1) {
+        if (count > 0) {
+        	holder.messageIcon.setVisibility(View.VISIBLE);
 			holder.counter.setVisibility(View.VISIBLE);
 			holder.counter.setText(count+"");
-		} else holder.counter.setVisibility(View.GONE);
+		} else {
+			holder.messageIcon.setVisibility(View.GONE);
+			holder.counter.setVisibility(View.GONE);
+		}
         
         if (holder.caps != null) {
         	if (!isMuc) {
@@ -196,15 +200,8 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<String> implements Spinner
 			else holder.avatar.setVisibility(View.GONE);
 		}
         
-		holder.messageIcon.setVisibility(service.getMessagesList().contains(jid) ? View.VISIBLE : View.GONE);
-		if (!isMuc) {
-			holder.messageIcon.setVisibility(service.getMessagesList().contains(jid) ? View.VISIBLE : View.GONE);
-			holder.statusIcon.setImageBitmap(iconPicker.getIconByPresence(presence));
-		}
-		else {
-			holder.messageIcon.setVisibility(service.getMucMessagesList().contains(jid) ? View.VISIBLE : View.GONE);
-			holder.statusIcon.setImageBitmap(iconPicker.getMucBitmap());
-		}
+		if (!isMuc) holder.statusIcon.setImageBitmap(iconPicker.getIconByPresence(presence));
+		else holder.statusIcon.setImageBitmap(iconPicker.getMucBitmap());
 		return convertView;
 	}
 }

@@ -257,10 +257,14 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 	        	holder.status.setText(status);
 	        }
 			
-	        if (count > 1) {
+	        if (count > 0) {
+	        	holder.messageIcon.setVisibility(View.VISIBLE);
 				holder.counter.setVisibility(View.VISIBLE);
 				holder.counter.setText(count+"");
-			} else holder.counter.setVisibility(View.GONE);
+			} else {
+				holder.messageIcon.setVisibility(View.GONE);
+				holder.counter.setVisibility(View.GONE);
+			}
 	        
 	        if (holder.caps != null) {
 				String node = service.getNode(jid);
@@ -271,7 +275,6 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 				Avatars.loadAvatar(activity, jid, holder.avatar);
 			}
 	        
-			holder.messageIcon.setVisibility(service.getMessagesList().contains(jid) ? View.VISIBLE : View.GONE);
 			if (iconPicker != null) holder.statusIcon.setImageBitmap(iconPicker.getIconByPresence(presence));
 			return convertView;
 		}

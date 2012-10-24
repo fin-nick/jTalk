@@ -150,7 +150,7 @@ public class MucRosterAdapter extends ArrayAdapter<String> {
 				if (service.getMessagesHash().get(group + "/" + nick).size() > 0) holder.name.setTypeface(Typeface.DEFAULT_BOLD);
 			} else holder.name.setTypeface(Typeface.DEFAULT);
 			
-			holder.messageIcon.setVisibility(service.getMessagesList().contains(group + "/" + nick) ? View.VISIBLE : View.GONE);
+			holder.messageIcon.setVisibility(service.getMessagesCount(group + "/" + nick) > 0 ? View.VISIBLE : View.GONE);
 			holder.statusIcon.setImageBitmap(ip.getIconByPresence(p));
 			
 			holder.status.setText(status);
@@ -192,15 +192,17 @@ public class MucRosterAdapter extends ArrayAdapter<String> {
 			GroupHolder holder = (GroupHolder) convertView.getTag();
 			holder.text.setText(item);
 			holder.state.setImageResource(service.getCollapsedGroups().contains(item) ? R.drawable.close : R.drawable.open);
-			holder.counter.setVisibility(count > 1 ? View.VISIBLE : View.GONE);
-			holder.counter.setText(count+"");
-
-			if (service.getMucMessagesList().contains(item)) {
+			
+			if (count > 0) {
 				holder.messageIcon.setImageBitmap(ip.getMsgBitmap());
+				holder.counter.setVisibility(View.VISIBLE);
+				holder.counter.setText(count+"");
 			} else {
 				if (!joined) holder.messageIcon.setImageBitmap(ip.getOfflineBitmap());
 				else holder.messageIcon.setImageBitmap(ip.getMucBitmap());
+				holder.counter.setVisibility(View.GONE);
 			}
+
 			holder.messageIcon.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
 					Intent intent = new Intent(activity, Chat.class);

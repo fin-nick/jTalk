@@ -139,6 +139,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.text.format.DateFormat;
 import android.util.Log;
 
@@ -149,7 +150,6 @@ public class JTalkService extends Service {
     private static List<String> collapsedGroups = new ArrayList<String>();
     private static List<String> composeList = new ArrayList<String>();
     private static List<String> messagesList    = new ArrayList<String>();
-    private static List<String> mucMessagesList = new ArrayList<String>();
     private static List<String> mucHighlightsList = new ArrayList<String>();
     private static Hashtable<String, String> textHash = new Hashtable<String, String>();
     private static Hashtable<String, Conference> joinedConferences = new Hashtable<String, Conference>();
@@ -161,8 +161,6 @@ public class JTalkService extends Service {
     private static Hashtable<String, DataForm> formHash = new Hashtable<String, DataForm>(); 
     private Roster roster = null;
     private String currentJid = "me";
-    private String currentGroup = "me";
-    private String currentMucGroup = null;
     private String sidebarMode = "users";
     private String state = "";
     private Bitmap avatar = null;
@@ -238,10 +236,6 @@ public class JTalkService extends Service {
     public List<FileTransferRequest> getIncomingRequests() { return incomingRequests; }
     public void setCurrentJid(String jid) { this.currentJid = jid; }
     public String getCurrentJid() { return currentJid; }
-    public void setCurrentGroup(String group) { this.currentGroup = group; }
-    public String getCurrentGroup() { return currentGroup; }
-    public void setCurrentMucGroup(String group) { this.currentMucGroup = group; }
-    public String getCurrentMucGroup() { return currentMucGroup; }
     public boolean isStarted() { return started; }
     public String getState() { return state; }
     public void setState(String s) { state = s; }
@@ -255,7 +249,6 @@ public class JTalkService extends Service {
     public Hashtable<String, Conference> getJoinedConferences() { return joinedConferences; }
     public Hashtable<String, Bitmap> getAvatarsHash() { return avatarsHash; }
     public List<String> getMessagesList() { return messagesList; }
-    public List<String> getMucMessagesList() { return mucMessagesList; }
     public boolean isHighlight(String jid) { return mucHighlightsList.contains(jid); }
     public void removeHighlight(String jid) { while (mucHighlightsList.contains(jid)) mucHighlightsList.remove(jid); }
     public void addHighlight(String jid) { mucHighlightsList.add(jid); }
@@ -479,11 +472,13 @@ public class JTalkService extends Service {
    		i.addCategory(Intent.CATEGORY_LAUNCHER);
    		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
    		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, i, 0);
-   		Notification notification = new Notification(R.drawable.stat_offline, "jTalk", System.currentTimeMillis());
-   		notification.flags |= Notification.FLAG_ONGOING_EVENT;
-   		notification.setLatestEventInfo(this, "jTalk", "", contentIntent);
+   		
+   		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
+        mBuilder.setSmallIcon(R.drawable.stat_offline);
+        mBuilder.setContentTitle(getString(R.string.app_name));
+        mBuilder.setContentIntent(contentIntent);
     		
-		startForeground(1, notification);
+		startForeground(1, mBuilder.build());
 		
 		wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 		wifiLock = wifiManager.createWifiLock("jTalk");
@@ -941,7 +936,6 @@ public class JTalkService extends Service {
         composeList.clear();
         messagesList.clear();
         messagesHash.clear();
-        mucMessagesList.clear();
         mucMessagesHash.clear();
         conferencesHash.clear();
         joinedConferences.clear();

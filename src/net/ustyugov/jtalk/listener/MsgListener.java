@@ -124,7 +124,7 @@ public class MsgListener implements PacketListener {
 							}
 						}.start();
 					}
-					Intent i = new Intent(net.ustyugov.jtalk.Constants.RECEIVED);
+					Intent i = new Intent(Constants.RECEIVED);
 					context.sendBroadcast(i);
 				}
 			}
@@ -145,9 +145,10 @@ public class MsgListener implements PacketListener {
 	        	if (service.getConferencesHash().containsKey(group)) mynick = service.getConferencesHash().get(group).getNickname();
 	            if (body.contains(mynick)) {
 	            	if (!service.getCurrentJid().equals(group)) service.addHighlight(group);
-	            	Notify.messageNotify(context, group, Notify.Type.Direct, body);
+	            	if (!service.getMessagesList().contains(group)) service.getMessagesList().add(group);
+	            	Notify.messageNotify(group, Notify.Type.Direct, body);
 	            }
-	            else Notify.messageNotify(context, group, Notify.Type.Conference, body);
+	            else Notify.messageNotify(group, Notify.Type.Conference, body);
 	            
 	            if (nick != null && nick.length() > 0) {
 	            	MessageItem item = new MessageItem();
@@ -170,7 +171,6 @@ public class MsgListener implements PacketListener {
 	                }
 
 	                if (!service.getCurrentJid().equals(group)) {
-	                	if (!service.getMucMessagesList().contains(group)) service.getMucMessagesList().add(group);
 	                	service.addMessagesCount(group);
 	                }
 	                    
@@ -184,22 +184,22 @@ public class MsgListener implements PacketListener {
 	    			String rid = replace.getId();
 	    			MessageLog.editMessage(user, rid, body);
 	    		} else {
-	    			String action = net.ustyugov.jtalk.Constants.NEW_MESSAGE;
+	    			String action = Constants.NEW_MESSAGE;
 		        	String name = null;
 		        	String group = null;
 		        	
+		        	// from room 
 		        	if (service.getConferencesHash().containsKey(user)) {
-		        		user = from;
 		        		group = StringUtils.parseBareAddress(from);
 		        		name = StringUtils.parseResource(from);
-		        		action = net.ustyugov.jtalk.Constants.NEW_MUC_MESSAGE;
+		        		action = Constants.NEW_MUC_MESSAGE;
 		        		
 		        		if (name == null || name.length() <= 0) {
 		        			MessageItem mucMsg = new MessageItem();
 		    				mucMsg.setBody(body);
 		    				mucMsg.setId(id);
 		    				mucMsg.setTime("");
-		    	            mucMsg.setName(user);
+		    	            mucMsg.setName(group);
 		    	            
 		    	            CaptchaExtension captcha = (CaptchaExtension) msg.getExtension("captcha", "urn:xmpp:captcha");
 			            	if (captcha != null) {
@@ -211,21 +211,21 @@ public class MsgListener implements PacketListener {
 			            		Notify.captchaNotify(mucMsg);
 			            	}
 		    	            
-		        			if (service.getMucMessagesHash().containsKey(user)) {
-		                       	List<MessageItem> list = service.getMucMessagesHash().get(user);
+		        			if (service.getMucMessagesHash().containsKey(group)) {
+		                       	List<MessageItem> list = service.getMucMessagesHash().get(group);
 		                       	list.add(mucMsg);
 		                    } else {
 		                    	List<MessageItem> list = new ArrayList<MessageItem>();
 		                    	list.add(mucMsg);
-		                    	service.getMucMessagesHash().put(user, list);
+		                    	service.getMucMessagesHash().put(group, list);
 		                    }
 
-		                    if (!service.getCurrentJid().equals(from)) {
-		                    	if (!service.getMucMessagesList().contains(from)) service.getMucMessagesList().add(from);
+		                    if (!service.getCurrentJid().equals(group)) {
+		                    	if (!service.getMessagesList().contains(group)) service.getMessagesList().add(group);
 		                    }
 		                        
-		                    Intent intent = new Intent(net.ustyugov.jtalk.Constants.NEW_MUC_MESSAGE);
-		                    intent.putExtra("jid", from);
+		                    Intent intent = new Intent(Constants.NEW_MUC_MESSAGE);
+		                    intent.putExtra("jid", group);
 		                    context.sendBroadcast(intent);
 		                    
 		                    // TODO
@@ -244,12 +244,10 @@ public class MsgListener implements PacketListener {
 		    	            	item.setCollapsed(true);
 		    	            }
 		    	            
-		    	            MessageLog.writeMessage(group + "/" + name, item);
-		    	            //////////////////////////////////////////////////////
-		    	            
+		    	            MessageLog.writeMessage(group, item);
 		                    return;
 		        		}
-		        	} else {
+		        	} else { // from user
 		        		name = service.getRoster().getEntry(user).getName();
 		        	}
 		        	
@@ -271,9 +269,10 @@ public class MsgListener implements PacketListener {
 		            	item.setCollapsed(true);
 		            }
 		            
-		            if (group == null) MessageLog.writeMessage(user, item);
-		            else MessageLog.writeMessage(group + "/" + name, item);
+		            if (group != null && group.length() > 0) user = group + "/" + name; 
 		        	
+		            MessageLog.writeMessage(user, item);
+		            
 		            if (service.getMessagesHash().containsKey(user)) {
 		            	List<MessageItem> list = service.getMessagesHash().get(user); 
 		           		list.add(item);
@@ -294,7 +293,7 @@ public class MsgListener implements PacketListener {
 		            intent.putExtra("jid", user);
 		            context.sendBroadcast(intent);
 		            
-		            Notify.messageNotify(context, user, Notify.Type.Chat, body);
+		            Notify.messageNotify(user, Notify.Type.Chat, body);
 	    		}
 	        }
 		}
@@ -308,7 +307,7 @@ public class MsgListener implements PacketListener {
 		}
 		
 		if (send) {
-			Intent i = new Intent(net.ustyugov.jtalk.Constants.UPDATE);
+			Intent i = new Intent(Constants.UPDATE);
 			context.sendBroadcast(i);
 		}
 	}

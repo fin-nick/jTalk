@@ -77,12 +77,13 @@ public class ChangeChatAdapter extends ArrayAdapter<String> {
         
 		ImageView msg  = (ImageView) v.findViewById(R.id.msg);
 		msg.setImageBitmap(ip.getMsgBitmap());
+		msg.setVisibility(service.getMessagesCount(jid) > 0 ? View.VISIBLE : View.GONE);
+		
 		ImageView icon = (ImageView) v.findViewById(R.id.status);
 		ImageView close = (ImageView) v.findViewById(R.id.close);
         
         if (service.getConferencesHash().containsKey(jid)) {
         	icon.setImageBitmap(ip.getMucBitmap());
-        	msg.setVisibility(service.getMucMessagesList().contains(jid) ? View.VISIBLE : View.GONE);
     		
     		close.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
@@ -114,8 +115,6 @@ public class ChangeChatAdapter extends ArrayAdapter<String> {
             
             Presence presence = service.getPresence(jid);
         	icon.setImageBitmap(ip.getIconByPresence(presence));
-    		
-        	msg.setVisibility(service.getMessagesList().contains(jid) ? View.VISIBLE : View.GONE);
         }
         
         label.setText(name);

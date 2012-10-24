@@ -148,8 +148,7 @@ public class MucUserAdapter extends ArrayAdapter<String> {
 	       	
 	       	ImageView msg  = (ImageView) v.findViewById(R.id.msg);
 	       	msg.setImageBitmap(ip.getMsgBitmap());
-	        if (service.getMessagesList().contains(group + "/" + nick)) msg.setVisibility(View.VISIBLE);
-			else msg.setVisibility(View.GONE);
+	        msg.setVisibility(service.getMessagesCount(group + "/" + nick) > 0 ? View.VISIBLE : View.GONE);
 			
 	       	TextView label = (TextView) v.findViewById(R.id.name);
 	       	label.setTextSize(fontSize);

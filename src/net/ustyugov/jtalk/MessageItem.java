@@ -26,7 +26,7 @@ import org.jivesoftware.smackx.packet.DataForm;
 
 public class MessageItem {
 	private String time = null;
-	private String body = null;
+	private String body = "";
 	private String stamp = null;
 	private String name = null;
 	private String id = null;

@@ -131,10 +131,14 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterEntry> {
 		holder.status.setText(status);
         holder.status.setVisibility((prefs.getBoolean("ShowStatuses", false) && status.length() > 0) ? View.VISIBLE : View.GONE);
 		
-        if (count > 1) {
+        if (count > 0) {
+        	holder.messageIcon.setVisibility(View.VISIBLE);
 			holder.counter.setVisibility(View.VISIBLE);
 			holder.counter.setText(count+"");
-		} else holder.counter.setVisibility(View.GONE);
+		} else {
+			holder.messageIcon.setVisibility(View.GONE);
+			holder.counter.setVisibility(View.GONE);
+		}
         
         if (holder.caps != null) {
 			String node = service.getNode(re.getUser());
@@ -145,7 +149,6 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterEntry> {
 			Avatars.loadAvatar(activity, re.getUser(), holder.avatar);
 		}
         
-		holder.messageIcon.setVisibility(service.getMessagesList().contains(re.getUser()) ? View.VISIBLE : View.GONE);
 		if (iconPicker != null) holder.statusIcon.setImageBitmap(iconPicker.getIconByPresence(presence));
 		return convertView;
 	}

@@ -17,17 +17,15 @@
 
 package net.ustyugov.jtalk;
 
+import java.util.List;
 import net.ustyugov.jtalk.activity.DataFormActivity;
 import net.ustyugov.jtalk.activity.RosterActivity;
 import net.ustyugov.jtalk.service.JTalkService;
-
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.filetransfer.FileTransfer.Status;
-
 import com.jtalk2.R;
-
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -36,14 +34,14 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.util.Log;
+import android.support.v4.app.NotificationCompat;
 
 public class Notify {
 	private static final int NOTIFICATION              = 1;
 	private static final int NOTIFICATION_FILE 		   = 2;
 	private static final int NOTIFICATION_IN_FILE 	   = 3;
 	private static final int NOTIFICATION_FILE_REQUEST = 4;
-	private static final int NOTIFICATION_SUBSCRIBTION = 5;
+//	private static final int NOTIFICATION_SUBSCRIBTION = 5;
 	private static final int NOTIFICATION_CAPTCHA      = 6;
 	
 	public static boolean newMessages = false;
@@ -82,28 +80,53 @@ public class Notify {
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
             
-            Notification notification = new Notification(icon, statusArray[pos] + " (" + text + ")", System.currentTimeMillis());
-            notification.flags |= Notification.FLAG_ONGOING_EVENT;
-            notification.setLatestEventInfo(service, statusArray[pos], text, contentIntent);
-
+            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+            mBuilder.setSmallIcon(icon);
+            mBuilder.setContentTitle(statusArray[pos]);
+            mBuilder.setContentText(text);
+            mBuilder.setContentIntent(contentIntent);
+            
             NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
-            mng.notify(NOTIFICATION, notification);
+            mng.notify(NOTIFICATION, mBuilder.build());
     	} else {
-    		String currentJid = JTalkService.getInstance().getCurrentJid();
-        	if (currentJid.equals("me")) {
+//    		String currentJid = JTalkService.getInstance().getCurrentJid();
+//        	if (currentJid.equals("me")) {
             	Intent i = new Intent(service, RosterActivity.class);
             	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             	i.putExtra("msg", true);
-                PendingIntent pi = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
                 
-                Notification n = new Notification(R.drawable.msg, service.getString(R.string.UnreadMessage), System.currentTimeMillis());
-                n.flags |= Notification.FLAG_ONGOING_EVENT;
-                n.flags |= Notification.FLAG_SHOW_LIGHTS;
-                n.setLatestEventInfo(service, service.getString(R.string.app_name), service.getString(R.string.UnreadMessage), pi);
+                NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+                mBuilder.setSmallIcon(R.drawable.stat_msg);
+                mBuilder.setLights(0xFF00FF00, 2000, 3000);
+                mBuilder.setContentTitle(service.getString(R.string.app_name));
+                mBuilder.setContentText(service.getString(R.string.UnreadMessage)).setNumber(service.getMessagesCount());
+                mBuilder.setContentIntent(contentIntent);
+                
+                NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+                inboxStyle.setBigContentTitle(service.getString(R.string.UnreadMessage));
+                
+                List<String> list = service.getMessagesList();
+                for (String jid : list) {
+                	String n = null;
+                	if (service.getConferencesHash().containsKey(jid)) {
+            			n = StringUtils.parseName(jid);
+            		} else if (service.getConferencesHash().containsKey(StringUtils.parseBareAddress(jid))) {
+            			n = StringUtils.parseResource(jid);
+            		} else {
+            			Roster roster = JTalkService.getInstance().getRoster();
+                		if (roster != null) {
+                			RosterEntry re = roster.getEntry(jid);
+                			if (re != null && re.getName() != null) n = re.getName();
+                		}
+            		}
+                	if (n != null && n.length() > 0) inboxStyle.addLine(n + ": " + service.getMessagesCount(jid));
+                }
+                mBuilder.setStyle(inboxStyle);
                 
                 NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
-                mng.notify(NOTIFICATION, n);
-        	}
+                mng.notify(NOTIFICATION, mBuilder.build());
+//        	}
     	}
     }
     
@@ -116,15 +139,14 @@ public class Notify {
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
    		
-//        String str = service.getString(R.string.Disconnect);
-//        str = str + " (" + state + ")";
-        
-        Notification notification = new Notification(R.drawable.stat_offline, state, System.currentTimeMillis());
-        notification.flags |= Notification.FLAG_ONGOING_EVENT;
-        notification.setLatestEventInfo(service, "jTalk", state, contentIntent);
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+        mBuilder.setSmallIcon(R.drawable.stat_offline);
+        mBuilder.setContentTitle(service.getString(R.string.app_name));
+        mBuilder.setContentText(state);
+        mBuilder.setContentIntent(contentIntent);
 
         NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
-        mng.notify(NOTIFICATION, notification);
+        mng.notify(NOTIFICATION, mBuilder.build());
     }
     
     public static void cancelAll(Context context) {
@@ -133,17 +155,18 @@ public class Notify {
     	mng.cancelAll();
     }
     
-    public static void messageNotify(Context c, String from, Type type, String text) {
+    public static void messageNotify(String from, Type type, String text) {
     	newMessages = true;
+    	JTalkService service = JTalkService.getInstance();
     	String nick = from;
-    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(c);
+    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
     	boolean include = prefs.getBoolean("MessageInNotification", false);
     	if (include) {
     		int count = Integer.parseInt(prefs.getString("MessageInNotificationCount", "64"));
     		if (count > 0 && count < text.length()) text = text.substring(0, count);
     	}
     	String vibration = prefs.getString("vibrationMode", "1");
-    	Vibrator vibrator = (Vibrator) c.getSystemService(Context.VIBRATOR_SERVICE);
+    	Vibrator vibrator = (Vibrator) service.getSystemService(Context.VIBRATOR_SERVICE);
     	boolean vibro = false;
     	boolean sound = true;
     	String soundPath = "";
@@ -169,56 +192,83 @@ public class Notify {
     	if (!currentJid.equals(from) || currentJid.equals("me")) {
     		if (vibro) vibrator.vibrate(200);
     	
-    		Roster roster = JTalkService.getInstance().getRoster();
-    		if (roster != null) {
-    			RosterEntry re = roster.getEntry(from);
-    			if (re != null && re.getName() != null) nick = re.getName();
+    		if (service.getConferencesHash().containsKey(from)) {
+    			nick = StringUtils.parseName(from);
+    		} else if (service.getConferencesHash().containsKey(StringUtils.parseBareAddress(from))) {
+    			nick = StringUtils.parseResource(from);
+    		} else {
+    			Roster roster = JTalkService.getInstance().getRoster();
+        		if (roster != null) {
+        			RosterEntry re = roster.getEntry(from);
+        			if (re != null && re.getName() != null) nick = re.getName();
+        		}
     		}
     		
         	Uri sound_file = Uri.parse(soundPath);
         	
-        	Intent i = new Intent(c, RosterActivity.class);
+        	Intent i = new Intent(service, RosterActivity.class);
         	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         	i.putExtra("msg", true);
-            PendingIntent pi = PendingIntent.getActivity(c, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-            
-            Notification n;
-            if (include) n = new Notification(R.drawable.stat_msg, c.getString(R.string.NewMessageFrom) + " " + nick + ": " + text, System.currentTimeMillis());
-            else n = new Notification(R.drawable.stat_msg, c.getString(R.string.NewMessageFrom) + " " + nick, System.currentTimeMillis());
-            n.flags |= Notification.FLAG_ONGOING_EVENT;
-            n.flags |= Notification.FLAG_SHOW_LIGHTS;
-            n.ledARGB = 0xFF00FF00;
-            n.ledOnMS = 2000;
-            n.ledOffMS = 3000;
-            n.setLatestEventInfo(c, c.getString(R.string.app_name), c.getString(R.string.UnreadMessage), pi);
-            
-            if (sound) n.sound = sound_file;
+            PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
           
-            NotificationManager mng = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
-            mng.notify(NOTIFICATION, n);
+            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+            mBuilder.setSmallIcon(R.drawable.stat_msg);
+            mBuilder.setLights(0xFF00FF00, 2000, 3000);
+            mBuilder.setContentTitle(service.getString(R.string.app_name));
+            mBuilder.setContentText(service.getString(R.string.UnreadMessage)).setNumber(service.getMessagesCount());
+            mBuilder.setContentIntent(contentIntent);
+            if (include) mBuilder.setTicker(service.getString(R.string.NewMessageFrom) + " " + nick + ": " + text);
+            else mBuilder.setTicker(service.getString(R.string.NewMessageFrom) + " " + nick);
+            if (sound) mBuilder.setSound(sound_file);
+            
+            NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+            inboxStyle.setBigContentTitle(service.getString(R.string.UnreadMessage));
+            
+            List<String> list = service.getMessagesList();
+            for (String jid : list) {
+            	String n = null;
+            	if (service.getConferencesHash().containsKey(jid)) {
+        			n = StringUtils.parseName(jid);
+        		} else if (service.getConferencesHash().containsKey(StringUtils.parseBareAddress(jid))) {
+        			n = StringUtils.parseResource(jid);
+        		} else {
+        			Roster roster = JTalkService.getInstance().getRoster();
+            		if (roster != null) {
+            			RosterEntry re = roster.getEntry(jid);
+            			if (re != null && re.getName() != null) n = re.getName();
+            		}
+        		}
+            	if (n != null && n.length() > 0) inboxStyle.addLine(n + ": " + service.getMessagesCount(jid));
+            }
+            mBuilder.setStyle(inboxStyle);
+            
+            NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
+            mng.notify(NOTIFICATION, mBuilder.build());
     	}
     }
     
-    public static void subscribtionRequest(Context context, String from) {
-    	newMessages = false;
-    	Intent i = new Intent(context, RosterActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, i, 0);
-  
-        String str = "Request subscribtion from " + from; 
-        
-        Notification notification = new Notification(R.drawable.noface, str, System.currentTimeMillis());
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        notification.setLatestEventInfo(context, "JTalk", str, contentIntent);
-    	
-    	NotificationManager mng = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        mng.notify(NOTIFICATION_SUBSCRIBTION, notification);
-    }
+//    public static void subscribtionRequest(Context context, String from) {
+//    	newMessages = false;
+//    	Intent i = new Intent(context, RosterActivity.class);
+//        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, i, 0);
+//  
+//        String str = "Request subscribtion from " + from; 
+//        
+//        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);
+//        mBuilder.setOngoing(false);
+//        mBuilder.setSmallIcon(R.drawable.noface);
+//        mBuilder.setLights(0xFF0000FF, 2000, 3000);
+//        mBuilder.setContentTitle(context.getString(R.string.app_name));
+//        mBuilder.setContentText(str);
+//        mBuilder.setContentIntent(contentIntent);
+//        mBuilder.setTicker(str);
+//        
+//    	NotificationManager mng = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+//        mng.notify(NOTIFICATION_SUBSCRIBTION, mBuilder.build());
+//    }
     
     public static void fileProgress(String filename, Status status) {
     	JTalkService service = JTalkService.getInstance();
-    	int drawable = android.R.drawable.stat_sys_warning;
-    	String str = "";
-    	int flag = Notification.FLAG_AUTO_CANCEL;
     	
     	Intent i = new Intent(service, RosterActivity.class);
     	i.setAction(Intent.ACTION_MAIN);
@@ -226,36 +276,46 @@ public class Notify {
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
         
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+        mBuilder.setContentTitle(filename);
+        mBuilder.setContentIntent(contentIntent);
+        
         if (status == Status.complete) {
-        	drawable = android.R.drawable.stat_sys_upload_done;
-        	str = service.getString(R.string.Completed);
+        	mBuilder.setSmallIcon(android.R.drawable.stat_sys_download_done);
+        	mBuilder.setTicker(service.getString(R.string.Completed));
+        	mBuilder.setContentText(service.getString(R.string.Completed));
+        	mBuilder.setOngoing(false);
         } else if (status == Status.cancelled) {
-        	drawable = android.R.drawable.stat_sys_warning;
-        	str = service.getString(R.string.Canceled);
+        	mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
+        	mBuilder.setTicker(service.getString(R.string.Canceled));
+        	mBuilder.setContentText(service.getString(R.string.Canceled));
+        	mBuilder.setOngoing(false);
         } else if (status == Status.refused) {
-        	drawable = android.R.drawable.stat_sys_warning;
-        	str = service.getString(R.string.Refused);
+        	mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
+        	mBuilder.setTicker(service.getString(R.string.Canceled));
+        	mBuilder.setContentText(service.getString(R.string.Canceled));
+        	mBuilder.setOngoing(false);
         } else if (status == Status.negotiating_transfer) {
-//        	flag = Notification.FLAG_ONGOING_EVENT;
-        	drawable = android.R.drawable.stat_sys_upload_done;
-        	str = service.getString(R.string.Waiting);
+        	mBuilder.setOngoing(true);
+        	mBuilder.setSmallIcon(android.R.drawable.stat_sys_download_done);
+        	mBuilder.setTicker(service.getString(R.string.Waiting));
+        	mBuilder.setContentText(service.getString(R.string.Waiting));
         } else if (status == Status.in_progress) {
-        	flag = Notification.FLAG_ONGOING_EVENT;
-        	drawable = android.R.drawable.stat_sys_upload;
-        	str = service.getString(R.string.Sending);
+        	mBuilder.setOngoing(true);
+        	mBuilder.setSmallIcon(android.R.drawable.stat_sys_download);
+        	mBuilder.setTicker(service.getString(R.string.Downloading));
+        	mBuilder.setContentText(service.getString(R.string.Downloading));
         } else if (status == Status.error) {
-        	drawable = android.R.drawable.stat_sys_warning;
-        	str = service.getString(R.string.Error);
+        	mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
+        	mBuilder.setTicker(service.getString(R.string.Error));
+        	mBuilder.setContentText(service.getString(R.string.Error));
+        	mBuilder.setOngoing(false);
         } else {
         	return;
         }
         
-        Notification notification = new Notification(drawable, str, System.currentTimeMillis());
-        notification.flags |= flag;
-        notification.setLatestEventInfo(service, filename, str, contentIntent);
-    	
     	NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
-        mng.notify(NOTIFICATION_FILE, notification);
+        mng.notify(NOTIFICATION_FILE, mBuilder.build());
     }
     
     public static void incomingFile() {
@@ -265,57 +325,67 @@ public class Notify {
     	i.putExtra("file", true);
         PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
   
-        Notification notification = new Notification(android.R.drawable.stat_sys_warning, service.getString(R.string.AcceptFile), System.currentTimeMillis());
-        notification.flags |= Notification.FLAG_ONGOING_EVENT;
-        notification.setLatestEventInfo(service, "jTalk", service.getString(R.string.AcceptFile), contentIntent);
-    	
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+        mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
+        mBuilder.setLights(0xFF0000FF, 2000, 3000);
+        mBuilder.setContentTitle(service.getString(R.string.app_name));
+        mBuilder.setContentText(service.getString(R.string.AcceptFile));
+        mBuilder.setContentIntent(contentIntent);
+        
     	NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
-        mng.notify(NOTIFICATION_FILE_REQUEST, notification);
+        mng.notify(NOTIFICATION_FILE_REQUEST, mBuilder.build());
     }
     
     public static void incomingFileProgress(String filename, Status status) {
     	JTalkService service = JTalkService.getInstance();
-    	int drawable = android.R.drawable.stat_sys_warning;
-    	String str = "";
-    	int flag = Notification.FLAG_AUTO_CANCEL;
     	
     	Intent i = new Intent(service, RosterActivity.class);
     	i.setAction(Intent.ACTION_MAIN);
         i.addCategory(Intent.CATEGORY_LAUNCHER);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         
+        PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
+        
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+        mBuilder.setContentTitle(filename);
+        mBuilder.setContentIntent(contentIntent);
+        
         if (status == Status.complete) {
-        	drawable = android.R.drawable.stat_sys_download_done;
-        	str = service.getString(R.string.Completed);
+        	mBuilder.setSmallIcon(android.R.drawable.stat_sys_download_done);
+        	mBuilder.setTicker(service.getString(R.string.Completed));
+        	mBuilder.setContentText(service.getString(R.string.Completed));
+        	mBuilder.setOngoing(false);
         } else if (status == Status.cancelled) {
-        	drawable = android.R.drawable.stat_sys_warning;
-        	str = service.getString(R.string.Canceled);
+        	mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
+        	mBuilder.setTicker(service.getString(R.string.Canceled));
+        	mBuilder.setContentText(service.getString(R.string.Canceled));
+        	mBuilder.setOngoing(false);
         } else if (status == Status.refused) {
-        	drawable = android.R.drawable.stat_sys_warning;
-        	str = service.getString(R.string.Refused);
+        	mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
+        	mBuilder.setTicker(service.getString(R.string.Canceled));
+        	mBuilder.setContentText(service.getString(R.string.Canceled));
+        	mBuilder.setOngoing(false);
         } else if (status == Status.negotiating_transfer) {
-        	flag = Notification.FLAG_ONGOING_EVENT;
-        	drawable = android.R.drawable.stat_sys_download_done;
-        	str = service.getString(R.string.Waiting);
+        	mBuilder.setOngoing(true);
+        	mBuilder.setSmallIcon(android.R.drawable.stat_sys_download_done);
+        	mBuilder.setTicker(service.getString(R.string.Waiting));
+        	mBuilder.setContentText(service.getString(R.string.Waiting));
         } else if (status == Status.in_progress) {
-        	flag = Notification.FLAG_ONGOING_EVENT;
-        	drawable = android.R.drawable.stat_sys_download;
-        	str = service.getString(R.string.Downloading);
+        	mBuilder.setOngoing(true);
+        	mBuilder.setSmallIcon(android.R.drawable.stat_sys_download);
+        	mBuilder.setTicker(service.getString(R.string.Downloading));
+        	mBuilder.setContentText(service.getString(R.string.Downloading));
         } else if (status == Status.error) {
-        	drawable = android.R.drawable.stat_sys_warning;
-        	str = service.getString(R.string.Error);
+        	mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
+        	mBuilder.setTicker(service.getString(R.string.Error));
+        	mBuilder.setContentText(service.getString(R.string.Error));
+        	mBuilder.setOngoing(false);
         } else {
         	return;
         }
         
-        PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
-        
-        Notification notification = new Notification(drawable, str, System.currentTimeMillis());
-        notification.flags |= flag;
-        notification.setLatestEventInfo(service, filename, str, contentIntent);
-    	
     	NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
-        mng.notify(NOTIFICATION_IN_FILE, notification);
+        mng.notify(NOTIFICATION_IN_FILE, mBuilder.build());
     }
     
     public static void cancelFileRequest() {
@@ -337,11 +407,16 @@ public class Notify {
    		
         String str = "Captcha";
         
-        Notification notification = new Notification(R.drawable.muc, str, System.currentTimeMillis());
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        notification.setLatestEventInfo(service, "jTalk", str, contentIntent);
-
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+        mBuilder.setOngoing(false);
+        mBuilder.setSmallIcon(R.drawable.muc);
+        mBuilder.setLights(0xFF0000FF, 2000, 3000);
+        mBuilder.setContentTitle(str);
+        mBuilder.setContentText(message.getBody());
+        mBuilder.setContentIntent(contentIntent);
+        mBuilder.setTicker(str);
+        
         NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
-        mng.notify(NOTIFICATION_CAPTCHA, notification);
+        mng.notify(NOTIFICATION_CAPTCHA, mBuilder.build());
     }
 }

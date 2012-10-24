@@ -178,7 +178,7 @@ public class MsgListener implements PacketListener {
 	                intent.putExtra("jid", group);
 	                context.sendBroadcast(intent);
 	            }
-	        } else if (type.equals("chat") || type.equals("normal")) {
+	        } else if (type.equals("chat") || type.equals("normal") || type.equals("headline")) {
 	        	ReplaceExtension replace = (ReplaceExtension) msg.getExtension("urn:xmpp:message-correct:0");
 	    		if (replace != null) {
 	    			String rid = replace.getId();
@@ -260,6 +260,7 @@ public class MsgListener implements PacketListener {
 					if (delayExt != null) time = delayExt.getStamp().toLocaleString();
 					
 		            MessageItem item = new MessageItem();
+		            item.setSubject(msg.getSubject());
 					item.setBody(body);
 					item.setId(id);
 					item.setTime(time);

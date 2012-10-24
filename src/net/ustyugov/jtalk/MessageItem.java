@@ -27,6 +27,7 @@ import org.jivesoftware.smackx.packet.DataForm;
 public class MessageItem {
 	private String time = null;
 	private String body = "";
+	private String subj = "";
 	private String stamp = null;
 	private String name = null;
 	private String id = null;
@@ -92,6 +93,13 @@ public class MessageItem {
 		this.body = body.replaceAll(";amp;", "&");
 	}
 	
+	public void setSubject(String subject) {
+		if (subject != null) {
+			this.subj = subject.replaceAll("&lt;", "<");
+			this.subj = subject.replaceAll(";amp;", "&");
+		}
+	}
+	
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -114,6 +122,10 @@ public class MessageItem {
 	
 	public String getBody() {
 		return this.body;
+	}
+	
+	public String getSubject() {
+		return this.subj;
 	}
 	
 	public String getName() {

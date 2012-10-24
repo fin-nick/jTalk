@@ -184,6 +184,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         }
 
         final MessageItem item = getItem(position);
+        String subj = "";
         String body = item.getBody();
         String name = item.getName();
         MessageItem.Type type = item.getType();
@@ -191,6 +192,8 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         final boolean collapsed = item.isCollapsed();
         boolean received = item.isReceived();
         String t = "(" + item.getTime() + ")";
+        if (item.getSubject().length() > 0) subj = "\n" + context.getString(R.string.Subject) + ": " + item.getSubject() + "\n";
+        body = subj + body;
         
 //        String id = item.getId();
 //        Cursor cursor = context.getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "' AND id = '" + id + "'", null, MessageDbHelper._ID);
@@ -207,23 +210,26 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         	ssb.append(message);
         	ssb.setSpan(new ForegroundColorSpan(0xFF239923), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         } else {
-        	int length = name.length();
+        	int colorLength = name.length();
+        	int boldLength = colorLength;
+        	
         	if (showtime) {
         		message = t + " " + name + ": " + body; 
-        		length = name.length() + t.length() + 1;
+        		colorLength = name.length() + t.length() + 1;
+        		boldLength = name.length() + t.length() + subj.length() + 2;
         	}
         	else message = name + ": " + body;
         	ssb.append(message);
         	ssb.setSpan(new ForegroundColorSpan(textColor), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        	ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        	ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, boldLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             if (!nick.equals(context.getResources().getString(R.string.Me)))
-            	ssb.setSpan(new ForegroundColorSpan(inColor), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            	ssb.setSpan(new ForegroundColorSpan(inColor), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             else {
-            	if (received) ssb.setSpan(new ForegroundColorSpan(outColor), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            	else ssb.setSpan(new ForegroundColorSpan(textColor), 0, length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            	if (received) ssb.setSpan(new ForegroundColorSpan(outColor), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            	else ssb.setSpan(new ForegroundColorSpan(textColor), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
             
-            if (item.isEdited()) ssb.setSpan(new ForegroundColorSpan(inColor), length + 1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if (item.isEdited()) ssb.setSpan(new ForegroundColorSpan(inColor), colorLength + 1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         
      // Search...

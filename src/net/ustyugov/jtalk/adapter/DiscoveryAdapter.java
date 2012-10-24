@@ -71,7 +71,7 @@ public class DiscoveryAdapter extends ArrayAdapter<DiscoItem>{
         ImageView icon = (ImageView) v.findViewById(R.id.status_icon);
         icon.setVisibility(View.VISIBLE);
         if (cat != null && cat.equals("conference")) {
-        	icon.setImageResource(R.drawable.muc);
+        	icon.setImageResource(R.drawable.icon_muc);
         	if (type != null && type.equals("irc")) icon.setImageResource(R.drawable.irc);
         }
         else if (cat != null && cat.equals("client")) icon.setImageResource(R.drawable.noface);

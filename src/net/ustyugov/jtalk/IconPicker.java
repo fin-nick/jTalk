@@ -27,7 +27,6 @@ import org.jivesoftware.smack.packet.RosterPacket.ItemType;
 import com.jtalk2.R;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -65,7 +64,7 @@ public class IconPicker {
 	
 	private SharedPreferences prefs;
 	private Context context;
-	private String currentPack = "default";
+	private String currentPack;
 	
 	public IconPicker(Context context) {
 		this.context = context;
@@ -74,54 +73,67 @@ public class IconPicker {
 	}
 	
 	public void loadIconPack() {
-		Resources defres = context.getResources();
-		String packName = prefs.getString("IconPack", "default");
+		String packName = prefs.getString("IconPack", context.getPackageName());
 		try {
 			res = context.getPackageManager().getResourcesForApplication(packName);
-			this.currentPack = packName;
+			currentPack = packName;
 		}
-		catch(NameNotFoundException nnfe) {
-			res = defres;
-			this.currentPack = "default";
+		catch(Exception e) {
+			res = context.getResources();
+			currentPack = context.getPackageName();
 		}
-			
-		onlineId = res.getIdentifier(packName + ":drawable/online", null, null);
-		chatId = res.getIdentifier(packName + ":drawable/chat", null, null);
-		awayId = res.getIdentifier(packName + ":drawable/away", null, null);
-		xaId = res.getIdentifier(packName + ":drawable/xa", null, null);
-		dndId = res.getIdentifier(packName + ":drawable/dnd", null, null);
-		offlineId = res.getIdentifier(packName + ":drawable/offline", null, null);
-		noneId = res.getIdentifier(packName + ":drawable/none", null, null);
-		mucId = res.getIdentifier(packName + ":drawable/muc", null, null);
-		moderatorId = res.getIdentifier(packName + ":drawable/moderator", null, null);
-		participantId = res.getIdentifier(packName + ":drawable/participant", null, null);
-		visitorId = res.getIdentifier(packName + ":drawable/visitor", null, null);
-		msgId = res.getIdentifier(packName + ":drawable/msg", null, null);
+		
+		onlineId = res.getIdentifier("icon_online", "drawable", packName);
+		chatId = res.getIdentifier("icon_chat", "drawable", packName);
+		awayId = res.getIdentifier("icon_away", "drawable", packName);
+		xaId = res.getIdentifier("icon_xa", "drawable", packName);
+		dndId = res.getIdentifier("icon_dnd", "drawable", packName);
+		offlineId = res.getIdentifier("icon_offline", "drawable", packName);
+		noneId = res.getIdentifier("icon_none", "drawable", packName);
+		mucId = res.getIdentifier("icon_muc", "drawable", packName);
+		msgId = res.getIdentifier("icon_msg", "drawable", packName);
+		moderatorId = res.getIdentifier("icon_moderator", "drawable", packName);
+		visitorId = res.getIdentifier("icon_visitor", "drawable", packName);
+		participantId = res.getIdentifier("icon_participant", "drawable", packName);
+		
+		if (onlineId == 0) onlineId = R.drawable.icon_online;
+		if (chatId == 0) chatId = R.drawable.icon_chat;
+		if (awayId == 0) awayId = R.drawable.icon_away;
+		if (xaId == 0) xaId = R.drawable.icon_xa;
+		if (dndId == 0) dndId = R.drawable.icon_dnd;
+		if (offlineId == 0) offlineId = R.drawable.icon_offline;
+		if (noneId == 0) noneId = R.drawable.icon_none;
+		if (mucId == 0) mucId = R.drawable.icon_muc;
+		if (moderatorId == 0) moderatorId = R.drawable.icon_moderator;
+		if (participantId == 0) participantId = R.drawable.icon_participant;
+		if (visitorId == 0) visitorId = R.drawable.icon_visitor;
+		if (msgId == 0) msgId = R.drawable.icon_msg;
 			
 		online = BitmapFactory.decodeResource(res, onlineId);
-		if (online == null) online = BitmapFactory.decodeResource(defres, R.drawable.icon_online);
 		chat = BitmapFactory.decodeResource(res, chatId);
-		if (chat == null) chat = BitmapFactory.decodeResource(defres, R.drawable.icon_chat);
 		away = BitmapFactory.decodeResource(res, awayId);
-		if (away == null) away = BitmapFactory.decodeResource(defres, R.drawable.icon_away);
 		xa = BitmapFactory.decodeResource(res, xaId);
-		if (xa == null) xa = BitmapFactory.decodeResource(defres, R.drawable.icon_xa);
 		dnd = BitmapFactory.decodeResource(res, dndId);
-		if (dnd == null) dnd = BitmapFactory.decodeResource(defres, R.drawable.icon_dnd);
 		offline = BitmapFactory.decodeResource(res, offlineId);
-		if (offline == null) offline = BitmapFactory.decodeResource(defres, R.drawable.icon_offline);
 		none = BitmapFactory.decodeResource(res, noneId);
-		if (none == null) none = BitmapFactory.decodeResource(defres, R.drawable.icon_none);
 		msg = BitmapFactory.decodeResource(res, msgId);
-		if (msg == null) msg = BitmapFactory.decodeResource(defres, R.drawable.msg);
 		muc = BitmapFactory.decodeResource(res, mucId);
-		if (muc == null) muc = BitmapFactory.decodeResource(defres, R.drawable.muc); 
 		moderator = BitmapFactory.decodeResource(res, moderatorId);
-		if (moderator == null) moderator = BitmapFactory.decodeResource(defres, R.drawable.moderator);
 		participant = BitmapFactory.decodeResource(res, participantId);
-		if (participant == null) participant = BitmapFactory.decodeResource(defres, R.drawable.participant);
 		visitor = BitmapFactory.decodeResource(res, visitorId);
-		if (visitor == null) visitor = BitmapFactory.decodeResource(defres, R.drawable.visitor);
+		
+		if (online == null) online = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon_online);
+		if (chat == null) chat = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon_chat);
+		if (away == null) away = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon_away);
+		if (xa == null) xa = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon_xa);
+		if (dnd == null) dnd = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon_dnd);
+		if (offline == null) offline = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon_offline);
+		if (none == null) none = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon_none);
+		if (msg == null) msg = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon_msg);
+		if (muc == null) muc = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon_muc);
+		if (moderator == null) moderator = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon_moderator);
+		if (participant == null) participant = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon_participant);
+		if (visitor == null) visitor = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon_visitor);
 	}
 	
 	public String getPackName() { return currentPack; }
@@ -185,39 +197,59 @@ public class IconPicker {
 			if (type == Presence.Type.available) {
 				Presence.Mode mode = presence.getMode();
 				if(mode == Presence.Mode.away) {
-					if (currentPack.equals("default")) return context.getResources().getDrawable(R.drawable.icon_away);
-					else return res.getDrawable(awayId);
+					try {
+						return res.getDrawable(awayId);
+					} catch (Exception e) {
+						return context.getResources().getDrawable(R.drawable.icon_away);
+					}
 				}
 				else if (mode == Presence.Mode.xa) {
-					if (currentPack.equals("default")) return context.getResources().getDrawable(R.drawable.icon_xa);
-					else return res.getDrawable(xaId);
+					try {
+						return res.getDrawable(xaId);
+					} catch (Exception e) {
+						return context.getResources().getDrawable(R.drawable.icon_xa);
+					}
 				}
 				else if (mode == Presence.Mode.dnd) {
-					if (currentPack.equals("default")) return context.getResources().getDrawable(R.drawable.icon_dnd);
-					else return res.getDrawable(dndId);
+					try {
+						return res.getDrawable(dndId);
+					} catch (Exception e) {
+						return context.getResources().getDrawable(R.drawable.icon_dnd);
+					}
 				}
 				else if (mode == Presence.Mode.chat) {
-					if (currentPack.equals("default")) return context.getResources().getDrawable(R.drawable.icon_chat);
-					else return res.getDrawable(chatId);
+					try {
+						return res.getDrawable(chatId);
+					} catch (Exception e) {
+						return context.getResources().getDrawable(R.drawable.icon_chat);
+					}
 				}
 				else {
-					if (currentPack.equals("default")) return context.getResources().getDrawable(R.drawable.icon_online);
-					else return res.getDrawable(onlineId);
+					try {
+						return res.getDrawable(onlineId);
+					} catch (Exception e) {
+						return context.getResources().getDrawable(R.drawable.icon_online);
+					}
 				}
 			} else {
-				if (currentPack.equals("default")) return context.getResources().getDrawable(R.drawable.icon_offline);
-				else return res.getDrawable(offlineId);
+				try {
+					return res.getDrawable(offlineId);
+				} catch (Exception e) {
+					return context.getResources().getDrawable(R.drawable.icon_offline);
+				}
 			}
 		} else {
-			if (currentPack.equals("default")) return context.getResources().getDrawable(R.drawable.icon_offline);
-			else return res.getDrawable(offlineId);
+			try {
+				return res.getDrawable(offlineId);
+			} catch (Exception e) {
+				return context.getResources().getDrawable(R.drawable.icon_offline);
+			}
 		}
 	}
 	
 	public Drawable getMucDrawable() {
 		try {
-			if (currentPack.equals("default")) return context.getResources().getDrawable(R.drawable.muc);
-			else return res.getDrawable(mucId);
-		} catch (Exception e) { return context.getResources().getDrawable(R.drawable.muc); }
+			return res.getDrawable(mucId);
+		} catch (Exception e) { return context.getResources().getDrawable(R.drawable.icon_muc); }
 	}
 }

@@ -350,7 +350,7 @@ public class Notify {
         PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
         
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
-        mBuilder.setSmallIcon(R.drawable.muc);
+        mBuilder.setSmallIcon(R.drawable.icon_muc);
         mBuilder.setLights(0xFF0000FF, 2000, 3000);
         mBuilder.setAutoCancel(true);
         mBuilder.setTicker(service.getString(R.string.InviteTo) + " " + room);
@@ -435,7 +435,7 @@ public class Notify {
         
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
         mBuilder.setOngoing(false);
-        mBuilder.setSmallIcon(R.drawable.muc);
+        mBuilder.setSmallIcon(R.drawable.icon_muc);
         mBuilder.setLights(0xFF0000FF, 2000, 3000);
         mBuilder.setContentTitle(str);
         mBuilder.setContentText(message.getBody());

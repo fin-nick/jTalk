@@ -230,4 +230,22 @@
             android:key="LoadAllAvatars"
             android:defaultValue="false"/>
     </PreferenceScreen>
+    <PreferenceScreen android:title="@string/Info">
+        <Preference 
+            android:title="@string/Client"
+            android:summary="@string/app_name"/>
+        <Preference 
+            android:key="version"
+            android:title="Version"/>
+        <Preference 
+            android:key="build"
+            android:title="Build"/>
+        <Preference 
+            android:title="Web" 
+            android:summary="http://jtalk.ustyugov.net">
+            <intent 
+                android:action="android.intent.action.VIEW"
+                android:data="http://jtalk.ustyugov.net"/>
+            </Preference>
+    </PreferenceScreen>
 </PreferenceScreen>

@@ -17,20 +17,11 @@
 
 package net.ustyugov.jtalk.dialog;
 
-import net.ustyugov.jtalk.service.JTalkService;
-
-import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.util.StringUtils;
-import org.jivesoftware.smackx.bookmark.BookmarkManager;
-import org.jivesoftware.smackx.bookmark.BookmarkedConference;
-
 import com.jtalk2.R;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
-import android.util.Log;
 
 public class InviteDialog {
 	private Activity activity;
@@ -49,7 +40,6 @@ public class InviteDialog {
 	
 	public void show() {
 		String str = activity.getString(R.string.Room) +": " + room + "\n" + activity.getString(R.string.From) + ": " +from + "\n" + activity.getString(R.string.Reason) + ": " + reason;
-		Log.i("Invite", str);
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setTitle("Invite");
@@ -57,27 +47,7 @@ public class InviteDialog {
         builder.setCancelable(false);
         builder.setPositiveButton("Yes", new OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
-				new Thread() {
-					@Override
-					public void run() {
-						JTalkService service = JTalkService.getInstance();
-						String jid = service.getConnection().getUser();
-						if (jid != null) {
-							String nick = StringUtils.parseName(jid);
-							try {
-								BookmarkManager bm = BookmarkManager.getBookmarkManager(service.getConnection());
-								for(BookmarkedConference bc : bm.getBookmarkedConferences()) {
-									if (bc.getJid().equals(room)) {
-										String n = bc.getNickname();
-										if (n != null && n.length() > 0) nick = n;
-									}
-								}
-							} catch (XMPPException e) { }
-							
-							service.joinRoom(room, nick, password);
-						}
-					}
-				}.start();
+				MucDialogs.joinDialog(activity, room, password);
 			}
         });
         builder.setNegativeButton("No", new OnClickListener() {

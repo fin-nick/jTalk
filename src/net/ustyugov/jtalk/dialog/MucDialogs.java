@@ -203,13 +203,14 @@ public class MucDialogs {
 		builder.create().show();
 	}
 	
-	public static void joinDialog(final Activity activity, String jid) {
+	public static void joinDialog(final Activity activity, String jid, String password) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
 		
 		LayoutInflater inflater = activity.getLayoutInflater();
 		View layout = inflater.inflate(R.layout.muc_join, (ViewGroup) activity.findViewById(R.id.muc_join_linear));
 	    
 	    final EditText passEdit = (EditText) layout.findViewById(R.id.muc_join_password_entry);
+	    if (password != null) passEdit.setText(password);
 	    final EditText groupEdit = (EditText) layout.findViewById(R.id.muc_join_group_entry);
 	    if (jid != null) groupEdit.setText(jid);
 	    else groupEdit.setText(prefs.getString("lastGroup", ""));

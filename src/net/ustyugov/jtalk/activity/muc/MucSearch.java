@@ -112,7 +112,7 @@ public class MucSearch extends SherlockActivity implements OnClickListener, OnIt
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		HostedRoom item = (HostedRoom) parent.getItemAtPosition(position);
 		String jid = item.getJid();
-		MucDialogs.joinDialog(this, jid);
+		MucDialogs.joinDialog(this, jid, null);
 	}
 	
 	@Override

@@ -125,6 +125,9 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		if (smiles.length > 0) {
 			smilespack.setEnabled(prefs.getBoolean("ShowSmiles", true) ? true : false);
 		} else smilespack.setEnabled(false);
+		
+		getPreferenceScreen().findPreference("version").setSummary(R.string.version);
+		getPreferenceScreen().findPreference("build").setSummary(R.string.build);
 	}
 		
 	@Override
@@ -144,6 +147,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
 	}
 
+	@Override
 	public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
 		smilespack.setEnabled(prefs.getBoolean("ShowSmiles", true) ? true : false);
 		autoCollapse.setEnabled(prefs.getBoolean("EnableCollapseMessages", true) ? true : false);

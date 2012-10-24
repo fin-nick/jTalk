@@ -37,12 +37,13 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
 public class Notify {
-	private static final int NOTIFICATION              = 1;
-	private static final int NOTIFICATION_FILE 		   = 2;
-	private static final int NOTIFICATION_IN_FILE 	   = 3;
+	private static final int NOTIFICATION = 1;
+	private static final int NOTIFICATION_FILE = 2;
+	private static final int NOTIFICATION_IN_FILE = 3;
 	private static final int NOTIFICATION_FILE_REQUEST = 4;
 //	private static final int NOTIFICATION_SUBSCRIBTION = 5;
-	private static final int NOTIFICATION_CAPTCHA      = 6;
+	private static final int NOTIFICATION_CAPTCHA = 6;
+	private static final int NOTIFICATION_INVITE = 7;
 	
 	public static boolean newMessages = false;
 	public enum Type {Chat, Conference, Direct}
@@ -334,6 +335,31 @@ public class Notify {
         
     	NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
         mng.notify(NOTIFICATION_FILE_REQUEST, mBuilder.build());
+    }
+    
+    public static void inviteNotify(String room, String from, String reason, String password) {
+    	JTalkService service = JTalkService.getInstance();
+    	
+    	Intent i = new Intent(service, RosterActivity.class);
+    	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        i.putExtra("invite", true);
+        i.putExtra("room", room);
+        i.putExtra("from", from);
+        i.putExtra("reason", reason);
+        i.putExtra("password", password);
+        PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+        
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+        mBuilder.setSmallIcon(R.drawable.muc);
+        mBuilder.setLights(0xFF0000FF, 2000, 3000);
+        mBuilder.setAutoCancel(true);
+        mBuilder.setTicker(service.getString(R.string.InviteTo) + " " + room);
+        mBuilder.setContentTitle(service.getString(R.string.InviteTo));
+        mBuilder.setContentText(room);
+        mBuilder.setContentIntent(contentIntent);
+        
+    	NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
+        mng.notify(NOTIFICATION_INVITE, mBuilder.build());
     }
     
     public static void incomingFileProgress(String filename, Status status) {

@@ -115,6 +115,7 @@ public class BookmarksDialogs {
 		View layout = inflater.inflate(R.layout.bookmark_dialog, (ViewGroup) a.findViewById(R.id.bookmarks_dialog_linear));
 	    
 		final EditText groupEdit = (EditText) layout.findViewById(R.id.bookmarks_dialog_jid);
+		groupEdit.setText(item.getJid());
 		groupEdit.setEnabled(false);
 	    final EditText nameEdit = (EditText) layout.findViewById(R.id.bookmarks_dialog_name);
 	    nameEdit.setText(item.getName());
@@ -157,5 +158,4 @@ public class BookmarksDialogs {
 		});
 		builder.create().show();
 	}
-
 }

@@ -239,7 +239,7 @@ public class Muc extends SherlockActivity implements OnKeyListener, OnItemLongCl
 				finish();
 				break;
   	    	case R.id.join:
-  	    		MucDialogs.joinDialog(this, null);
+  	    		MucDialogs.joinDialog(this, null, null);
   	    		break;
   	    	case R.id.search:
   	    		startActivity(new Intent(this, MucSearch.class));

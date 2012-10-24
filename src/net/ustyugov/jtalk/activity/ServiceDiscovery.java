@@ -179,7 +179,7 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
 				}
 				break;
 			case CONTEXT_JOIN:
-				if (discoItem != null && discoItem.isMUC()) MucDialogs.joinDialog(this, jid);
+				if (discoItem != null && discoItem.isMUC()) MucDialogs.joinDialog(this, jid, null);
 				break;
 			case CONTEXT_INFO:
 				if (discoItem != null && discoItem.isVCard()) {
@@ -216,7 +216,7 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
   	    		}
   	    		break;
   	    	case R.id.join:
-  	    		if (jid != null) MucDialogs.joinDialog(this, jid);
+  	    		if (jid != null) MucDialogs.joinDialog(this, jid, null);
   	    		break;
   	    	case R.id.add:
   	    		if (jid != null) RosterDialogs.addDialog(this, jid);

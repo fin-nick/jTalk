@@ -44,11 +44,8 @@ import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -57,13 +54,11 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.GridView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
@@ -302,25 +297,6 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
   	    		break;
   	    	case R.id.disco:
   	    		startActivity(new Intent(this, ServiceDiscovery.class));
-  	    		break;
-  	    	case R.id.info:
-  	    		String message = "jTalk " + getString(R.string.version) + " (" + getString(R.string.build) + ")";
-  	    	
-				View layout = getLayoutInflater().inflate(R.layout.about_dialog, (ViewGroup) findViewById(R.id.about_dialog_linear));
-				TextView text = (TextView) layout.findViewById(R.id.text);
-				text.setText(message);
-  	    		
-  	    		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-  	    		builder.setIcon(R.drawable.ic_launcher);
-  	    		builder.setTitle(R.string.Info);
-  	    		builder.setView(layout);
-  	    		builder.setPositiveButton("OK", new OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int arg1) {
-						dialog.dismiss();
-					}
-  	    		});
-  	    		builder.create().show();
   	    		break;
   	    	case R.id.exit:
   	    		if (prefs.getBoolean("DeleteHistory", false)) {

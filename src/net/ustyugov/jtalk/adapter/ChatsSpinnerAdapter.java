@@ -174,9 +174,13 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<String> implements Spinner
         holder.name.setText(name);
         holder.name.setTypeface(Typeface.DEFAULT_BOLD);
         
-        if (holder.status != null && status != null) {
-        	holder.status.setVisibility(status.length() > 0 ? View.VISIBLE : View.GONE);
-        	holder.status.setText(status);
+        if (holder.status != null) {
+        	if (status != null && status.length() > 0) {
+        		holder.status.setVisibility(View.VISIBLE);
+            	holder.status.setText(status);
+        	} else {
+        		holder.status.setVisibility(View.GONE);
+        	}
         }
 		
         if (count > 0) {

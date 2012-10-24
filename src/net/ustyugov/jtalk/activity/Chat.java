@@ -571,8 +571,10 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnLo
 				service.resetTimer();
 				sendMessage();
 				messageInput.setText("");
-				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.hideSoftInputFromWindow(messageInput.getWindowToken(), 0, null);
+				if (prefs.getBoolean("HideKeyboard", true)) {
+					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow(messageInput.getWindowToken(), 0, null);
+				}
 			}
 		}
 	}

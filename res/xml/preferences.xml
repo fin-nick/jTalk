@@ -57,6 +57,10 @@
            android:key="SendOnEnter"
            android:title="@string/SendOnEnter"
            android:defaultValue="false" />
+         <CheckBoxPreference
+           android:key="HideKeyboard"
+           android:title="Hide keyboard on send"
+           android:defaultValue="true" />
          <EditTextPreference
            android:key="FontSize"
            android:title="@string/FontSize"

@@ -166,7 +166,8 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
         	startService(new Intent(this, JTalkService.class));
         }
     }
-
+    final static int UPDATE_INTERVAL = 500;
+    static long lastUpdateReceived;
     @Override
     public void onResume() {
         super.onResume();
@@ -179,14 +180,19 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
     			Toast.makeText(context, error, Toast.LENGTH_LONG).show();
     		}
     	};
-    	
+
         updateReceiver = new BroadcastReceiver() {
-  			@Override
-  			public void onReceive(Context context, Intent intent) {
-  				service = JTalkService.getInstance();
-  				updateList();
-  			}
-  		};
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                long now = System.currentTimeMillis();
+                if ((now - lastUpdateReceived) < RosterActivity.UPDATE_INTERVAL)
+                    return;
+                lastUpdateReceived = now;
+                service = JTalkService.getInstance();
+
+                updateList();
+            }
+        };
   		
   		stateReceiver = new BroadcastReceiver() {
   			@Override

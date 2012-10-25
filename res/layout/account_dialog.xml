@@ -23,7 +23,8 @@
 				android:singleLine="true"
  				android:layout_width="fill_parent" 
  				android:layout_height="wrap_content"
- 				android:hint="user@server.com"/> 
+ 				android:hint="user@server.com"
+                 android:inputType="textEmailAddress"/>
       		<TextView 
     			android:layout_width="fill_parent"
     			android:layout_height="wrap_content" android:text="@string/Password"/>

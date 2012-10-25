@@ -332,11 +332,17 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnLo
 		}
 		
 		int unreadMessages = service.getMessagesCount(jid);
-		if (unreadMessages > 1) {
+		int lastPosition = service.getLastPosition(jid);
+		if (lastPosition >= 0) {
 			listView.setScroll(false);
-			listView.setSelection(listView.getCount() - (unreadMessages + 1));
+			listView.setSelection(lastPosition);
 		} else {
-			if (listView.isScroll()) listView.setSelection(listView.getCount());
+			if (unreadMessages > 1) {
+				listView.setScroll(false);
+				listView.setSelection(listView.getCount() - (unreadMessages + 1));
+			} else {
+				if (listView.isScroll()) listView.setSelection(listView.getCount());
+			}
 		}
 		service.removeMessagesCount(jid);
 		
@@ -369,6 +375,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnLo
 		if (!isMuc)  service.setChatState(jid, ChatState.active);
 		service.setCurrentJid("me");
 		service.setText(jid, messageInput.getText().toString());
+		if (!listView.isScroll()) service.addLastPosition(jid, listView.getFirstVisiblePosition());
 	}
 	
 	@Override 

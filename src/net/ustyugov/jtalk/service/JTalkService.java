@@ -119,7 +119,6 @@ import org.xbill.DNS.SRVRecord;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -152,6 +151,7 @@ public class JTalkService extends Service {
     private static List<String> messagesList    = new ArrayList<String>();
     private static List<String> mucHighlightsList = new ArrayList<String>();
     private static Hashtable<String, String> textHash = new Hashtable<String, String>();
+    private static Hashtable<String, Integer> positionHash = new Hashtable<String, Integer>();
     private static Hashtable<String, Conference> joinedConferences = new Hashtable<String, Conference>();
     private static Hashtable<String, MultiUserChat> conferencesHash = new Hashtable<String, MultiUserChat>();
     private static Hashtable<String, Bitmap> avatarsHash = new Hashtable<String, Bitmap>();
@@ -224,6 +224,15 @@ public class JTalkService extends Service {
     public DataForm getDataForm(String id) {
     	if (formHash.containsKey(id)) return formHash.remove(id);
     	else return null;
+    }
+    
+    public void addLastPosition(String jid, int position) {
+    	positionHash.put(jid, position);
+    }
+    
+    public int getLastPosition(String jid) {
+    	if (positionHash.containsKey(jid)) return positionHash.remove(jid);
+    	else return -1;
     }
     
     public IconPicker getIconPicker() { return iconPicker; }

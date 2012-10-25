@@ -416,6 +416,9 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
 				   				simpleAdapter.update(list);
 				   				simpleAdapter.notifyDataSetChanged();
 							}
+					} else {
+						if (prefs.getBoolean("ShowGroups", true)) rosterAdapter.notifyDataSetChanged();
+						else simpleAdapter.notifyDataSetChanged();
 					}
 					}
     			});

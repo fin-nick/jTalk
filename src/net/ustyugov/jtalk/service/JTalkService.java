@@ -297,6 +297,8 @@ public class JTalkService extends Service {
     public Presence getPresence(String user) {
     	Presence unavailable = new Presence(Presence.Type.unavailable);
     	
+    	if (!isAuthenticated()) return unavailable;
+    	
 		if (StringUtils.parseResource(user).length() > 0) {
 			String g = StringUtils.parseBareAddress(user);
 			if (conferencesHash.containsKey(g)) {

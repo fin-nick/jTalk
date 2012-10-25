@@ -19,10 +19,12 @@ package net.ustyugov.jtalk.dialog;
 
 import java.util.Iterator;
 
+import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.IgnoreList;
 import net.ustyugov.jtalk.activity.CommandsActivity;
 import net.ustyugov.jtalk.activity.SendFileActivity;
 import net.ustyugov.jtalk.activity.vcard.VCardActivity;
+import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
 
 import org.jivesoftware.smack.RosterEntry;
@@ -45,10 +47,10 @@ public class ContactMenuDialogs {
     	
     	CharSequence[] items;
     	if (service.getMessagesHash().containsKey(entry.getUser())) {
-    		items = new CharSequence[9];
-    		items[8] = activity.getString(R.string.Close);
+    		items = new CharSequence[10];
+    		items[9] = activity.getString(R.string.Close);
     	}
-    	else items = new CharSequence[8];
+    	else items = new CharSequence[9];
         items[0] = activity.getString(R.string.Info);
         items[1] = activity.getString(R.string.Edit);
         items[2] = activity.getString(R.string.SendStatus);
@@ -56,7 +58,8 @@ public class ContactMenuDialogs {
         items[4] = activity.getString(R.string.Subscribtion);
         items[5] = activity.getString(R.string.AddInIgnoreList);
         items[6] = activity.getString(R.string.ExecuteCommand);
-        items[7] = activity.getString(R.string.Remove);
+        items[7] = activity.getString(R.string.DeleteHistory);
+        items[8] = activity.getString(R.string.Remove);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(entry.getUser());
@@ -71,44 +74,51 @@ public class ContactMenuDialogs {
 		    		if (it.hasNext()) group = it.next().getName();
 		    	}
 		    	
-		        switch (which) {
-		        	case 0:
-		        		Intent infoIntent = new Intent(activity, VCardActivity.class);
-		        		infoIntent.putExtra("jid", jid);
-		        		activity.startActivity(infoIntent);
-		        		break;
-		        	case 1:
-			         	RosterDialogs.editDialog(activity, jid, name, group);
-			         	break;
-		        	case 2:
-		        		RosterDialogs.changeStatusDialog(activity, jid);
-		        		break;
-		        	case 3:
-			        	 Intent intent = new Intent(activity, SendFileActivity.class);
-			        	 intent.putExtra("jid", jid);
-			        	 activity.startActivity(intent);
-			 	        break;
-		        	case 4:
-			        	 RosterDialogs.subscribtionDialog(activity, jid);
-			        	 break;
-		        	case 5:
-			        	 new IgnoreList.UpdateIgnoreList().execute(jid);
-			        	 break;
-		        	case 6:
-			        	 RosterDialogs.resourceDialog(activity, jid);
-			        	 break;
-		        	case 7:
-					    service.removeContact(jid);
-					    Intent i = new Intent(net.ustyugov.jtalk.Constants.UPDATE);
-			         	activity.sendBroadcast(i);
-			 	        break;
-		        	case 8:
-		        		service.setChatState(jid, ChatState.gone);
-			        	if (service.getMessagesHash().containsKey(jid)) service.getMessagesHash().remove(jid);
-						if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(net.ustyugov.jtalk.Constants.FINISH));
-						else service.sendBroadcast(new Intent(net.ustyugov.jtalk.Constants.UPDATE));
-			        	break;
-		        }
+		    	switch (which) {
+	        	case 0:
+	        		Intent infoIntent = new Intent(activity, VCardActivity.class);
+	        		infoIntent.putExtra("jid", jid);
+	        		activity.startActivity(infoIntent);
+	        		break;
+	        	case 1:
+		         	RosterDialogs.editDialog(activity, jid, name, group);
+		         	break;
+	        	case 2:
+	        		RosterDialogs.changeStatusDialog(activity, jid);
+	        		break;
+	        	case 3:
+		        	 Intent intent = new Intent(activity, SendFileActivity.class);
+		        	 intent.putExtra("jid", jid);
+		        	 activity.startActivity(intent);
+		 	        break;
+	        	case 4:
+		        	 RosterDialogs.subscribtionDialog(activity, jid);
+		        	 break;
+	        	case 5:
+		        	 new IgnoreList.UpdateIgnoreList().execute(jid);
+		        	 break;
+	        	case 6:
+		        	 RosterDialogs.resourceDialog(activity, jid);
+		        	 break;
+	        	case 7:
+	        		activity.getContentResolver().delete(JTalkProvider.CONTENT_URI, "jid = '" + jid + "'", null);
+	  	    		if (service.getMessagesHash().containsKey(jid)) {
+	  	    			service.getMessagesHash().remove(jid);
+	  	    		}
+	  	    		service.sendBroadcast(new Intent(Constants.UPDATE));
+	  	    		break;
+	        	case 8:
+				    service.removeContact(jid);
+				    Intent i = new Intent(Constants.UPDATE);
+		         	activity.sendBroadcast(i);
+		 	        break;
+	        	case 9:
+	        		service.setChatState(jid, ChatState.gone);
+		        	if (service.getMessagesHash().containsKey(jid)) service.getMessagesHash().remove(jid);
+					if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));
+					else service.sendBroadcast(new Intent(Constants.UPDATE));
+		        	break;
+		    	}
 			}
         });
         builder.create().show();

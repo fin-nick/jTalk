@@ -498,6 +498,11 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnLo
         		infoIntent.putExtra("jid", jid);
         		startActivity(infoIntent);
   	    		break;
+	    	case R.id.file:
+	    		Intent intent = new Intent(this, SendFileActivity.class);
+	    		intent.putExtra("jid", jid);
+	    		startActivity(intent);
+	    		break;
 	    	case R.id.invite:
 				MucDialogs.inviteDialog(this, jid);
 				break;

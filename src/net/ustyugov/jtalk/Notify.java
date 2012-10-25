@@ -285,16 +285,19 @@ public class Notify {
         	mBuilder.setSmallIcon(android.R.drawable.stat_sys_download_done);
         	mBuilder.setTicker(service.getString(R.string.Completed));
         	mBuilder.setContentText(service.getString(R.string.Completed));
+        	mBuilder.setAutoCancel(true);
         	mBuilder.setOngoing(false);
         } else if (status == Status.cancelled) {
         	mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
         	mBuilder.setTicker(service.getString(R.string.Canceled));
         	mBuilder.setContentText(service.getString(R.string.Canceled));
+        	mBuilder.setAutoCancel(true);
         	mBuilder.setOngoing(false);
         } else if (status == Status.refused) {
         	mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
         	mBuilder.setTicker(service.getString(R.string.Canceled));
         	mBuilder.setContentText(service.getString(R.string.Canceled));
+        	mBuilder.setAutoCancel(true);
         	mBuilder.setOngoing(false);
         } else if (status == Status.negotiating_transfer) {
         	mBuilder.setOngoing(true);
@@ -310,6 +313,7 @@ public class Notify {
         	mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
         	mBuilder.setTicker(service.getString(R.string.Error));
         	mBuilder.setContentText(service.getString(R.string.Error));
+        	mBuilder.setAutoCancel(true);
         	mBuilder.setOngoing(false);
         } else {
         	return;
@@ -380,16 +384,19 @@ public class Notify {
         	mBuilder.setSmallIcon(android.R.drawable.stat_sys_download_done);
         	mBuilder.setTicker(service.getString(R.string.Completed));
         	mBuilder.setContentText(service.getString(R.string.Completed));
+        	mBuilder.setAutoCancel(true);
         	mBuilder.setOngoing(false);
         } else if (status == Status.cancelled) {
         	mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
         	mBuilder.setTicker(service.getString(R.string.Canceled));
         	mBuilder.setContentText(service.getString(R.string.Canceled));
+        	mBuilder.setAutoCancel(true);
         	mBuilder.setOngoing(false);
         } else if (status == Status.refused) {
         	mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
         	mBuilder.setTicker(service.getString(R.string.Canceled));
         	mBuilder.setContentText(service.getString(R.string.Canceled));
+        	mBuilder.setAutoCancel(true);
         	mBuilder.setOngoing(false);
         } else if (status == Status.negotiating_transfer) {
         	mBuilder.setOngoing(true);
@@ -405,6 +412,7 @@ public class Notify {
         	mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
         	mBuilder.setTicker(service.getString(R.string.Error));
         	mBuilder.setContentText(service.getString(R.string.Error));
+        	mBuilder.setAutoCancel(true);
         	mBuilder.setOngoing(false);
         } else {
         	return;
@@ -434,6 +442,7 @@ public class Notify {
         String str = "Captcha";
         
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+        mBuilder.setAutoCancel(true);
         mBuilder.setOngoing(false);
         mBuilder.setSmallIcon(R.drawable.icon_muc);
         mBuilder.setLights(0xFF0000FF, 2000, 3000);

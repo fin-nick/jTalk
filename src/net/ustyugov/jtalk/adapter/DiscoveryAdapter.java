@@ -69,18 +69,22 @@ public class DiscoveryAdapter extends ArrayAdapter<DiscoItem>{
         String type = item.getType();
         
         ImageView icon = (ImageView) v.findViewById(R.id.status_icon);
+        icon.setImageResource(R.drawable.icon_online);
         icon.setVisibility(View.VISIBLE);
-        if (cat != null && cat.equals("conference")) {
-        	icon.setImageResource(R.drawable.icon_muc);
-        	if (type != null && type.equals("irc")) icon.setImageResource(R.drawable.irc);
+        if (cat != null) {
+        	if (cat.equals("conference")) {
+            	icon.setImageResource(R.drawable.icon_muc);
+            	if (type != null && type.equals("irc")) icon.setImageResource(R.drawable.irc);
+            }
+            else if (cat.equals("client")) icon.setImageResource(R.drawable.noface);
+            else if (cat.equals("gateway")) {
+            	if (type != null) {
+            		if (type.equals("msn")) icon.setImageResource(R.drawable.msn);
+                	else if (type.equals("icq")) icon.setImageResource(R.drawable.icq);
+                	else if (type.equals("gtalk")) icon.setImageResource(R.drawable.gtalk);
+            	}
+            } else if (cat.equals("error")) icon.setImageResource(R.drawable.icon_none);
         }
-        else if (cat != null && cat.equals("client")) icon.setImageResource(R.drawable.noface);
-        else if (cat != null && cat.equals("gateway")) {
-        	if (type != null && type.equals("msn")) icon.setImageResource(R.drawable.msn);
-        	else if (type != null && type.equals("icq")) icon.setImageResource(R.drawable.icq);
-        	else if (type != null && type.equals("gtalk")) icon.setImageResource(R.drawable.gtalk);
-        }
-        else icon.setImageResource(R.drawable.icon_online);
         
         TextView label = (TextView) v.findViewById(R.id.name);
 		label.setTextSize(fontSize);

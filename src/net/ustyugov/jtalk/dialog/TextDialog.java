@@ -44,5 +44,4 @@ public class TextDialog {
         });
         builder.create().show();
 	}
-
 }

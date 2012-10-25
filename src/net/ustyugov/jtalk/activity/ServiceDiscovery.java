@@ -26,9 +26,11 @@ import net.ustyugov.jtalk.activity.vcard.VCardActivity;
 import net.ustyugov.jtalk.adapter.DiscoveryAdapter;
 import net.ustyugov.jtalk.dialog.MucDialogs;
 import net.ustyugov.jtalk.dialog.RosterDialogs;
+import net.ustyugov.jtalk.dialog.TextDialog;
 import net.ustyugov.jtalk.service.JTalkService;
 
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.XMPPError;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.jivesoftware.smackx.packet.DiscoverInfo.Feature;
@@ -76,13 +78,14 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
 	private ProgressBar progress;
 	private JTalkService service;
 	private DiscoveryAdapter adapter;
-	private ServiceDiscoveryManager discoManager;
 	private DiscoItem discoItem;
+	private SharedPreferences prefs;
+	private Menu menu;
 	
 	@Override
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
 		setContentView(R.layout.discovery);
 		setTitle(R.string.ServiceDiscovery);
@@ -92,12 +95,10 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
         linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
 		
 		service = JTalkService.getInstance();
-		discoManager = ServiceDiscoveryManager.getInstanceFor(service.getConnection());
 		
 		progress = (ProgressBar) findViewById(R.id.progress);
 		
-		String host = (prefs.getString("Server", "")).trim();
-		if (host == null || host.length() < 3) host = service.getConnection().getHost();
+		String host = service.getConnection().getServiceName();
 		
 		input = (EditText) findViewById(R.id.input);
 		input.setText(host);
@@ -126,23 +127,24 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
 		super.onResume();
 	}
 	
+	@Override
 	public void onClick(View v) {
 		if(v.equals(button)) {
-			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-			imm.hideSoftInputFromWindow(input.getWindowToken(), 0, null);
-			
-			if (task != null && task.getStatus() == AsyncTask.Status.RUNNING) task.cancel(true);
-			task = new ParseIdentity();
-			task.execute(null, null, null);
+			if (prefs.getBoolean("HideKeyboard", true)) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(input.getWindowToken(), 0, null);
+			}
+			init(null);
 		}
 	}
 	
+	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		DiscoItem item = (DiscoItem) parent.getItemAtPosition(position);
 		String jid = item.getJid();
 		input.setText(jid);
 		String node = item.getNode();
-		new ParseIdentity().execute(node, null, null);
+		init(node);
 	}
 	
 	@Override
@@ -194,8 +196,18 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
 	
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
+		menu.clear();
+		
         MenuInflater inflater = getSupportMenuInflater();
         inflater.inflate(R.menu.discovery, menu);
+        
+        menu.findItem(R.id.reg).setEnabled((discoItem != null && discoItem.isRegister()) ? true : false);
+        menu.findItem(R.id.join).setEnabled((discoItem != null && discoItem.isMUC()) ? true : false);
+        menu.findItem(R.id.info).setEnabled((discoItem != null && discoItem.isVCard()) ? true : false);
+        menu.findItem(R.id.add).setEnabled((discoItem != null && discoItem.getJid() != null) ? true : false);
+        
+        this.menu = menu;
+        super.onCreateOptionsMenu(menu);
         return true;
     }
 	
@@ -233,66 +245,95 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
 		return true;
 	}
 	
+	private void init(String node) {
+		if (task != null && task.getStatus() == AsyncTask.Status.RUNNING) task.cancel(false);
+		task = new ParseIdentity();
+		task.execute(node);
+	}
+	
+	private void showError(String error) {
+		new TextDialog(this, "error", error).show();
+	}
+	
 	private class ParseIdentity extends AsyncTask<String, Void, Void> {
+		ServiceDiscoveryManager discoManager;
 		@Override
 		protected Void doInBackground(String... params) {
 			String node = params[0];
 			String server = input.getText().toString();
-			discoItem = new DiscoItem();
-			discoItem.setJid(server);
 			List<DiscoItem> items = new ArrayList<DiscoItem>();
 			
-			DiscoverItems discoItems;
 			try {
-				if (node != null && node.length() > 0) discoItems = discoManager.discoverItems(server, node);
-				else discoItems = discoManager.discoverItems(server);
+				discoItem = new DiscoItem();
+				discoItem.setJid(server);
 				
 				DiscoverInfo dci = discoManager.discoverInfo(server);
 				Iterator<Feature> itf = dci.getFeatures();
 				while (itf.hasNext()) {
-					Feature f = itf.next();
-					if (f.getVar().equals("jabber:iq:register")) discoItem.setRegister(true);
-					else if (f.getVar().equals("vcard-temp")) discoItem.setVCard(true);
-					else if (f.getVar().equals("http://jabber.org/protocol/muc")) discoItem.setMUC(true);
+					String var = itf.next().getVar();
+					if (var.equals("jabber:iq:register")) discoItem.setRegister(true);
+					else if (var.equals("vcard-temp")) discoItem.setVCard(true);
+					else if (var.equals("http://jabber.org/protocol/muc")) discoItem.setMUC(true);
 				}
-			    
-			    Iterator<DiscoverItems.Item> i = discoItems.getItems();
-			    while (i.hasNext()) {
-			    	DiscoverItems.Item item = i.next();
-			    	String j = item.getEntityID();
-			    	String n = item.getNode();
-			    	String name = item.getName();
-			    	if (name == null || name.length() <= 0) name = j;
-			    	
-			    	DiscoItem di = new DiscoItem();
-					di.setJid(j);
-					di.setNode(n);
-					di.setName(name);
-					
-			    	try {
-			    		DiscoverInfo info = discoManager.discoverInfo(j);
-			    		if (info.containsFeature("jabber:iq:register")) di.setRegister(true);
-			    		if (info.containsFeature("vcard-temp")) di.setVCard(true);
-			    		if (info.containsFeature("http://jabber.org/protocol/muc")) di.setMUC(true);
-						Iterator<Identity> it = info.getIdentities();
-						if (it.hasNext()) {
-							Identity identity = it.next();
-							String type = identity.getType();
-							String category = identity.getCategory();
-							
-							String iname = identity.getName();
-							if (iname != null && iname.length() > 0) di.setName(iname);
-							
-							di.setType(type);
-							di.setCategory(category);
-					    }
-			    	} catch (XMPPException ex) { }
-			    	
-			    	items.add(di);
-			    }
-			} catch (Exception e) { 
-//				Toast.makeText(ServiceDiscovery.this, e.getLocalizedMessage(), Toast.LENGTH_LONG);
+			} catch (final XMPPException e) {
+				ServiceDiscovery.this.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						String error = "Undefined error";
+						XMPPError xe = e.getXMPPError();
+						if (xe != null) error = "[" + xe.getCode() + "] " + xe.getMessage();
+						showError(error);
+					}
+				});
+				return null;
 			}
+			
+			DiscoverItems discoItems = new DiscoverItems();
+			try {
+				if (node != null && node.length() > 0) discoItems = discoManager.discoverItems(server, node);
+				else discoItems = discoManager.discoverItems(server);
+			    
+			} catch (Exception e) { 
+				Log.e("ServiceDiscovery", e.getLocalizedMessage());
+			}
+			
+			Iterator<DiscoverItems.Item> i = discoItems.getItems();
+		    while (i.hasNext()) {
+		    	DiscoverItems.Item item = i.next();
+		    	String eid = item.getEntityID();
+		    	String n = item.getNode();
+		    	String name = item.getName();
+		    	if (name == null || name.length() <= 0) name = eid;
+		    	
+		    	DiscoItem di = new DiscoItem();
+				di.setJid(eid);
+				di.setNode(n);
+				di.setName(name);
+				
+				try {
+					DiscoverInfo info = discoManager.discoverInfo(eid);
+		    		if (info.containsFeature("jabber:iq:register")) di.setRegister(true);
+		    		if (info.containsFeature("vcard-temp")) di.setVCard(true);
+		    		if (info.containsFeature("http://jabber.org/protocol/muc")) di.setMUC(true);
+					Iterator<Identity> it = info.getIdentities();
+					if (it.hasNext()) {
+						Identity identity = it.next();
+						String type = identity.getType();
+						String category = identity.getCategory();
+						
+						String iname = identity.getName();
+						if (iname != null && iname.length() > 0) di.setName(iname);
+						
+						di.setType(type);
+						di.setCategory(category);
+				    }
+				} catch (Exception xe) {
+					di.setType(null);
+					di.setCategory(null);
+				}
+				
+		    	items.add(di);
+		    }
 			
 			adapter = new DiscoveryAdapter(ServiceDiscovery.this, items);
 			return null;
@@ -301,15 +342,16 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
 		@Override
 		protected void onPostExecute(Void v) {
 			super.onPostExecute(v);
-		    list.refreshDrawableState();
 		    list.setAdapter(adapter);
 		    list.setVisibility(View.VISIBLE);
 		    progress.setVisibility(View.GONE);
+		    onCreateOptionsMenu(menu);
 		}
 		
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
+			discoManager = ServiceDiscoveryManager.getInstanceFor(service.getConnection());
 			list.setVisibility(View.GONE);
 			progress.setVisibility(View.VISIBLE);
 		}

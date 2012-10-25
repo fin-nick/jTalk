@@ -146,6 +146,8 @@
     <string name="next">Следующий</string>
     <string name="prev">Предыдущий</string>
     <string name="PrivacyLists">Списки приватности</string>
+    <string name="HideOfflineContacts">Спрятать отключенных</string>
+    <string name="ShowOfflineContacts">Показать отключенных</string>
     
     <!-- Dialogs -->
     <string name="Room">Комната</string>

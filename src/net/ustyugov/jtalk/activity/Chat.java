@@ -374,6 +374,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnLo
 	@Override 
 	public void onDestroy() {
 		super.onDestroy();
+		if (msgList.isEmpty()) closeChat();
 		jid = null;
 	}
 	
@@ -509,22 +510,10 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnLo
   	    		ChangeChatDialog.show(this);
   	    		break;
   	    	case R.id.clear:
-  	    		msgList.clear();
-  	    		if (service.getMessagesHash().containsKey(jid)) {
-  	    			service.getMessagesHash().remove(jid);
-  	    		}
-  	    		if (service.getMucMessagesHash().containsKey(jid)) {
-  	    			service.getMucMessagesHash().remove(jid);
-  	    		}
-  	    		updateList();
+  	    		clearChat();
   	    		break;
   	    	case R.id.close:
-  	    		if (!isMuc) service.setChatState(jid, ChatState.gone);
-  	    		msgList.clear();
-  	    		if (service.getMessagesHash().containsKey(jid)) {
-  	    			service.getMessagesHash().remove(jid);
-  	    		}
-  	    		finish();
+  	    		closeChat();
   	    		break;
   	    	case R.id.leave:
   	    		finish();
@@ -823,5 +812,22 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnLo
 			} while (cursor.moveToNext());
 		}
 		service.getMessagesHash().put(jid, msgList);
+	}
+	
+	private void clearChat() {
+		msgList.clear();
+  		if (service.getMessagesHash().containsKey(jid)) {
+  			service.getMessagesHash().remove(jid);
+  		}
+  		if (service.getMucMessagesHash().containsKey(jid)) {
+  			service.getMucMessagesHash().remove(jid);
+  		}
+  		updateList();
+	}
+	
+	private void closeChat() {
+		if (!isMuc) service.setChatState(jid, ChatState.gone);
+		clearChat();
+		finish();
 	}
 }

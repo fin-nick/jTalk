@@ -48,7 +48,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -67,6 +66,7 @@ import com.viewpagerindicator.TitlePageIndicator;
 
 public class VCardActivity extends SherlockActivity {
 	private JTalkService service;
+	private String account;
 	private String jid;
 	
 	private TextView nick, first, last, middle, bday, url, about, ctry, locality, street, emailHome, phoneHome, org, unit, role, emailWork, phoneWork;
@@ -81,7 +81,8 @@ public class VCardActivity extends SherlockActivity {
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		service = JTalkService.getInstance();
-		jid = getIntent().getExtras().getString("jid");
+		account = getIntent().getStringExtra("account");
+		jid = getIntent().getStringExtra("jid");
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
 		setContentView(R.layout.paged_activity);
@@ -195,7 +196,7 @@ public class VCardActivity extends SherlockActivity {
 		protected Integer doInBackground(Integer... arg0) {
 			vCard = new VCard();
     		try {
-    			vCard.load(service.getConnection(), jid);
+    			vCard.load(service.getConnection(account), jid);
     			byte[] buffer = vCard.getAvatar();
     			
 				if (buffer != null) {
@@ -232,10 +233,10 @@ public class VCardActivity extends SherlockActivity {
     		
     		// Load info
     		try {
-    			re = service.getRoster().getEntry(jid);
+    			re = service.getRoster(account).getEntry(jid);
     			// Load Version
     			if (jid.indexOf("/") == -1) {
-    				Iterator<Presence> it =  service.getRoster().getPresences(jid);
+    				Iterator<Presence> it =  service.getRoster(account).getPresences(jid);
     				int i = 0;
     				while (it.hasNext()) {
     					i++;
@@ -247,8 +248,8 @@ public class VCardActivity extends SherlockActivity {
     						versionRequest.setType(IQ.Type.GET);
     						versionRequest.setTo(p.getFrom());
 
-    						PacketCollector collector = service.getConnection().createPacketCollector(new PacketIDFilter(versionRequest.getPacketID()));
-    						service.getConnection().sendPacket(versionRequest);
+    						PacketCollector collector = service.getConnection(account).createPacketCollector(new PacketIDFilter(versionRequest.getPacketID()));
+    						service.getConnection(account).sendPacket(versionRequest);
     						 
     						IQ result = (IQ)collector.nextResult(5000);
     						try {
@@ -275,8 +276,8 @@ public class VCardActivity extends SherlockActivity {
     				request.setType(IQ.Type.GET);
     				request.setTo(jid);
 
-    				PacketCollector collector = service.getConnection().createPacketCollector(new PacketIDFilter(request.getPacketID()));
-    				service.getConnection().sendPacket(request);
+    				PacketCollector collector = service.getConnection(account).createPacketCollector(new PacketIDFilter(request.getPacketID()));
+    				service.getConnection(account).sendPacket(request);
     					 
     				String vstr = "";
     				IQ result = (IQ)collector.nextResult(5000);
@@ -292,13 +293,11 @@ public class VCardActivity extends SherlockActivity {
     					
     				if (vstr.length() < 3) vstr += "???";
     				
-    				String str = getString(R.string.Status) + ": " + service.getStatus(jid) + "\n"
+    				String str = getString(R.string.Status) + ": " + service.getStatus(account, jid) + "\n"
     						+ getString(R.string.Client) + ": " + vstr;
     				strings.put(StringUtils.parseResource(jid), str);
     			}
-    		} catch (Exception e) { 
-    			Log.i("VCARD", e.getLocalizedMessage());
-    		}
+    		} catch (Exception e) { }
 			return 1;
 		}
 		

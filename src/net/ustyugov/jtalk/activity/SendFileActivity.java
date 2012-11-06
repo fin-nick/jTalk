@@ -52,6 +52,7 @@ import com.jtalk2.R;
 
 public class SendFileActivity extends SherlockActivity implements OnClickListener {
 	private static final int RESULT = 1;
+	private String account;
 	private String jid;
 	private Boolean muc = false;
 	private EditText description;
@@ -73,10 +74,11 @@ public class SendFileActivity extends SherlockActivity implements OnClickListene
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		service = JTalkService.getInstance();
+		account = getIntent().getStringExtra("account");
 		jid = getIntent().getStringExtra("jid");
 		muc = getIntent().getBooleanExtra("muc", false);
     	
-		Iterator<Presence> it = service.getRoster().getPresences(jid);
+		Iterator<Presence> it = service.getRoster(account).getPresences(jid);
 		while (it.hasNext()) {
 			Presence p = it.next();
 			if (p.getType() != Presence.Type.unavailable) {

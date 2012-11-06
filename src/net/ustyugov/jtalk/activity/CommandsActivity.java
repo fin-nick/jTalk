@@ -45,6 +45,7 @@ import com.jtalk2.R;
 public class CommandsActivity extends SherlockActivity implements OnItemClickListener {
 	private JTalkService service;
 	private String fullJid;
+	private String account;
 	private ProgressBar progress;
 	private ListView list;
 	private Init task;
@@ -57,8 +58,9 @@ public class CommandsActivity extends SherlockActivity implements OnItemClickLis
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
 		fullJid = getIntent().getStringExtra("jid");
+		account = getIntent().getStringExtra("account");
 		service = JTalkService.getInstance();
-		ahcm = AdHocCommandManager.getAddHocCommandsManager(service.getConnection());
+		ahcm = AdHocCommandManager.getAddHocCommandsManager(service.getConnection(account));
 		
 		setContentView(R.layout.list_activity);
 		setTitle(R.string.ExecuteCommand);

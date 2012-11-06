@@ -30,6 +30,9 @@ import net.ustyugov.jtalk.db.MessageDbHelper;
 import net.ustyugov.jtalk.service.JTalkService;
 
 import org.jivesoftware.smack.PacketListener;
+import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.PacketExtension;
@@ -47,17 +50,20 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
-import android.util.Log;
 
 import com.jtalk2.R;
 
 public class MsgListener implements PacketListener {
+	private XMPPConnection connection;
+	private String account;
 	private Context context;
 	private SharedPreferences prefs;
 	private JTalkService service;
 	
-    public MsgListener(Context c) {
+    public MsgListener(Context c, XMPPConnection connection, String account) {
     	this.context = c;
+    	this.connection = connection;
+    	this.account = account;
     	this.prefs = PreferenceManager.getDefaultSharedPreferences(context);
     	this.service = JTalkService.getInstance();
     	return;
@@ -81,7 +87,7 @@ public class MsgListener implements PacketListener {
 		}
 		
 		PacketExtension stateExt = msg.getExtension("http://jabber.org/protocol/chatstates");
-		if (stateExt != null && !type.equals("error") && !service.getConferencesHash().containsKey(user)) {
+		if (stateExt != null && !type.equals("error") && !service.getConferencesHash(account).containsKey(user)) {
 			String state = stateExt.getElementName();
 			if (state.equals(ChatState.composing.name())) {
 				updateComposeList(user, true, true);
@@ -95,10 +101,10 @@ public class MsgListener implements PacketListener {
 		if (receiptExt != null && !type.equals("error")) {
 			String receipt = receiptExt.getElementName();
 			if (receipt.equals("request")) {
-				service.sendReceivedPacket(user, id);
+				service.sendReceivedPacket(connection, user, id);
 			} else if (receipt.equals("received")) {
-				if (service.getMessagesHash().containsKey(user)) {
-					List<MessageItem> l = service.getMessagesHash().get(user);
+				if (service.getMessagesHash(account).containsKey(user)) {
+					List<MessageItem> l = service.getMessagesHash(account).get(user);
 					for (final MessageItem i : l) {
 						if (i.getId().equals(id)) i.setReceived(true);
 						final String u = user;
@@ -118,9 +124,7 @@ public class MsgListener implements PacketListener {
 					 	            values.put(MessageDbHelper.FORM, "NULL");
 					 	            values.put(MessageDbHelper.BOB, "NULL");
 					            	service.getContentResolver().update(JTalkProvider.CONTENT_URI, values, MessageDbHelper.ID + " = '" + pid + "'", null);
-					            } catch (Exception sqle) {
-					            	Log.i("SQL", sqle.getLocalizedMessage());
-					            }
+					            } catch (Exception sqle) { }
 							}
 						}.start();
 					}
@@ -132,23 +136,27 @@ public class MsgListener implements PacketListener {
 		
 		if (body.length() > 0) {
 	        if (type.equals("groupchat")) { // Group Chat Message
-	        	
 	        	Date date = new java.util.Date();
 				String time = DateFormat.getTimeFormat(context).format(date);
-				
 				DelayInformation delayExt = (DelayInformation) msg.getExtension("jabber:x:delay");
 				if (delayExt != null) time = delayExt.getStamp().toLocaleString();
-				String mynick = context.getResources().getString(R.string.Me);
 		       
 	        	String nick  = StringUtils.parseResource(from);
 	        	String group = StringUtils.parseBareAddress(from);
-	        	if (service.getConferencesHash().containsKey(group)) mynick = service.getConferencesHash().get(group).getNickname();
+	        	
+	        	String mynick = context.getResources().getString(R.string.Me);
+	        	if (service.getConferencesHash(account).containsKey(group)) mynick = service.getConferencesHash(account).get(group).getNickname();
+	        	
+	        	if (!service.getCurrentJid().equals(group)) {
+                	service.addMessagesCount(account, group);
+                }
+	        	
 	            if (body.contains(mynick)) {
 	            	if (!service.getCurrentJid().equals(group)) service.addHighlight(group);
 	            	if (!service.getMessagesList().contains(group)) service.getMessagesList().add(group);
-	            	Notify.messageNotify(group, Notify.Type.Direct, body);
+	            	Notify.messageNotify(account, group, Notify.Type.Direct, body);
 	            }
-	            else Notify.messageNotify(group, Notify.Type.Conference, body);
+	            else Notify.messageNotify(account, group, Notify.Type.Conference, body);
 	            
 	            if (nick != null && nick.length() > 0) {
 	            	MessageItem item = new MessageItem();
@@ -160,18 +168,14 @@ public class MsgListener implements PacketListener {
 		            
 	            	MessageLog.writeMucMessage(group, nick, item);
 	            	
-	                if (service.getMucMessagesHash().containsKey(group)) {
-	                   	List<MessageItem> list = service.getMucMessagesHash().get(group);
+	                if (service.getMucMessagesHash(account).containsKey(group)) {
+	                   	List<MessageItem> list = service.getMucMessagesHash(account).get(group);
 	                   	list.add(item);
 	                   	if (list.size() > Constants.MAX_MUC_MESSAGES) list.remove(0);
 	                } else {
 	                	List<MessageItem> list = new ArrayList<MessageItem>();
 	                	list.add(item);
-	                	service.getMucMessagesHash().put(group, list);
-	                }
-
-	                if (!service.getCurrentJid().equals(group)) {
-	                	service.addMessagesCount(group);
+	                	service.getMucMessagesHash(account).put(group, list);
 	                }
 	                    
 	                Intent intent = new Intent(Constants.NEW_MUC_MESSAGE);
@@ -182,14 +186,14 @@ public class MsgListener implements PacketListener {
 	        	ReplaceExtension replace = (ReplaceExtension) msg.getExtension("urn:xmpp:message-correct:0");
 	    		if (replace != null) {
 	    			String rid = replace.getId();
-	    			MessageLog.editMessage(user, rid, body);
+	    			MessageLog.editMessage(account, user, rid, body);
 	    		} else {
 	    			String action = Constants.NEW_MESSAGE;
 		        	String name = null;
 		        	String group = null;
 		        	
 		        	// from room 
-		        	if (service.getConferencesHash().containsKey(user)) {
+		        	if (service.getConferencesHash(account).containsKey(user)) {
 		        		group = StringUtils.parseBareAddress(from);
 		        		name = StringUtils.parseResource(from);
 		        		action = Constants.NEW_MUC_MESSAGE;
@@ -211,13 +215,13 @@ public class MsgListener implements PacketListener {
 			            		Notify.captchaNotify(mucMsg);
 			            	}
 		    	            
-		        			if (service.getMucMessagesHash().containsKey(group)) {
-		                       	List<MessageItem> list = service.getMucMessagesHash().get(group);
+		        			if (service.getMucMessagesHash(account).containsKey(group)) {
+		                       	List<MessageItem> list = service.getMucMessagesHash(account).get(group);
 		                       	list.add(mucMsg);
 		                    } else {
 		                    	List<MessageItem> list = new ArrayList<MessageItem>();
 		                    	list.add(mucMsg);
-		                    	service.getMucMessagesHash().put(group, list);
+		                    	service.getMucMessagesHash(account).put(group, list);
 		                    }
 
 		                    if (!service.getCurrentJid().equals(group)) {
@@ -248,7 +252,11 @@ public class MsgListener implements PacketListener {
 		                    return;
 		        		}
 		        	} else { // from user
-		        		name = service.getRoster().getEntry(user).getName();
+		        		Roster roster = service.getRoster(account);
+		        		if (roster != null) {
+		        			RosterEntry entry = roster.getEntry(user);
+		        			if (entry != null) name = entry.getName();
+		        		}
 		        	}
 		        	
 		            if (name == null || name.equals("")) name = user;
@@ -274,18 +282,18 @@ public class MsgListener implements PacketListener {
 		        	
 		            MessageLog.writeMessage(user, item);
 		            
-		            if (service.getMessagesHash().containsKey(user)) {
-		            	List<MessageItem> list = service.getMessagesHash().get(user); 
+		            if (service.getMessagesHash(account).containsKey(user)) {
+		            	List<MessageItem> list = service.getMessagesHash(account).get(user); 
 		           		list.add(item);
 		            } else {
 		        		List<MessageItem> list = new ArrayList<MessageItem>();
 		        		list.add(item);
-		        		service.getMessagesHash().put(user, list);
+		        		service.getMessagesHash(account).put(user, list);
 		        	}
 		            
 		            if (!service.getCurrentJid().equals(user)) {
 		            	if (!service.getMessagesList().contains(user)) service.getMessagesList().add(user);
-		            	service.addMessagesCount(user);
+		            	service.addMessagesCount(account, user);
 		            }
 		            
 		            updateComposeList(user, false, false);
@@ -294,7 +302,7 @@ public class MsgListener implements PacketListener {
 		            intent.putExtra("jid", user);
 		            context.sendBroadcast(intent);
 		            
-		            Notify.messageNotify(user, Notify.Type.Chat, body);
+		            Notify.messageNotify(account, user, Notify.Type.Chat, body);
 	    		}
 	        }
 		}

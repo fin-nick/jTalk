@@ -41,7 +41,7 @@ import com.jtalk2.R;
 
 public class PrivacyDialogs {
 	
-	public static void addListDialog(final Activity activity, PrivacyItem item, final int position) {
+	public static void addListDialog(final Activity activity, final String account, PrivacyItem item, final int position) {
 		final JTalkService service = JTalkService.getInstance();
 		LayoutInflater inflater = activity.getLayoutInflater();
 		View layout = inflater.inflate(R.layout.privacy_dialog, (ViewGroup) activity.findViewById(R.id.privacy_linear));
@@ -67,7 +67,7 @@ public class PrivacyDialogs {
 					edit.setVisibility(View.GONE);
 					valueSpinner.setVisibility(View.VISIBLE);
 					if (type.equals("group")) {
-						Collection<RosterGroup> coll = service.getRoster().getGroups();
+						Collection<RosterGroup> coll = service.getRoster(account).getGroups();
 						String[] array = new String[coll.size()];
 						int i = 0;
 						for (RosterGroup group : coll) {

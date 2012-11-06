@@ -12,7 +12,7 @@
         android:title="@string/Add"/>
     <item android:id="@+id/muc"
         android:showAsAction="never"
-        android:title="@string/MUC"/>
+        android:title="@string/Bookmarks"/>
     <item android:id="@+id/offline"
         android:showAsAction="never"
         android:title=""/>

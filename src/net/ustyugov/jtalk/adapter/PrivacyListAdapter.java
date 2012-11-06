@@ -39,6 +39,7 @@ import com.jtalk2.R;
 public class PrivacyListAdapter extends ArrayAdapter<PrivacyList> {
 	private JTalkService service;
 	private Context context;
+	private String account;
 	
 	static class ViewHolder {
 		protected TextView name;
@@ -46,15 +47,16 @@ public class PrivacyListAdapter extends ArrayAdapter<PrivacyList> {
 		protected ImageView close;
 	}
 	
-	public PrivacyListAdapter(Context context) {
+	public PrivacyListAdapter(Context context, String account) {
 		super(context, R.id.item);
 		this.context = context;
         this.service = JTalkService.getInstance();
+        this.account = account;
         update();
 	}
 	
 	public void update() {
-		PrivacyListManager plm = PrivacyListManager.getInstanceFor(service.getConnection());
+		PrivacyListManager plm = PrivacyListManager.getInstanceFor(service.getConnection(account));
 		clear();
 		try {
 			PrivacyList[] array = plm.getPrivacyLists();

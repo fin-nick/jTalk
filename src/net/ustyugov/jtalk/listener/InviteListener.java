@@ -23,8 +23,14 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smackx.muc.InvitationListener;
 
 public class InviteListener implements InvitationListener {
+	String account;
+	
+	public InviteListener(String account) {
+		this.account = account;
+	}
+	
 	@Override
 	public void invitationReceived(Connection conn, String room, String inviter, String reason, String password, Message message) {
-		Notify.inviteNotify(room, inviter, reason, password);
+		Notify.inviteNotify(account, room, inviter, reason, password);
 	}
 }

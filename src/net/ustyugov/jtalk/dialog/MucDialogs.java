@@ -56,7 +56,7 @@ import com.jtalk2.R;
 
 public class MucDialogs {
 
-	public static void roomMenu(final Activity activity, final String group) {
+	public static void roomMenu(final Activity activity, final String account, final String group) {
 		CharSequence[] items = new CharSequence[6];
         items[0] = activity.getString(R.string.Open);
         items[1] = activity.getString(R.string.ChangeNick);
@@ -74,15 +74,15 @@ public class MucDialogs {
 		        	case 0:
 		        		Intent intent = new Intent(activity, net.ustyugov.jtalk.activity.Chat.class);
 		        		intent.putExtra("jid", group);
-		        		intent.putExtra("username", group);
+		        		intent.putExtra("account", account);
 		        		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		        		activity.startActivity(intent);
 		        		break;
 		        	case 1:
-		        		MucDialogs.setNickDialog(activity, group);
+		        		MucDialogs.setNickDialog(activity, account, group);
 		        		break;
 		        	case 2:
-		        		RosterDialogs.changeStatusDialog(activity, group);
+		        		RosterDialogs.changeStatusDialog(activity, account, group);
 		        		break;
 		        	case 3:
 		        		Intent uIntent = new Intent(activity, MucUsers.class);
@@ -96,7 +96,7 @@ public class MucDialogs {
 		           	 	activity.startActivity(cIntent);
 		        		break;
 		        	case 5:
-		        		JTalkService.getInstance().leaveRoom(group);
+		        		JTalkService.getInstance().leaveRoom(account, group);
 		        		activity.sendBroadcast(new Intent(Constants.UPDATE));
 		        		break;
 		        }
@@ -105,7 +105,7 @@ public class MucDialogs {
         builder.create().show();
 	}
 	
-	public static void userMenu(final Activity activity, final String group, final String nick) {
+	public static void userMenu(final Activity activity, final String account, final String group, final String nick) {
 		CharSequence[] items = new CharSequence[5];
         items[0] = activity.getString(R.string.Chat);
         items[1] = activity.getString(R.string.Info);
@@ -122,17 +122,18 @@ public class MucDialogs {
 		        	case 0:
 		        		Intent intent = new Intent(activity, Chat.class);
 		        		intent.putExtra("jid", group + "/" + nick);
-		        		intent.putExtra("username", group + "/" + nick);
+		        		intent.putExtra("account", account);
 		        		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		        		activity.startActivity(intent);
 		        		break;
 		        	case 1:
 		        		Intent infoIntent = new Intent(activity, VCardActivity.class);
 		        		infoIntent.putExtra("jid", group + "/" + nick);
+		        		infoIntent.putExtra("account", account);
 		        		activity.startActivity(infoIntent);
 		        		break;
 		        	case 2:
-		        		new IgnoreList.UpdateIgnoreList().execute(group + "/" + nick);
+		        		new IgnoreList(account).updateIgnoreList(group + "/" + nick);
 		        		break;
 		        	case 3:
 		        		Intent cintent = new Intent(activity, CommandsActivity.class);
@@ -141,8 +142,8 @@ public class MucDialogs {
 		        		break;
 		        	case 4:
 		        		JTalkService service = JTalkService.getInstance();
-		        		if (service.getConferencesHash().containsKey(group)) {
-		        			MultiUserChat muc = service.getConferencesHash().get(group);
+		        		if (service.getConferencesHash(account).containsKey(group)) {
+		        			MultiUserChat muc = service.getConferencesHash(account).get(group);
 			        		new MucAdminMenu(activity, muc, nick).show();
 		        		}
 		        		
@@ -203,7 +204,7 @@ public class MucDialogs {
 		builder.create().show();
 	}
 	
-	public static void joinDialog(final Activity activity, String jid, String password) {
+	public static void joinDialog(final Activity activity, final String account, String jid, String password) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
 		
 		LayoutInflater inflater = activity.getLayoutInflater();
@@ -229,10 +230,10 @@ public class MucDialogs {
 				String pass = passEdit.getText().toString();
 				
 				if (group.length() > 0) {
-					if (nick == null || nick.length() < 1) nick = StringUtils.parseName(service.getConnection().getUser());
-					service.setPreference("lastGroup", group);
-  	  				service.setPreference("lastNick", nick);
-  	  				service.joinRoom(group, nick, pass);
+					if (nick == null || nick.length() < 1) nick = StringUtils.parseName(service.getConnection(account).getUser());
+					service.setPreference(activity, "lastGroup", group);
+  	  				service.setPreference(activity, "lastNick", nick);
+  	  				service.joinRoom(account, group, nick, pass);
   	  				
 					Intent i = new Intent(Constants.PRESENCE_CHANGED);
 	             	activity.sendBroadcast(i);
@@ -247,11 +248,11 @@ public class MucDialogs {
 		builder.create().show();
 	}
 	
-	public static void setNickDialog(final Activity activity, final String group) {
+	public static void setNickDialog(final Activity activity, String account, final String group) {
 		final JTalkService service = JTalkService.getInstance();
 		
-		if (service.getConferencesHash().containsKey(group)) {
-			final MultiUserChat muc = service.getConferencesHash().get(group);
+		if (service.getConferencesHash(account).containsKey(group)) {
+			final MultiUserChat muc = service.getConferencesHash(account).get(group);
 			if (muc.isJoined()) {
 				final String oldnick = muc.getNickname();
 				
@@ -288,7 +289,7 @@ public class MucDialogs {
 		}
 	}
 	
-	public static void inviteDialog(final Activity activity, final String group) {
+	public static void inviteDialog(final Activity activity, final String account, final String group) {
 		final OnlineUsersAdapter adapter = new OnlineUsersAdapter(activity);
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -297,10 +298,10 @@ public class MucDialogs {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				JTalkService service = JTalkService.getInstance();
-				final RosterEntry entry = adapter.getItem(which);
+				final RosterEntry entry = adapter.getItem(which).getEntry();
 				
-				if (service.getConferencesHash().containsKey(group)) {
-					final MultiUserChat muc = service.getConferencesHash().get(group);
+				if (service.getConferencesHash(account).containsKey(group)) {
+					final MultiUserChat muc = service.getConferencesHash(account).get(group);
 					
 					LayoutInflater inflater = activity.getLayoutInflater();
 					View layout = inflater.inflate(R.layout.set_nick_dialog, (ViewGroup) activity.findViewById(R.id.set_nick_linear));
@@ -328,10 +329,10 @@ public class MucDialogs {
         builder.create().show();
 	}
 	
-	public static void subjectDialog(final Activity activity, final String group) {
+	public static void subjectDialog(final Activity activity, String account, final String group) {
 		final JTalkService service = JTalkService.getInstance();
-		if (service.getConferencesHash().containsKey(group)) {
-			final MultiUserChat muc = service.getConferencesHash().get(group);
+		if (service.getConferencesHash(account).containsKey(group)) {
+			final MultiUserChat muc = service.getConferencesHash(account).get(group);
 			if (muc.isJoined()) {
 				String subj = muc.getSubject();
 				if (subj == null) subj = "";
@@ -368,13 +369,13 @@ public class MucDialogs {
 		}
 	}
 	
-	public static void showUsersDialog(final Activity activity, final BookmarkedConference bc) {
+	public static void showUsersDialog(final Activity activity, final String account, final BookmarkedConference bc) {
 		final JTalkService service = JTalkService.getInstance();
 		final String group = bc.getJid();
 		
 		try {
 			List<String> list = new ArrayList<String>();
-			ServiceDiscoveryManager discoManager = ServiceDiscoveryManager.getInstanceFor(service.getConnection());
+			ServiceDiscoveryManager discoManager = ServiceDiscoveryManager.getInstanceFor(service.getConnection(account));
 			DiscoverItems items = discoManager.discoverItems(group);
 			
 			Iterator<DiscoverItems.Item> it = items.getItems();
@@ -393,9 +394,9 @@ public class MucDialogs {
 				public void onClick(DialogInterface dialog, int which) {
 					String jid  = bc.getJid();
 					String nick = bc.getNickname();
-					if (nick == null || nick.length() < 1) nick = StringUtils.parseName(service.getConnection().getUser());
+					if (nick == null || nick.length() < 1) nick = StringUtils.parseName(service.getConnection(account).getUser());
 					String pass = bc.getPassword();
-					service.joinRoom(jid, nick, pass);
+					service.joinRoom(account, jid, nick, pass);
 				}
 			});
 			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

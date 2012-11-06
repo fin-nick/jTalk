@@ -17,48 +17,85 @@
 
 package net.ustyugov.jtalk.adapter;
 
-import java.util.List;
+import java.util.Enumeration;
 
-import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.IconPicker;
+import net.ustyugov.jtalk.RosterItem;
+import net.ustyugov.jtalk.db.AccountDbHelper;
+import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
 
+import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.packet.RosterPacket;
 import org.jivesoftware.smack.util.StringUtils;
 
-import com.jtalk2.R;
-
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ChangeChatAdapter extends ArrayAdapter<String> {
+import com.jtalk2.R;
+
+public class ChangeChatAdapter extends ArrayAdapter<RosterItem> {
 	private JTalkService service;
 	
-	public ChangeChatAdapter(Context context, List<String> list) {
+	public ChangeChatAdapter(Context context) {
 		super(context, R.layout.selector);
         this.service = JTalkService.getInstance();
         
-        for(int i = 0; i < list.size(); i++) {
-			add(list.get(i));
+        clear();
+		Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
+		if (cursor != null && cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			do {
+				String account = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
+				XMPPConnection connection = service.getConnection(account);
+				
+				Enumeration<String> chatEnum = service.getMessagesHash(account).keys();
+				while (chatEnum.hasMoreElements()) {
+					if (service != null && service.getRoster(account) != null && connection != null && connection.isAuthenticated()) {
+						String name = chatEnum.nextElement();
+						Roster roster = service.getRoster(account);
+						RosterEntry entry = roster.getEntry(name);
+						if (entry == null) entry = new RosterEntry(name, name, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+						RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
+						add(item);
+					}
+				}
+				
+				Enumeration<String> groupEnum = service.getConferencesHash(account).keys();
+				while(groupEnum.hasMoreElements()) {
+					String name = groupEnum.nextElement();
+					RosterItem item = new RosterItem(account, RosterItem.Type.muc, null);
+					item.setName(name);
+					add(item);
+				}
+			} while (cursor.moveToNext());
+			cursor.close();
 		}
     }
 	
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
         View v = convertView;
-        final String jid = getItem(position);
-        String name = jid;
+        RosterItem item = getItem(position);
+        String account = item.getAccount();
+        
+        String jid = "";
+        if (item.isMuc()) jid = item.getName();
+        else if (item.isEntry()) jid = item.getEntry().getUser();
+        String name = item.getName();
+        
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
         IconPicker ip = service.getIconPicker();
         
@@ -77,43 +114,21 @@ public class ChangeChatAdapter extends ArrayAdapter<String> {
         
 		ImageView msg  = (ImageView) v.findViewById(R.id.msg);
 		msg.setImageBitmap(ip.getMsgBitmap());
-		msg.setVisibility(service.getMessagesCount(jid) > 0 ? View.VISIBLE : View.GONE);
+		msg.setVisibility(service.getMessagesCount(account, jid) > 0 ? View.VISIBLE : View.GONE);
 		
 		ImageView icon = (ImageView) v.findViewById(R.id.status);
-		ImageView close = (ImageView) v.findViewById(R.id.close);
-        
-        if (service.getConferencesHash().containsKey(jid)) {
+        if (service.getJoinedConferences().containsKey(jid)) {
         	icon.setImageBitmap(ip.getMucBitmap());
-    		
-    		close.setOnClickListener(new OnClickListener() {
-				public void onClick(View v) {
-					remove(jid);
-					service.leaveRoom(jid);
-					if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));
-					else service.sendBroadcast(new Intent(Constants.PRESENCE_CHANGED));
-				}
-        		
-        	});
         } else {
-        	close.setOnClickListener(new OnClickListener() {
-				public void onClick(View v) {
-					remove(jid);
-					if (service.getMessagesHash().containsKey(jid)) service.getMessagesHash().remove(jid);
-					if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));
-					else service.sendBroadcast(new Intent(Constants.UPDATE));
-				}
-        		
-        	});
-        	
-        	if (service.getConferencesHash().containsKey(StringUtils.parseBareAddress(jid))) {
+        	if (service.getJoinedConferences().containsKey(StringUtils.parseBareAddress(jid))) {
         		name = StringUtils.parseResource(jid);
         	} else {
         		name = jid;
-        		RosterEntry re = JTalkService.getInstance().getRoster().getEntry(jid);
+        		RosterEntry re = JTalkService.getInstance().getRoster(account).getEntry(jid);
                 if (re != null && re.getName() != null && re.getName().length() > 0) name = re.getName();
         	}
             
-            Presence presence = service.getPresence(jid);
+            Presence presence = service.getPresence(account, jid);
         	icon.setImageBitmap(ip.getIconByPresence(presence));
         }
         

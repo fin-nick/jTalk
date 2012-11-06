@@ -36,12 +36,14 @@ import com.jtalk2.R;
 
 public class MessageMenuDialog implements OnItemLongClickListener, OnClickListener {
     private Activity activity;
+    private String account;
     private String jid;
     private MessageItem message;
     private JTalkService service;
 
-    public MessageMenuDialog(Activity activity, String jid) {
+    public MessageMenuDialog(Activity activity, String account, String jid) {
         this.activity = activity;
+        this.account = account;
         this.jid = jid;
         this.service = JTalkService.getInstance();
     }
@@ -58,7 +60,7 @@ public class MessageMenuDialog implements OnItemLongClickListener, OnClickListen
     		items = new CharSequence[4];
     		items[3] = "Captcha";
     	}
-    	else if (service.getConferencesHash().containsKey(jid)) { 
+    	else if (service.getConferencesHash(account).containsKey(jid)) { 
     		items = new CharSequence[4];
     		items[3] = activity.getString(R.string.Reply);
     	}
@@ -99,8 +101,8 @@ public class MessageMenuDialog implements OnItemLongClickListener, OnClickListen
     		        in.putExtra("cid", message.getBob().getCid());
     				activity.startActivity(in);
         		} else if (message.getName().equals(activity.getString(R.string.Me))) {
-        			MessageDialogs.EditMessageDialog(activity, message, jid);
-        		} else if (service.getConferencesHash().containsKey(jid)) {
+        			MessageDialogs.EditMessageDialog(activity, account, message, jid);
+        		} else if (service.getConferencesHash(account).containsKey(jid)) {
         			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
         			String separator = prefs.getString("nickSeparator", ", ");
         			

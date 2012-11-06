@@ -38,9 +38,11 @@ import com.jtalk2.R;
 
 public class RstListener implements RosterListener {
 	private JTalkService service;
+	private String account;
 
-	public RstListener() {
+	public RstListener(String account) {
 		this.service = JTalkService.getInstance();
+		this.account = account;
 	}
 	
     public void entriesAdded(Collection<String> addresses) {
@@ -98,8 +100,8 @@ public class RstListener implements RosterListener {
         item.setTime(time);
         item.setType(MessageItem.Type.status);
         
-        if (service.getMessagesHash().containsKey(jid)) {
-        	List<MessageItem> list = service.getMessagesHash().get(jid); 
+        if (service.getMessagesHash(account).containsKey(jid)) {
+        	List<MessageItem> list = service.getMessagesHash(account).get(jid); 
        		list.add(item);
         }
         

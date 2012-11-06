@@ -56,6 +56,7 @@ public class PrivacyRulesActivity extends SherlockActivity {
 	private static final int CONTEXT_EDIT = 3;
 	private static final int CONTEXT_REMOVE = 4;
 	
+	private String account;
 	private JTalkService service;
 	private PrivacyListManager plm;
 	private ProgressBar progress;
@@ -69,6 +70,7 @@ public class PrivacyRulesActivity extends SherlockActivity {
 	@Override
 	protected void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
+		account = getIntent().getStringExtra("account");
 		service = JTalkService.getInstance();
 		listName = getIntent().getStringExtra("list");
 		
@@ -148,7 +150,7 @@ public class PrivacyRulesActivity extends SherlockActivity {
     			finish();
     			break;
     		case MENU_ADD:
-    			PrivacyDialogs.addListDialog(this, null, -1);
+    			PrivacyDialogs.addListDialog(this, account, null, -1);
 	     		break;
     		case MENU_SAVE:
     			try {
@@ -179,7 +181,7 @@ public class PrivacyRulesActivity extends SherlockActivity {
 	     switch(item.getItemId()) {
 	     	case CONTEXT_EDIT:
 	     		PrivacyItem pi = rules.get(position);
-	     		PrivacyDialogs.addListDialog(this, pi, position);
+	     		PrivacyDialogs.addListDialog(this, account, pi, position);
 	            break;
 	        case CONTEXT_REMOVE:
 	        	rules.remove(position);
@@ -190,7 +192,7 @@ public class PrivacyRulesActivity extends SherlockActivity {
 	    }
 
 	private void init() {
-		plm = PrivacyListManager.getInstanceFor(service.getConnection());
+		plm = PrivacyListManager.getInstanceFor(service.getConnection(account));
 		if (listName != null) {
 			try {
 				PrivacyList list = plm.getPrivacyList(listName);

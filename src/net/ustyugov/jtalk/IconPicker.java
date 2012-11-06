@@ -176,18 +176,7 @@ public class IconPicker {
 				else if (mode == Presence.Mode.chat) return chat;
 				else return online;
 			} else if (type == Presence.Type.error) return none;
-			else {
-				JTalkService service = JTalkService.getInstance();
-				Roster roster = service.getRoster();
-				if (roster != null) {
-					RosterEntry re = service.getRoster().getEntry(presence.getFrom());
-					if (re != null) {
-						ItemType it = re.getType();
-						if (it.equals(ItemType.none) || it.equals(ItemType.from)) return none;
-						else return offline;
-					} else return offline;
-				} else return offline;
-			}
+			else return offline;
 		} else return offline;
 	}
 	

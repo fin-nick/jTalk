@@ -48,7 +48,7 @@ public class Notify {
 	public static boolean newMessages = false;
 	public enum Type {Chat, Conference, Direct}
 	
-    public static void updateNotify() {
+    public static void updateNotify(String account) {
     	JTalkService service = JTalkService.getInstance();
     	if (service.getMessagesList().isEmpty()) {
     		newMessages = false;
@@ -110,18 +110,18 @@ public class Notify {
                 List<String> list = service.getMessagesList();
                 for (String jid : list) {
                 	String n = null;
-                	if (service.getConferencesHash().containsKey(jid)) {
+                	if (service.getConferencesHash(account).containsKey(jid)) {
             			n = StringUtils.parseName(jid);
-            		} else if (service.getConferencesHash().containsKey(StringUtils.parseBareAddress(jid))) {
+            		} else if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {
             			n = StringUtils.parseResource(jid);
             		} else {
-            			Roster roster = JTalkService.getInstance().getRoster();
+            			Roster roster = JTalkService.getInstance().getRoster(account);
                 		if (roster != null) {
                 			RosterEntry re = roster.getEntry(jid);
                 			if (re != null && re.getName() != null) n = re.getName();
                 		}
             		}
-                	if (n != null && n.length() > 0) inboxStyle.addLine(n + ": " + service.getMessagesCount(jid));
+                	if (n != null && n.length() > 0) inboxStyle.addLine(n + ": " + service.getMessagesCount(account, jid));
                 }
                 mBuilder.setStyle(inboxStyle);
                 
@@ -156,7 +156,7 @@ public class Notify {
     	mng.cancelAll();
     }
     
-    public static void messageNotify(String from, Type type, String text) {
+    public static void messageNotify(String account, String from, Type type, String text) {
     	newMessages = true;
     	JTalkService service = JTalkService.getInstance();
     	String nick = from;
@@ -193,12 +193,12 @@ public class Notify {
     	if (!currentJid.equals(from) || currentJid.equals("me")) {
     		if (vibro) vibrator.vibrate(200);
     	
-    		if (service.getConferencesHash().containsKey(from)) {
+    		if (service.getConferencesHash(account).containsKey(from)) {
     			nick = StringUtils.parseName(from);
-    		} else if (service.getConferencesHash().containsKey(StringUtils.parseBareAddress(from))) {
+    		} else if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(from))) {
     			nick = StringUtils.parseResource(from);
     		} else {
-    			Roster roster = JTalkService.getInstance().getRoster();
+    			Roster roster = JTalkService.getInstance().getRoster(account);
         		if (roster != null) {
         			RosterEntry re = roster.getEntry(from);
         			if (re != null && re.getName() != null) nick = re.getName();
@@ -228,18 +228,18 @@ public class Notify {
             List<String> list = service.getMessagesList();
             for (String jid : list) {
             	String n = null;
-            	if (service.getConferencesHash().containsKey(jid)) {
+            	if (service.getConferencesHash(account).containsKey(jid)) {
         			n = StringUtils.parseName(jid);
-        		} else if (service.getConferencesHash().containsKey(StringUtils.parseBareAddress(jid))) {
+        		} else if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {
         			n = StringUtils.parseResource(jid);
         		} else {
-        			Roster roster = JTalkService.getInstance().getRoster();
+        			Roster roster = JTalkService.getInstance().getRoster(account);
             		if (roster != null) {
             			RosterEntry re = roster.getEntry(jid);
             			if (re != null && re.getName() != null) n = re.getName();
             		}
         		}
-            	if (n != null && n.length() > 0) inboxStyle.addLine(n + ": " + service.getMessagesCount(jid));
+            	if (n != null && n.length() > 0) inboxStyle.addLine(n + ": " + service.getMessagesCount(account, jid));
             }
             mBuilder.setStyle(inboxStyle);
             
@@ -341,11 +341,12 @@ public class Notify {
         mng.notify(NOTIFICATION_FILE_REQUEST, mBuilder.build());
     }
     
-    public static void inviteNotify(String room, String from, String reason, String password) {
+    public static void inviteNotify(String account, String room, String from, String reason, String password) {
     	JTalkService service = JTalkService.getInstance();
     	
     	Intent i = new Intent(service, RosterActivity.class);
     	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    	i.putExtra("account", account);
         i.putExtra("invite", true);
         i.putExtra("room", room);
         i.putExtra("from", from);

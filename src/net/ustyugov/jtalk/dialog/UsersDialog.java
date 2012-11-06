@@ -51,7 +51,7 @@ public class UsersDialog implements DialogInterface.OnClickListener {
 	public void onClick(DialogInterface dialog, int which) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		String separator = prefs.getString("nickSeparator", ", ");
-		String nick = adapter.getItem(which);
+		String nick = adapter.getItem(which).getName();
 		
 		Intent intent = new Intent(Constants.PASTE_TEXT);
 		intent.putExtra("text", nick + separator);

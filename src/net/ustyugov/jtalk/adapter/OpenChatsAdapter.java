@@ -20,10 +20,16 @@ package net.ustyugov.jtalk.adapter;
 import java.util.Enumeration;
 
 import net.ustyugov.jtalk.IconPicker;
+import net.ustyugov.jtalk.RosterItem;
+import net.ustyugov.jtalk.db.AccountDbHelper;
+import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
 
+import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.packet.RosterPacket;
 import org.jivesoftware.smack.util.StringUtils;
 
 import com.jtalk2.R;
@@ -31,6 +37,7 @@ import com.jtalk2.R;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.graphics.Typeface;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -40,7 +47,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class OpenChatsAdapter extends ArrayAdapter<String> {
+public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 	private JTalkService service;
 	private boolean isFragment;
 	
@@ -52,15 +59,36 @@ public class OpenChatsAdapter extends ArrayAdapter<String> {
 	
 	public void update() {
 		clear();
-		add("");
-		Enumeration<String> chatEnum = service.getMessagesHash().keys();
-		while (chatEnum.hasMoreElements()) {
-			add(chatEnum.nextElement());
-		}
-		
-		Enumeration<String> groupEnum = service.getConferencesHash().keys();
-		while(groupEnum.hasMoreElements()) {
-			add(groupEnum.nextElement());
+		add(null);
+
+		Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
+		if (cursor != null && cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			do {
+				String account = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
+				XMPPConnection connection = service.getConnection(account);
+				
+				Enumeration<String> chatEnum = service.getMessagesHash(account).keys();
+				while (chatEnum.hasMoreElements()) {
+					if (service != null && service.getRoster(account) != null && connection != null && connection.isAuthenticated()) {
+						String name = chatEnum.nextElement();
+						Roster roster = service.getRoster(account);
+						RosterEntry entry = roster.getEntry(name);
+						if (entry == null) entry = new RosterEntry(name, name, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+						RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
+						add(item);
+					}
+				}
+				
+				Enumeration<String> groupEnum = service.getConferencesHash(account).keys();
+				while(groupEnum.hasMoreElements()) {
+					String name = groupEnum.nextElement();
+					RosterItem item = new RosterItem(account, RosterItem.Type.muc, null);
+					item.setName(name);
+					add(item);
+				}
+			} while (cursor.moveToNext());
+			cursor.close();
 		}
 	}
 	
@@ -71,8 +99,6 @@ public class OpenChatsAdapter extends ArrayAdapter<String> {
 		boolean minimal = prefs.getBoolean("CompactMode", true);
 		
         View v = convertView;
-        String jid = getItem(position);
-        String name = jid;
         int fontSize = Integer.parseInt(service.getResources().getString(R.string.DefaultFontSize));
 		try {
 			fontSize = Integer.parseInt(prefs.getString("RosterSize", service.getResources().getString(R.string.DefaultFontSize)));
@@ -112,12 +138,19 @@ public class OpenChatsAdapter extends ArrayAdapter<String> {
     			v.setBackgroundColor(0xEEEEEEEE);
     		}
         } else {
-        	if (service.getConferencesHash().containsKey(jid)) {
+        	RosterItem ri = getItem(position);
+            String account = ri.getAccount();
+            String jid = "";
+            if (ri.isEntry() || ri.isSelf()) jid = ri.getEntry().getUser();
+            else if (ri.isMuc()) jid = ri.getName();
+            String name = ri.getName();
+            
+        	if (service.getJoinedConferences().containsKey(jid)) {
             	name = StringUtils.parseName(jid);
-            } else if (service.getConferencesHash().containsKey(StringUtils.parseBareAddress(jid))) {
+            } else if (service.getJoinedConferences().containsKey(StringUtils.parseBareAddress(jid))) {
             	name = StringUtils.parseResource(jid);
             } else {
-            	RosterEntry re = JTalkService.getInstance().getRoster().getEntry(jid);
+            	RosterEntry re = ri.getEntry();
                 if (re != null) name = re.getName();
                 if (name == null || name.equals("")) name = jid;
             }
@@ -134,10 +167,10 @@ public class OpenChatsAdapter extends ArrayAdapter<String> {
             	icon.setVisibility(View.GONE);
             } else {
             	icon.setVisibility(View.VISIBLE);
-            	if (service.getConferencesHash().containsKey(jid)) {
+            	if (service.getJoinedConferences().containsKey(jid)) {
                 	icon.setImageBitmap(ip.getMucBitmap());
                 } else {
-                	Presence presence = service.getPresence(jid);
+                	Presence presence = service.getPresence(ri.getAccount(), jid);
                 	icon.setImageBitmap(ip.getIconByPresence(presence));
                 }
             }
@@ -147,7 +180,7 @@ public class OpenChatsAdapter extends ArrayAdapter<String> {
             
             TextView counter = (TextView) v.findViewById(R.id.msg_counter);
     		counter.setTextSize(fontSize);
-            int count = service.getMessagesCount(jid);
+            int count = service.getMessagesCount(account, jid);
     		if (count > 0) {
     			msg.setVisibility(View.VISIBLE);
     			counter.setVisibility(View.VISIBLE);

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">jTalk</string>
-    <string name="version">0.46.2</string>
-    <string name="build">346</string>
+    <string name="version">0.47</string>
+    <string name="build">360</string>
     
     <string name="Connect">Connect</string>
     <string name="Disconnect">Disconnect</string>
@@ -24,6 +24,7 @@
     <string name="ConnectionError">Check account settings</string>
     <string name="Actions">Actions</string>
     <string name="Nogroup">Ungrouped</string>
+    <string name="SelfGroup">Self contacts</string>
     <string name="AllContacts">All contacs</string>
     <string name="Other">Other</string>
     <string name="Roster">Roster</string>

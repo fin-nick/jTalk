@@ -20,6 +20,7 @@
     <string name="ConnectionError">Проверьте настройки аккаунта</string>
     <string name="Actions">Действия</string>
     <string name="Nogroup">Негруппированные</string>
+    <string name="SelfGroup">Свои ресурсы</string>
     <string name="AllContacts">Все контакты</string>
     <string name="Other">Другое</string>
     <string name="Chat">Чат</string>

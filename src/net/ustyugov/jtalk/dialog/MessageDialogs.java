@@ -170,7 +170,7 @@ public class MessageDialogs {
 		builder.create().show();
 	}
 	
-	public static void EditMessageDialog(Activity activity, MessageItem message, final String jid) {
+	public static void EditMessageDialog(Activity activity, final String account, MessageItem message, final String jid) {
 		final String id = message.getId();
 		String text = message.getBody();
 		
@@ -187,7 +187,7 @@ public class MessageDialogs {
 			public void onClick(DialogInterface dialog, int which) {
 				JTalkService service = JTalkService.getInstance();
 				if (service != null && service.isAuthenticated()) {
-					service.editMessage(jid, id, edit.getText().toString());
+					service.editMessage(account, jid, id, edit.getText().toString());
 				}
 			}
 		});

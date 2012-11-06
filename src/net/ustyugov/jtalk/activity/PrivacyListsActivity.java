@@ -50,6 +50,7 @@ public class PrivacyListsActivity extends SherlockActivity implements OnItemClic
 	private static final int CONTEXT_EDIT = 3;
 	private static final int CONTEXT_REMOVE = 4;
 	
+	private String account;
 	private JTalkService service;
 	private PrivacyListManager plm;
 	private ProgressBar progress;
@@ -59,6 +60,7 @@ public class PrivacyListsActivity extends SherlockActivity implements OnItemClic
 	@Override
 	protected void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
+		account = getIntent().getStringExtra("account");
 		service = JTalkService.getInstance();
 		
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -80,7 +82,7 @@ public class PrivacyListsActivity extends SherlockActivity implements OnItemClic
 	}
 	
 	private void init() {
-		plm = PrivacyListManager.getInstanceFor(service.getConnection());
+		plm = PrivacyListManager.getInstanceFor(service.getConnection(account));
   		new Init().execute(null, null, null);
 	}
 	
@@ -178,7 +180,7 @@ public class PrivacyListsActivity extends SherlockActivity implements OnItemClic
 	private class Init extends AsyncTask<String, Void, Void> {
 		@Override
 		protected Void doInBackground(String... params) {
-			adapter = new PrivacyListAdapter(PrivacyListsActivity.this);
+			adapter = new PrivacyListAdapter(PrivacyListsActivity.this, account);
 			return null;
 		}
 		

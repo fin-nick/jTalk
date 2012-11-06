@@ -20,9 +20,12 @@ package net.ustyugov.jtalk.adapter;
 import java.util.Collection;
 
 import net.ustyugov.jtalk.IconPicker;
+import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.service.JTalkService;
 
+import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
 
 import android.content.Context;
@@ -38,7 +41,7 @@ import android.widget.TextView;
 
 import com.jtalk2.R;
 
-public class OnlineUsersAdapter extends ArrayAdapter<RosterEntry> {
+public class OnlineUsersAdapter extends ArrayAdapter<RosterItem> {
 	private JTalkService service;
 	
 	public OnlineUsersAdapter(Context context) {
@@ -49,10 +52,19 @@ public class OnlineUsersAdapter extends ArrayAdapter<RosterEntry> {
 	
 	public void update() {
 		clear();
-		Collection<RosterEntry> users = service.getRoster().getEntries();
-		for (RosterEntry entry : users) {
-			if (service.getRoster().getPresence(entry.getUser()).isAvailable()) {
-				add(entry);
+		for (XMPPConnection connection : service.getAllConnections()) {
+			if (connection.getUser() != null) {
+				String account = connection.getUser();
+				Roster roster = service.getRoster(account);
+				if (roster != null) {
+					Collection<RosterEntry> users = roster.getEntries();
+					for (RosterEntry entry : users) {
+						if (roster.getPresence(entry.getUser()).isAvailable()) {
+							RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
+							add(item);
+						}
+					}
+				}
 			}
 		}
 	}
@@ -61,7 +73,8 @@ public class OnlineUsersAdapter extends ArrayAdapter<RosterEntry> {
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		IconPicker ip = service.getIconPicker();
         View v = convertView;
-        RosterEntry entry = getItem(position);
+        RosterItem item = getItem(position);
+        RosterEntry entry = item.getEntry();
         
         String name = entry.getName();
         if (name == null || name.length() < 1) name = entry.getUser();
@@ -79,7 +92,7 @@ public class OnlineUsersAdapter extends ArrayAdapter<RosterEntry> {
         	label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
         } else label.setTextColor(0xFF232323);
         
-		Presence presence = service.getRoster().getPresence(entry.getUser());
+		Presence presence = service.getRoster(item.getAccount()).getPresence(entry.getUser());
       	ImageView icon = (ImageView)v.findViewById(R.id.status);
        	icon.setImageBitmap(ip.getIconByPresence(presence));
        	

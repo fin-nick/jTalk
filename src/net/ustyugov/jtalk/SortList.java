@@ -30,7 +30,7 @@ import org.jivesoftware.smack.packet.Presence;
 
 public class SortList {
 	
-    public static List<HashMap<String, RosterEntry>> sortGroupedContacts(List<HashMap<String, RosterEntry>> list) {
+    public static List<HashMap<String, RosterEntry>> sortGroupedContacts(String account, List<HashMap<String, RosterEntry>> list) {
     	JTalkService service = JTalkService.getInstance();
     	
     	List<HashMap<String, RosterEntry>> online  = new ArrayList<HashMap<String, RosterEntry>>();
@@ -42,8 +42,8 @@ public class SortList {
     	
     	for (HashMap<String, RosterEntry> hm : list) {
     		String jid = hm.get("entry").getUser();
-    		Presence.Mode presenceMode = service.getMode(jid);
-    		Presence.Type presenceType = service.getType(jid);
+    		Presence.Mode presenceMode = service.getMode(account, jid);
+    		Presence.Type presenceType = service.getType(account, jid);
   			
     		if (presenceType == Presence.Type.available) {
     			if (presenceMode == Presence.Mode.chat) {
@@ -72,7 +72,7 @@ public class SortList {
 		return result;
     }
     
-    public static List<String> sortSimpleContacts(List<String> list) {
+    public static List<String> sortSimpleContacts(String account, List<String> list) {
     	JTalkService service = JTalkService.getInstance();
     	
     	List<String> online  = new ArrayList<String>();
@@ -83,8 +83,8 @@ public class SortList {
     	List<String> offline = new ArrayList<String>();
     	
     	for (String jid : list) {
-    		Presence.Mode presenceMode = service.getMode(jid);
-    		Presence.Type presenceType = service.getType(jid);
+    		Presence.Mode presenceMode = service.getMode(account, jid);
+    		Presence.Type presenceType = service.getType(account, jid);
   			
     		if (presenceType == Presence.Type.available) {
     			if (presenceMode == Presence.Mode.chat) {
@@ -113,7 +113,7 @@ public class SortList {
 		return result;
     }
     
-    public static List<String> sortParticipants(String group) {
+    public static List<String> sortParticipants(String account, String group) {
     	JTalkService service = JTalkService.getInstance();
     	
     	List<String> online = new ArrayList<String>();
@@ -122,8 +122,8 @@ public class SortList {
     	List<String> xa     = new ArrayList<String>();
     	List<String> dnd    = new ArrayList<String>();
     	
-    	if (service.getConferencesHash().containsKey(group)) {
-			Iterator<Presence> it = service.getRoster().getPresences(group);
+    	if (service.getConferencesHash(account).containsKey(group)) {
+			Iterator<Presence> it = service.getRoster(account).getPresences(group);
 			while (it.hasNext()) {
 				Presence p = it.next();
 				String fjid = p.getFrom();
@@ -157,7 +157,7 @@ public class SortList {
 		return result;
     }
     
-    public static List<String> sortParticipantsInChat(String group, List<String> list) {
+    public static List<String> sortParticipantsInChat(String account, String group, List<String> list) {
     	JTalkService service = JTalkService.getInstance();
     	
     	List<String> online  = new ArrayList<String>();
@@ -166,9 +166,9 @@ public class SortList {
     	List<String> xa      = new ArrayList<String>();
     	List<String> dnd     = new ArrayList<String>();
     	
-    	if (service.getConferencesHash().containsKey(group)) {
+    	if (service.getConferencesHash(account).containsKey(group)) {
     		for (String nick : list) {
-        		Presence p = service.getConferencesHash().get(group).getOccupantPresence(group + "/" + nick);
+        		Presence p = service.getConferencesHash(account).get(group).getOccupantPresence(group + "/" + nick);
         		if (p != null) {
         			Presence.Type t = p.getType();
             		String mode;

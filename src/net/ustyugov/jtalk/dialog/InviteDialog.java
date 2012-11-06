@@ -25,13 +25,15 @@ import android.content.DialogInterface.OnClickListener;
 
 public class InviteDialog {
 	private Activity activity;
+	private String account;
 	private String room;
 	private String from;
 	private String reason;
 	private String password;
 	
-	public InviteDialog(Activity activity, String room, String from, String reason, String password) {
+	public InviteDialog(Activity activity, String account, String room, String from, String reason, String password) {
 		this.activity = activity;
+		this.account = account;
 		this.reason = reason;
 		this.room = room;
 		this.from = from;
@@ -47,7 +49,7 @@ public class InviteDialog {
         builder.setCancelable(false);
         builder.setPositiveButton("Yes", new OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
-				MucDialogs.joinDialog(activity, room, password);
+				MucDialogs.joinDialog(activity, account, room, password);
 			}
         });
         builder.setNegativeButton("No", new OnClickListener() {

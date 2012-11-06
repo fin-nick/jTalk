@@ -37,13 +37,15 @@ import com.jtalk2.R;
 
 public class SendToResourceDialog implements OnClickListener {
 	private Activity a;
+	private String account;
 	private String jid;
 	private String message;
 	private List<String> list = new ArrayList<String>();
 	private JTalkService service;
 	
-	public SendToResourceDialog(Activity activity, String jid, String message) {
+	public SendToResourceDialog(Activity activity, String account, String jid, String message) {
 		this.a = activity;
+		this.account = account;
 		this.jid = jid;
 		this.message = message;
 		this.service = JTalkService.getInstance();
@@ -52,7 +54,7 @@ public class SendToResourceDialog implements OnClickListener {
 	public void show() {
 		int slash = jid.lastIndexOf("/");
 		if (slash == -1) {
-			Iterator<Presence> it =  service.getRoster().getPresences(jid);
+			Iterator<Presence> it =  service.getRoster(account).getPresences(jid);
 			while (it.hasNext()) {
 				Presence p = it.next();
 				if (p.getType() != Presence.Type.unavailable) {
@@ -61,7 +63,7 @@ public class SendToResourceDialog implements OnClickListener {
 			}
 			
 			if (!list.isEmpty()) {
-				ResourceAdapter adapter = new ResourceAdapter(a, jid, list);
+				ResourceAdapter adapter = new ResourceAdapter(a, account, jid, list);
 
 		        AlertDialog.Builder builder = new AlertDialog.Builder(a);
 		        builder.setTitle(a.getString(R.string.SelectResource));

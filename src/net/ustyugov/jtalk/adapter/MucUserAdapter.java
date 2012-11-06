@@ -45,10 +45,12 @@ import com.jtalk2.R;
 
 public class MucUserAdapter extends ArrayAdapter<String> {
 	private String group;
+	private String account;
 	
-	public MucUserAdapter(Context context, String group) {
+	public MucUserAdapter(Context context, String account, String group) {
 		super(context, R.id.name);
 		this.group = group;
+		this.account = account;
         update();
 	}
 	
@@ -60,15 +62,15 @@ public class MucUserAdapter extends ArrayAdapter<String> {
 		JTalkService service = JTalkService.getInstance();
 		clear();
 		add("");
-		if (group != null && service.getConferencesHash().containsKey(group)) {
+		if (group != null && service.getConferencesHash(account).containsKey(group)) {
 			List<String> users = new ArrayList<String>();
-			Iterator<Presence> it = service.getRoster().getPresences(group);
+			Iterator<Presence> it = service.getRoster(account).getPresences(group);
 			while (it.hasNext()) {
 				Presence p = it.next();
 				users.add(StringUtils.parseResource(p.getFrom()));
 			}
 			
-			users = SortList.sortParticipantsInChat(group, users);
+			users = SortList.sortParticipantsInChat(account, group, users);
 			for (String user: users) {
 				add(user);
 			}
@@ -123,7 +125,7 @@ public class MucUserAdapter extends ArrayAdapter<String> {
 			
 	        String nick = getItem(position);
 			
-	        Presence p = service.getRoster().getPresenceResource(group + "/" + nick);
+	        Presence p = service.getRoster(account).getPresenceResource(group + "/" + nick);
 	        Presence.Type type = p.getType();
 	        Presence.Mode mode = p.getMode();
 	        
@@ -148,7 +150,7 @@ public class MucUserAdapter extends ArrayAdapter<String> {
 	       	
 	       	ImageView msg  = (ImageView) v.findViewById(R.id.msg);
 	       	msg.setImageBitmap(ip.getMsgBitmap());
-	        msg.setVisibility(service.getMessagesCount(group + "/" + nick) > 0 ? View.VISIBLE : View.GONE);
+	        msg.setVisibility(service.getMessagesCount(account, group + "/" + nick) > 0 ? View.VISIBLE : View.GONE);
 			
 	       	TextView label = (TextView) v.findViewById(R.id.name);
 	       	label.setTextSize(fontSize);
@@ -169,7 +171,7 @@ public class MucUserAdapter extends ArrayAdapter<String> {
 	       		}
 	        }
 	       	
-	        if (service.getMessagesHash().containsKey(group + "/" + nick)) label.setTypeface(Typeface.DEFAULT_BOLD);
+	        if (service.getMessagesHash(account).containsKey(group + "/" + nick)) label.setTypeface(Typeface.DEFAULT_BOLD);
 			else label.setTypeface(Typeface.DEFAULT);
 		}
         return v;

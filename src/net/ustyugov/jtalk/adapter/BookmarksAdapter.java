@@ -19,14 +19,20 @@ package net.ustyugov.jtalk.adapter;
 
 import java.util.Collection;
 
+import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.IconPicker;
+import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.service.JTalkService;
 
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.XMPPError;
+import org.jivesoftware.smackx.bookmark.BookmarkManager;
 import org.jivesoftware.smackx.bookmark.BookmarkedConference;
 
 import com.jtalk2.R;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -36,7 +42,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class BookmarksAdapter extends ArrayAdapter<BookmarkedConference> {
+public class BookmarksAdapter extends ArrayAdapter<RosterItem> {
 	Context context;
 	
 	static class ViewHolder {
@@ -45,12 +51,25 @@ public class BookmarksAdapter extends ArrayAdapter<BookmarkedConference> {
 		protected TextView jid;
 	}
 	
-	public BookmarksAdapter(Context context, Collection<BookmarkedConference> collection) {
+	public BookmarksAdapter(Context context, String account) {
 		super(context, R.id.name);
 		this.context = context;
 		
-		for (BookmarkedConference bc : collection) {
-			add(bc);
+		try {
+			BookmarkManager bm = BookmarkManager.getBookmarkManager(JTalkService.getInstance().getConnection(account));
+			Collection<BookmarkedConference> collection = bm.getBookmarkedConferences();
+			for (BookmarkedConference bc : collection) {
+				RosterItem item = new RosterItem(account, RosterItem.Type.muc, null);
+				item.setObject(bc);
+				add(item);
+			}
+		} catch (XMPPException e) {
+			XMPPError error = e.getXMPPError();
+			if (error != null) {
+				Intent intent = new Intent(Constants.ERROR);
+				intent.putExtra("error", "[" + error.getCode() + "] " + error.getMessage());
+				context.sendBroadcast(intent);
+			}
 		}
 	}
 	
@@ -88,7 +107,7 @@ public class BookmarksAdapter extends ArrayAdapter<BookmarkedConference> {
         	holder = (ViewHolder) convertView.getTag();
         }
 
-        BookmarkedConference item = getItem(position);
+        BookmarkedConference item = (BookmarkedConference) getItem(position).getObject();
         String name = item.getName();
         String jid  = item.getJid();
         String nick = item.getNickname();

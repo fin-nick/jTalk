@@ -71,6 +71,7 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
 	private static final int CONTEXT_INFO = 3;
 	private static final int CONTEXT_ADD  = 4;
 	
+	private String account;
 	private ParseIdentity task;
 	private ListView list;
 	private EditText input;
@@ -94,11 +95,13 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
         LinearLayout linear = (LinearLayout) findViewById(R.id.discovery_linear);
         linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
 		
+        account = getIntent().getStringExtra("account");
+        
 		service = JTalkService.getInstance();
 		
 		progress = (ProgressBar) findViewById(R.id.progress);
 		
-		String host = service.getConnection().getServiceName();
+		String host = service.getConnection(account).getServiceName();
 		
 		input = (EditText) findViewById(R.id.input);
 		input.setText(host);
@@ -181,7 +184,7 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
 				}
 				break;
 			case CONTEXT_JOIN:
-				if (discoItem != null && discoItem.isMUC()) MucDialogs.joinDialog(this, jid, null);
+				if (discoItem != null && discoItem.isMUC()) MucDialogs.joinDialog(this, account, jid, null);
 				break;
 			case CONTEXT_INFO:
 				if (discoItem != null && discoItem.isVCard()) {
@@ -228,7 +231,7 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
   	    		}
   	    		break;
   	    	case R.id.join:
-  	    		if (jid != null) MucDialogs.joinDialog(this, jid, null);
+  	    		if (jid != null) MucDialogs.joinDialog(this, account, jid, null);
   	    		break;
   	    	case R.id.add:
   	    		if (jid != null) RosterDialogs.addDialog(this, jid);
@@ -351,7 +354,7 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			discoManager = ServiceDiscoveryManager.getInstanceFor(service.getConnection());
+			discoManager = ServiceDiscoveryManager.getInstanceFor(service.getConnection(account));
 			list.setVisibility(View.GONE);
 			progress.setVisibility(View.VISIBLE);
 		}

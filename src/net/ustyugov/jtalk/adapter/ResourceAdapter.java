@@ -40,10 +40,12 @@ import com.jtalk2.R;
 public class ResourceAdapter extends ArrayAdapter<String> {
 	private JTalkService service;
 	private String jid;
+	private String account;
 	
-	public ResourceAdapter(Context context, String jid, List<String> list) {
+	public ResourceAdapter(Context context, String account, String jid, List<String> list) {
 		super(context, R.layout.selector);
 		this.jid = jid;
+		this.account = account;
         this.service = JTalkService.getInstance();
         
         for(int i = 0; i < list.size(); i++) {
@@ -63,7 +65,7 @@ public class ResourceAdapter extends ArrayAdapter<String> {
             v = vi.inflate(R.layout.selector, null);
         }
         
-		Presence presence = service.getRoster().getPresenceResource(jid + "/" + resource);
+		Presence presence = service.getRoster(account).getPresenceResource(jid + "/" + resource);
         	
       	ImageView close = (ImageView) v.findViewById(R.id.close);
       	close.setVisibility(View.GONE);

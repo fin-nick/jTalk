@@ -22,6 +22,7 @@ import java.util.List;
 import net.ustyugov.jtalk.service.JTalkService;
 import org.jivesoftware.smack.PrivacyList;
 import org.jivesoftware.smack.PrivacyListManager;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.PrivacyItem;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -29,8 +30,25 @@ import android.preference.PreferenceManager;
 
 public class IgnoreList {
 	public final static String LISTNAME = "Ignore-List";
+	private XMPPConnection connection;
 	
-	public static class CreateIgnoreList extends AsyncTask<Void, Void, Void> {
+	public IgnoreList(XMPPConnection conn) {
+		connection = conn;
+	}
+	
+	public IgnoreList(String account) {
+		connection = JTalkService.getInstance().getConnection(account);
+	}
+	
+	public void createIgnoreList() {
+		new CreateIgnoreList().execute();
+	}
+	
+	public void updateIgnoreList(String jid) {
+		new UpdateIgnoreList().execute(jid);
+	}
+	
+	private class CreateIgnoreList extends AsyncTask<Void, Void, Void> {
 		private JTalkService service;
 		private PrivacyListManager plm;
 		
@@ -39,14 +57,14 @@ public class IgnoreList {
 			try {
 				boolean exist = false;
 				service = JTalkService.getInstance();
-				plm = PrivacyListManager.getInstanceFor(service.getConnection());
+				plm = PrivacyListManager.getInstanceFor(connection);
 				PrivacyList[] list = plm.getPrivacyLists();
 				for (PrivacyList l : list) {
 					if (l.toString().equals(LISTNAME)) exist = true;
 				}
 				if (!exist) {
 					PrivacyItem item = new PrivacyItem("group", false, 0);
-					item.setValue("Ignore-List");
+					item.setValue(LISTNAME);
 					item.setFilterIQ(true);
 					item.setFilterMessage(true);
 					item.setFilterPresence_in(true);
@@ -69,17 +87,13 @@ public class IgnoreList {
 			} catch(Exception e) { }
 		}
 	}
-	public static class UpdateIgnoreList extends AsyncTask<String, Void, Void> {
-		public final static String LISTNAME = "Ignore-List";
-		JTalkService service;
-		PrivacyListManager plm;
-		
+	
+	private class UpdateIgnoreList extends AsyncTask<String, Void, Void> {
 		@Override
 		protected Void doInBackground(String... jids) {
 			String jid = jids[0];
 			try {
-				service = JTalkService.getInstance();
-				plm = PrivacyListManager.getInstanceFor(service.getConnection());
+				PrivacyListManager plm = PrivacyListManager.getInstanceFor(connection);
 				PrivacyList list = plm.getPrivacyList(LISTNAME);
 				List<PrivacyItem> items = list.getItems();
 				

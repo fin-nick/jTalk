@@ -38,10 +38,12 @@ import android.text.format.DateFormat;
 import com.jtalk2.R;
 
 public class MucParticipantStatusListener implements ParticipantStatusListener {
-	private String g = null;
+	private String g;
+	private String account;
 	private JTalkService service;
 	
-	public MucParticipantStatusListener(String group) {
+	public MucParticipantStatusListener(String account, String group) {
+		this.account = account;
 		this.g = group;	
 		this.service = JTalkService.getInstance();
 		return;
@@ -52,7 +54,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 		String nick = StringUtils.parseResource(participant);
     	
 		
-		Presence p = service.getPresence(g + "/" + nick);
+		Presence p = service.getPresence(account, g + "/" + nick);
 		Presence.Mode mode = p.getMode();
 		if (mode == null) mode = Presence.Mode.available;
 		String status = p.getStatus();
@@ -73,12 +75,12 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         MessageLog.writeMucMessage(g, nick, item);
         
 		List<MessageItem> list = new ArrayList<MessageItem>();
-        if (service.getMucMessagesHash().containsKey(g)) {
-           	list = service.getMucMessagesHash().get(g);
+        if (service.getMucMessagesHash(account).containsKey(g)) {
+           	list = service.getMucMessagesHash(account).get(g);
            	list.add(item);
         } else {
           	list.add(item);
-           	service.getMucMessagesHash().put(g, list);
+           	service.getMucMessagesHash(account).put(g, list);
         }
         
 		Intent i = new Intent(Constants.PRESENCE_CHANGED);
@@ -101,12 +103,12 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 		MessageLog.writeMucMessage(g, nick, item);
 		
 		List<MessageItem> list = new ArrayList<MessageItem>();
-        if (service.getMucMessagesHash().containsKey(g)) {
-           	list = service.getMucMessagesHash().get(g);
+        if (service.getMucMessagesHash(account).containsKey(g)) {
+           	list = service.getMucMessagesHash(account).get(g);
            	list.add(item);
         } else {
           	list.add(item);
-           	service.getMucMessagesHash().put(g, list);
+           	service.getMucMessagesHash(account).put(g, list);
         }
     	
         try {
@@ -138,12 +140,12 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         MessageLog.writeMucMessage(g, nick, item);
             
         List<MessageItem> list = new ArrayList<MessageItem>();
-        if (service.getMucMessagesHash().containsKey(g)) {
-           	list = service.getMucMessagesHash().get(g);
+        if (service.getMucMessagesHash(account).containsKey(g)) {
+           	list = service.getMucMessagesHash(account).get(g);
            	list.add(item);
         } else {
           	list.add(item);
-           	service.getMucMessagesHash().put(g, list);
+           	service.getMucMessagesHash(account).put(g, list);
         }
     	
     	Intent intent = new Intent(Constants.PRESENCE_CHANGED);
@@ -168,12 +170,12 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         MessageLog.writeMucMessage(g, nick, item);
             
         List<MessageItem> list = new ArrayList<MessageItem>();
-        if (service.getMucMessagesHash().containsKey(g)) {
-           	list = service.getMucMessagesHash().get(g);
+        if (service.getMucMessagesHash(account).containsKey(g)) {
+           	list = service.getMucMessagesHash(account).get(g);
            	list.add(item);
         } else {
            	list.add(item);
-          	service.getMucMessagesHash().put(g, list);
+          	service.getMucMessagesHash(account).put(g, list);
         }
     	
     	Intent intent = new Intent(Constants.PRESENCE_CHANGED);
@@ -197,12 +199,12 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         MessageLog.writeMucMessage(g, nick, item);
             
         List<MessageItem> list = new ArrayList<MessageItem>();
-        if (service.getMucMessagesHash().containsKey(g)) {
-           	list = service.getMucMessagesHash().get(g);
+        if (service.getMucMessagesHash(account).containsKey(g)) {
+           	list = service.getMucMessagesHash(account).get(g);
            	list.add(item);
         } else {
           	list.add(item);
-           	service.getMucMessagesHash().put(g, list);
+           	service.getMucMessagesHash(account).put(g, list);
         }
     	
     	Intent intent = new Intent(Constants.PRESENCE_CHANGED);
@@ -226,12 +228,12 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         MessageLog.writeMucMessage(g, nick, item);
             
         List<MessageItem> list = new ArrayList<MessageItem>();
-        if (service.getMucMessagesHash().containsKey(g)) {
-           	list = service.getMucMessagesHash().get(g);
+        if (service.getMucMessagesHash(account).containsKey(g)) {
+           	list = service.getMucMessagesHash(account).get(g);
            	list.add(item);
         } else {
           	list.add(item);
-           	service.getMucMessagesHash().put(g, list);
+           	service.getMucMessagesHash(account).put(g, list);
         }
     	
     	Intent intent = new Intent(Constants.PRESENCE_CHANGED);
@@ -254,7 +256,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 		String role = "", affiliation = "";
 		String nick = StringUtils.parseResource(participant);
 		
-		Presence p = service.getConferencesHash().get(g).getOccupantPresence(participant);
+		Presence p = service.getConferencesHash(account).get(g).getOccupantPresence(participant);
 		
 		MUCUser mucUser = (MUCUser) p.getExtension("x", "http://jabber.org/protocol/muc#user");
 		if (mucUser != null) {
@@ -279,12 +281,12 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 	        MessageLog.writeMucMessage(g, nick, item);
 	            
 	        List<MessageItem> list = new ArrayList<MessageItem>();
-	        if (service.getMucMessagesHash().containsKey(g)) {
-	           	list = service.getMucMessagesHash().get(g);
+	        if (service.getMucMessagesHash(account).containsKey(g)) {
+	           	list = service.getMucMessagesHash(account).get(g);
 	           	list.add(item);
 	        } else {
 	          	list.add(item);
-	           	service.getMucMessagesHash().put(g, list);
+	           	service.getMucMessagesHash(account).put(g, list);
 	        }
 	    	
 	    	Intent intent = new Intent(Constants.PRESENCE_CHANGED);

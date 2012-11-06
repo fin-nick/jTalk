@@ -20,23 +20,44 @@ package net.ustyugov.jtalk;
 import org.jivesoftware.smack.RosterEntry;
 
 public class RosterItem {
-	private String name = null;
+	private String name;
 	private RosterEntry entry;
+	private String account;
+	private Type type;
 	private boolean isCollapsed = false;
-	private boolean isGroup = false;
+	private Object object;
 	
-	public RosterItem() { }
+	public enum Type {account, group, entry, self, muc};
 	
-	public boolean isGroup() {return this.isGroup;}
+	public RosterItem(String account, Type type, RosterEntry entry) { 
+		this.account = account; 
+		this.type = type;
+		this.entry = entry;
+	}
+	
+	public boolean isGroup() {return type == Type.group;}
+	public boolean isAccount() {return type == Type.account;}
+	public boolean isEntry() {return type == Type.entry;}
+	public boolean isSelf() {return type == Type.self;}
+	public boolean isMuc() {return type == Type.muc;}
+	
 	public boolean isCollapsed() {return this.isCollapsed;}
 	
 	public void setCollapsed(boolean isExpanded) {this.isCollapsed= isExpanded;}
-	public void setGroup(boolean isGroup) {this.isGroup = isGroup;}
 	
 	public void setEntry(RosterEntry re) {this.entry = re;}
 	public RosterEntry getEntry() {return this.entry;}
 	
-	public void setName(String name) {this.name = name;}
-	public String getName() {return this.name;}
+	public void setName(String name) { this.name = name; }
+	public String getName() { 
+		if (entry == null) return name;
+		if (entry.getName() != null && entry.getName().length() > 0) return entry.getName();
+		else return entry.getUser();
+	}
 
+	public String getAccount() { return this.account; }
+	public void setAccount(String account) { this.account = account; }
+	
+	public Object getObject() { return object; }
+	public void setObject(Object object) { this.object = object; } 
 }

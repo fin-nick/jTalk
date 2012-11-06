@@ -23,13 +23,24 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.ustyugov.jtalk.Constants;
+import net.ustyugov.jtalk.IgnoreList;
+import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.activity.CommandsActivity;
+import net.ustyugov.jtalk.activity.PrivacyListsActivity;
+import net.ustyugov.jtalk.activity.SendFileActivity;
+import net.ustyugov.jtalk.activity.vcard.SetVcardActivity;
+import net.ustyugov.jtalk.activity.vcard.VCardActivity;
 import net.ustyugov.jtalk.adapter.ResourceAdapter;
+import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
 
+import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterGroup;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.ChatState;
+import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -52,7 +63,7 @@ import com.jtalk2.R;
 
 public class RosterDialogs {
 	
-	public static void changeStatusDialog(Activity a, final String to) {
+	public static void changeStatusDialog(final Activity a, final String account, final String to) {
 		final JTalkService service = JTalkService.getInstance();
 		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(a);
 		String[] statusArray = a.getResources().getStringArray(R.array.statusArray);
@@ -97,22 +108,33 @@ public class RosterDialogs {
 				String mode = (String) getMode(pos);
 				String text = statusMsg.getText().toString();
 				
-				if (service.isStarted()) {
-					if(service.isAuthenticated()) {
-		           		if (to == null) {
-		           			service.sendPresence(text, mode, priority);
+				if (account != null) {
+					if (service.isStarted() && service.isAuthenticated(account)) {
+						if (to == null) {
+		           			service.sendPresence(account, text, mode, priority);
 		           		} else {
-		           			service.sendPresenceTo(to, text, mode, priority);
+		           			service.sendPresenceTo(account, to, text, mode, priority);
 		           		}
-		           	} else {
-		           		service.setPreference("currentPriority", priority);
-		        		service.setPreference("currentSelection", pos);
-		        		service.setPreference("currentMode", mode);
-		        		service.setPreference("currentStatus", text);
-		        		service.setPreference("lastStatus"+mode, text);
+					} else {
+						service.setPreference(a, "currentPriority", priority);
+		        		service.setPreference(a,"currentSelection", pos);
+		        		service.setPreference(a, "currentMode", mode);
+		        		service.setPreference(a, "currentStatus", text);
+		        		service.setPreference(a, "lastStatus"+mode, text);
+		           		service.connect(account);
+					}
+				} else {
+					if (service.isAuthenticated()) {
+						service.sendPresence(text, mode, priority);
+					} else {
+						service.setPreference(a, "currentPriority", priority);
+		        		service.setPreference(a, "currentSelection", pos);
+		        		service.setPreference(a, "currentMode", mode);
+		        		service.setPreference(a, "currentStatus", text);
+		        		service.setPreference(a, "lastStatus"+mode, text);
 		           		service.connect();
-		           	}
-				} 
+					}
+				}
 			}
 		});
 		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -127,18 +149,30 @@ public class RosterDialogs {
 		final JTalkService service = JTalkService.getInstance();
 		
 		LayoutInflater inflater = a.getLayoutInflater();
-		View layout = inflater.inflate(R.layout.add_contact_dialog, (ViewGroup) a.findViewById(R.id.add_contact_linear));
+		View layout = inflater.inflate(R.layout.add_contact_dialog, (ViewGroup) a.findViewById(R.id.linear));
 	    
-	    final EditText jidEdit = (EditText) layout.findViewById(R.id.add_dialog_jid_entry);
+		List<String> accounts = new ArrayList<String>();
+		for(XMPPConnection connection : service.getAllConnections()) {
+			accounts.add(StringUtils.parseBareAddress(connection.getUser()));
+		}
+		
+		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(a, android.R.layout.simple_spinner_item, accounts);
+	    arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		
+		final Spinner spinner = (Spinner) layout.findViewById(R.id.accounts);
+		spinner.setAdapter(arrayAdapter);
+		
+	    final EditText jidEdit = (EditText) layout.findViewById(R.id.jid_entry);
 	    if (jid != null) jidEdit.setText(jid);
-	    final EditText nameEdit = (EditText) layout.findViewById(R.id.add_dialog_name_entry);
-	    final AutoCompleteTextView groupEdit = (AutoCompleteTextView) layout.findViewById(R.id.add_dialog_group_entry);
+	    final EditText nameEdit = (EditText) layout.findViewById(R.id.name_entry);
+	    final AutoCompleteTextView groupEdit = (AutoCompleteTextView) layout.findViewById(R.id.group_entry);
 	    
 		AlertDialog.Builder builder = new AlertDialog.Builder(a);
 		builder.setView(layout);
 		builder.setTitle(a.getString(R.string.Add));
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
+				String account = (String) spinner.getSelectedItem();
 				String group = groupEdit.getText().toString();
 				String name = nameEdit.getText().toString();
 				String jid = jidEdit.getText().toString();
@@ -147,7 +181,7 @@ public class RosterDialogs {
 					if (name.length() <= 0) name = jid;
 					if (group.length() <=0) group = null;
 					if (service != null && service.isAuthenticated()) {
-						service.addContact(jid, name, group);
+						service.addContact(account, jid, name, group);
 					}
 				}
 			}
@@ -160,30 +194,40 @@ public class RosterDialogs {
 		builder.create().show();
 	}
 	
-	public static void editDialog(Activity a, final String jid, String name, String group) {
+	public static void editDialog(Activity a, String account, final String jid, String name, String group) {
 		final JTalkService service = JTalkService.getInstance();
 		
 		LayoutInflater inflater = a.getLayoutInflater();
-		View layout = inflater.inflate(R.layout.edit_contact_dialog, (ViewGroup) a.findViewById(R.id.edit_contact_linear));
+		View layout = inflater.inflate(R.layout.add_contact_dialog, (ViewGroup) a.findViewById(R.id.linear));
 	    
-		EditText jidEdit = (EditText) layout.findViewById(R.id.edit_dialog_jid_entry);
+		List<String> connections = new ArrayList<String>();
+		for(XMPPConnection connection : service.getAllConnections()) {
+			connections.add(connection.getUser());
+		}
+		
+		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(a, android.R.layout.simple_spinner_item, connections);
+	    arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		
+		final Spinner spinner = (Spinner) layout.findViewById(R.id.accounts);
+		spinner.setAdapter(arrayAdapter);
+		spinner.setSelection(arrayAdapter.getPosition(account));
+		spinner.setEnabled(false);
+		
+		EditText jidEdit = (EditText) layout.findViewById(R.id.jid_entry);
 		jidEdit.setText(jid);
 		
-	    final EditText nameEdit = (EditText) layout.findViewById(R.id.edit_dialog_name_entry);
+	    final EditText nameEdit = (EditText) layout.findViewById(R.id.name_entry);
 	    nameEdit.setText(name);
 	    
 	    List<String> groups = new ArrayList<String>();
-	    Collection<RosterGroup> col = service.getRoster().getGroups();
+	    Collection<RosterGroup> col = service.getRoster(account).getGroups();
 	    for(RosterGroup rg : col) {
 	    	groups.add(rg.getName());
 	    }
 	    
-	    String[] array = new String[groups.size()];
-	    for (int i = 0; i < groups.size(); i++) array[i] = groups.get(i);
+	    ArrayAdapter<String> adapter = new ArrayAdapter<String>(a, android.R.layout.simple_list_item_1, groups);
 	    
-	    ArrayAdapter<String> adapter = new ArrayAdapter<String>(a, android.R.layout.simple_list_item_1, array);
-	    
-	    final AutoCompleteTextView groupEdit = (AutoCompleteTextView) layout.findViewById(R.id.edit_dialog_group_entry);
+	    final AutoCompleteTextView groupEdit = (AutoCompleteTextView) layout.findViewById(R.id.group_entry);
 	    groupEdit.setText(group);
 	    groupEdit.setAdapter(adapter);
 	    
@@ -193,13 +237,14 @@ public class RosterDialogs {
 		builder.setTitle(a.getString(R.string.Add));
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
+				String account = (String) spinner.getSelectedItem();
 				String group = groupEdit.getText().toString();
 				String name = nameEdit.getText().toString();
 				
 				if (name.length() <= 0) name = jid;
 				if (group.length() <=0) group = null;
 				if (service != null && service.isAuthenticated()) {
-					JTalkService.getInstance().addContact(jid, name, group);
+					JTalkService.getInstance().addContact(account, jid, name, group);
 				}
 			}
 		});
@@ -211,8 +256,8 @@ public class RosterDialogs {
 		builder.create().show();
 	}
 	
-	public static void renameGroupDialog(final Activity activity, String group) {
-		final RosterGroup rg = JTalkService.getInstance().getRoster().getGroup(group);
+	public static void renameGroupDialog(final Activity activity, final String account, String group) {
+		final RosterGroup rg = JTalkService.getInstance().getRoster(account).getGroup(group);
 		if (rg != null) {
 			final String oldname = rg.getName();
 			
@@ -244,7 +289,7 @@ public class RosterDialogs {
 		}
 	}
 	
-	public static void subscribtionDialog(Activity activity, final String jid) {
+	public static void subscribtionDialog(Activity activity, final String account, final String jid) {
 		final JTalkService service = JTalkService.getInstance();
 		
 		CharSequence[] items = new CharSequence[3];
@@ -271,27 +316,27 @@ public class RosterDialogs {
         				break;
         		}
         		if (service != null && service.isAuthenticated()) {
-        			service.sendPacket(presence);
+        			service.sendPacket(account, presence);
         		}
         	}
         });
         builder.create().show();
 	}
 	
-	public static void resourceDialog(final Activity activity, final String jid) {
+	public static void resourceDialog(final Activity activity, final String account, final String jid) {
 		JTalkService service = JTalkService.getInstance();
 		final List<String> list = new ArrayList<String>();
 		
 		int slash = jid.lastIndexOf("/");
 		if (slash == -1) {
-			Iterator<Presence> it =  service.getRoster().getPresences(jid);
+			Iterator<Presence> it =  service.getRoster(account).getPresences(jid);
 			while (it.hasNext()) {
 				Presence p = it.next();
 				if (p.isAvailable()) list.add(StringUtils.parseResource(p.getFrom()));
 			}
 			
 			if (!list.isEmpty()) {
-				ResourceAdapter adapter = new ResourceAdapter(activity, jid, list);
+				ResourceAdapter adapter = new ResourceAdapter(activity, account, jid, list);
 
 		        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		        builder.setTitle(activity.getString(R.string.SelectResource));
@@ -300,6 +345,7 @@ public class RosterDialogs {
 		        	public void onClick(DialogInterface dialog, int which) {
 	        			String resource = list.get(which);
 	        			Intent intent = new Intent(activity, CommandsActivity.class);
+	        			intent.putExtra("account", account);
 	        			intent.putExtra("jid", jid + "/" + resource);
 	        	        activity.startActivity(intent);
 		        	}
@@ -308,6 +354,215 @@ public class RosterDialogs {
 			}
 		}
 	}
+	
+	public static void ContactMenuDialog(final Activity activity, final RosterItem item) {
+    	final JTalkService service = JTalkService.getInstance();
+    	final String account = item.getAccount();
+    	final RosterEntry entry = item.getEntry();
+    	
+    	CharSequence[] items;
+    	if (service.getMessagesHash(account).containsKey(entry.getUser())) {
+    		items = new CharSequence[10];
+    		items[9] = activity.getString(R.string.Close);
+    	}
+    	else items = new CharSequence[9];
+        items[0] = activity.getString(R.string.Info);
+        items[1] = activity.getString(R.string.Edit);
+        items[2] = activity.getString(R.string.SendStatus);
+        items[3] = activity.getString(R.string.SendFile);
+        items[4] = activity.getString(R.string.Subscribtion);
+        items[5] = activity.getString(R.string.AddInIgnoreList);
+        items[6] = activity.getString(R.string.ExecuteCommand);
+        items[7] = activity.getString(R.string.DeleteHistory);
+        items[8] = activity.getString(R.string.Remove);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(entry.getUser());
+        builder.setItems(items, new OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				String jid = entry.getUser();
+		    	String name = entry.getName();
+		    	String group = activity.getResources().getString(R.string.Nogroup);
+		    	if (!entry.getGroups().isEmpty()) {
+		    		Iterator<RosterGroup> it = entry.getGroups().iterator();
+		    		if (it.hasNext()) group = it.next().getName();
+		    	}
+		    	
+		    	switch (which) {
+	        	case 0:
+	        		Intent infoIntent = new Intent(activity, VCardActivity.class);
+	        		infoIntent.putExtra("jid", jid);
+	        		infoIntent.putExtra("account", account);
+	        		activity.startActivity(infoIntent);
+	        		break;
+	        	case 1:
+		         	editDialog(activity, account, jid, name, group);
+		         	break;
+	        	case 2:
+	        		changeStatusDialog(activity, account, jid);
+	        		break;
+	        	case 3:
+		        	 Intent intent = new Intent(activity, SendFileActivity.class);
+		        	 intent.putExtra("account", account);
+		        	 intent.putExtra("jid", jid);
+		        	 activity.startActivity(intent);
+		 	        break;
+	        	case 4:
+		        	 subscribtionDialog(activity, account, jid);
+		        	 break;
+	        	case 5:
+		        	 new IgnoreList(account).updateIgnoreList(jid);
+		        	 break;
+	        	case 6:
+		        	 RosterDialogs.resourceDialog(activity, account, jid);
+		        	 break;
+	        	case 7:
+	        		activity.getContentResolver().delete(JTalkProvider.CONTENT_URI, "jid = '" + jid + "'", null);
+	  	    		if (service.getMessagesHash(account).containsKey(jid)) {
+	  	    			service.getMessagesHash(account).remove(jid);
+	  	    		}
+	  	    		service.sendBroadcast(new Intent(Constants.UPDATE));
+	  	    		break;
+	        	case 8:
+				    service.removeContact(account, jid);
+				    Intent i = new Intent(Constants.UPDATE);
+		         	activity.sendBroadcast(i);
+		 	        break;
+	        	case 9:
+	        		service.setChatState(account, jid, ChatState.gone);
+		        	if (service.getMessagesHash(account).containsKey(jid)) service.getMessagesHash(account).remove(jid);
+					if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));
+					else service.sendBroadcast(new Intent(Constants.UPDATE));
+		        	break;
+		    	}
+			}
+        });
+        builder.create().show();
+    }
+	
+	public static void MucContactMenuDialog(final Activity activity, final String account, final String group, final String nick) {
+    	final JTalkService service = JTalkService.getInstance();
+		final MultiUserChat muc = service.getConferencesHash(account).get(group);
+		
+		CharSequence[] items = new CharSequence[3];
+		items[0] = activity.getString(R.string.Info);
+		items[1] = activity.getString(R.string.ExecuteCommand);
+		items[2] = activity.getString(R.string.Actions);
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(R.string.Actions);
+        builder.setItems(items, new OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+		        switch(which) {
+		        	case 0:
+		        		Intent infoIntent = new Intent(activity, VCardActivity.class);
+		        		infoIntent.putExtra("jid", group + "/" + nick);
+		        		activity.startActivity(infoIntent);
+		        		break;
+		        	case 1:
+		        		Intent intent = new Intent(activity, CommandsActivity.class);
+		    			intent.putExtra("jid", group + "/" + nick);
+		    	        activity.startActivity(intent);
+		        		break;
+		        	case 2:
+		        		new MucAdminMenu(activity, muc, nick).show();
+		        		break;
+		        }
+			}
+        });
+        builder.create().show();
+    }
+	
+	public static void SelfContactMenuDialog(final Activity activity, final RosterItem item) {
+    	final JTalkService service = JTalkService.getInstance();
+    	final String account = item.getAccount();
+    	final RosterEntry entry = item.getEntry();
+    	
+    	CharSequence[] items;
+    	if (service.getMessagesHash(account).containsKey(entry.getUser())) {
+    		items = new CharSequence[5];
+    		items[4] = activity.getString(R.string.Close);
+    	}
+    	else items = new CharSequence[4];
+        items[0] = activity.getString(R.string.Info);
+        items[1] = activity.getString(R.string.SendFile);
+        items[2] = activity.getString(R.string.ExecuteCommand);
+        items[3] = activity.getString(R.string.DeleteHistory);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(entry.getUser());
+        builder.setItems(items, new OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				String jid = entry.getUser();
+		    	switch (which) {
+	        	case 0:
+	        		Intent infoIntent = new Intent(activity, VCardActivity.class);
+	        		infoIntent.putExtra("jid", StringUtils.parseBareAddress(jid));
+	        		infoIntent.putExtra("account", account);
+	        		activity.startActivity(infoIntent);
+	        		break;
+	        	case 1:
+	        		Intent intent = new Intent(activity, SendFileActivity.class);
+	        		intent.putExtra("account", account);
+	        		intent.putExtra("jid", jid);
+	        		activity.startActivity(intent);
+	        		break;
+	        	case 2:
+	        		Intent comIntent = new Intent(activity, CommandsActivity.class);
+        			comIntent.putExtra("account", account);
+        			comIntent.putExtra("jid", jid);
+        	        activity.startActivity(comIntent);
+	        		break;
+	        	case 3:
+	        		activity.getContentResolver().delete(JTalkProvider.CONTENT_URI, "jid = '" + jid + "'", null);
+	  	    		if (service.getMessagesHash(account).containsKey(jid)) {
+	  	    			service.getMessagesHash(account).remove(jid);
+	  	    		}
+	  	    		service.sendBroadcast(new Intent(Constants.UPDATE));
+		 	        break;
+	        	case 4:
+	        		service.setChatState(account, jid, ChatState.gone);
+		        	if (service.getMessagesHash(account).containsKey(jid)) service.getMessagesHash(account).remove(jid);
+					if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));
+					else service.sendBroadcast(new Intent(Constants.UPDATE));
+					break;
+		    	}
+			}
+        });
+        builder.create().show();
+    }
+	
+	public static void AccountMenuDialog(final Activity activity, final RosterItem item) {
+    	final String account = item.getAccount();
+    	
+    	CharSequence[] items = new CharSequence[3];
+        items[0] = activity.getString(R.string.Status);
+        items[1] = activity.getString(R.string.vcard);
+        items[2] = activity.getString(R.string.PrivacyLists);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(account);
+        builder.setItems(items, new OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+		    	switch (which) {
+	        	case 0:
+	        		changeStatusDialog(activity, account, null);
+	        		break;
+	        	case 1:
+	        		activity.startActivity(new Intent(activity, SetVcardActivity.class).putExtra("account", account));
+	        		break;
+	        	case 2:
+	        		activity.startActivity(new Intent(activity, PrivacyListsActivity.class).putExtra("account", account));
+		 	        break;
+		    	}
+			}
+        });
+        builder.create().show();
+    }
 	
 	private static String getMode(int position) {
   		String mode = null;

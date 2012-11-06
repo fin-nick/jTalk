@@ -49,7 +49,7 @@ public class RosterEntry {
      * @param status the subscription status (related to subscriptions pending to be approbed).
      * @param connection a connection to the XMPP server.
      */
-    RosterEntry(String user, String name, RosterPacket.ItemType type,
+    public RosterEntry(String user, String name, RosterPacket.ItemType type,
                 RosterPacket.ItemStatus status, Roster roster, Connection connection) {
         this.user = user;
         this.name = name;

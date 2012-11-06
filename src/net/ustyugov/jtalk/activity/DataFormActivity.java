@@ -68,6 +68,7 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 	private LinearLayout layout;
 	private String id;
 	private String jid;
+	private String account;
 	private boolean reg = false;
 	private boolean cap = false;
 	private boolean com = false;
@@ -97,6 +98,7 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
        	LinearLayout linear = (LinearLayout) findViewById(R.id.data_form);
        	linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
 		
+       	account = getIntent().getStringExtra("account");
 		jid = getIntent().getStringExtra("jid");
 		reg = getIntent().getBooleanExtra("reg", false);
 		cap = getIntent().getBooleanExtra("cap", false);
@@ -200,8 +202,8 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 								reg.setTo(jid);
 								reg.addExtension(f);
 								
-								PacketCollector collector = service.getConnection().createPacketCollector(new PacketIDFilter(id));
-								service.getConnection().sendPacket(reg);
+								PacketCollector collector = service.getConnection(account).createPacketCollector(new PacketIDFilter(id));
+								service.getConnection(account).sendPacket(reg);
 								
 								IQ result = (IQ) collector.nextResult(5000);
 								if (result != null) {
@@ -222,8 +224,8 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 								iq.setTo(jid);
 								iq.addExtension(captcha);
 									
-								PacketCollector collector = service.getConnection().createPacketCollector(new PacketIDFilter(id));
-								service.getConnection().sendPacket(iq);
+								PacketCollector collector = service.getConnection(account).createPacketCollector(new PacketIDFilter(id));
+								service.getConnection(account).sendPacket(iq);
 									
 								IQ result = (IQ) collector.nextResult(5000);
 								if (result != null) {
@@ -420,8 +422,8 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 			reg.setType(IQ.Type.GET);
 			reg.setTo(jid);
 			
-			PacketCollector collector = service.getConnection().createPacketCollector(new PacketIDFilter(id));
-			service.getConnection().sendPacket(reg);
+			PacketCollector collector = service.getConnection(account).createPacketCollector(new PacketIDFilter(id));
+			service.getConnection(account).sendPacket(reg);
 			
 			IQ result = (IQ) collector.nextResult(5000);
 			try {
@@ -485,7 +487,7 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 		@Override
 		protected Void doInBackground(String... params) {
 			String node = getIntent().getStringExtra("node");
-			AdHocCommandManager ahcm = AdHocCommandManager.getAddHocCommandsManager(service.getConnection());
+			AdHocCommandManager ahcm = AdHocCommandManager.getAddHocCommandsManager(service.getConnection(account));
 			if (ahcm != null && node != null) {
 				try {
 					rc = ahcm.getRemoteCommand(jid, node);
@@ -524,7 +526,7 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 		@Override
 		protected Void doInBackground(String... params) {
 			String group = getIntent().getStringExtra("group");
-			conference = service.getConferencesHash().get(group);
+			conference = service.getConferencesHash(account).get(group);
 			
 			if (conference != null) {
 				try {

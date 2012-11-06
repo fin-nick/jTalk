@@ -18,18 +18,18 @@
 package net.ustyugov.jtalk.adapter;
 
 import java.util.Enumeration;
-import java.util.List;
+import java.util.Iterator;
 
 import net.ustyugov.jtalk.Avatars;
-import net.ustyugov.jtalk.ClientIcons;
+import net.ustyugov.jtalk.Holders;
+import net.ustyugov.jtalk.Holders.GroupHolder;
+import net.ustyugov.jtalk.Holders.ItemHolder;
 import net.ustyugov.jtalk.IconPicker;
-import net.ustyugov.jtalk.SortList;
 import net.ustyugov.jtalk.activity.Chat;
 import net.ustyugov.jtalk.service.JTalkService;
 
-import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.util.StringUtils;
-import org.jivesoftware.smackx.packet.MUCUser;
+import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import android.app.Activity;
 import android.content.Context;
@@ -39,8 +39,8 @@ import android.graphics.Typeface;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -50,30 +50,14 @@ import com.jtalk2.R;
 public class MucRosterAdapter extends ArrayAdapter<String> {
 	private JTalkService service;
 	private Activity activity;
+	private String account;
 	private SharedPreferences prefs;
 	private IconPicker ip;
 	private int fontSize, statusSize;
 	
-	static class GroupHolder {
-		protected TextView text;
-		protected TextView counter;
-		protected ImageView state;
-		protected ImageView messageIcon;
-	}
-	
-	static class ItemHolder {
-		protected TextView name;
-		protected TextView status;
-		protected TextView counter;
-		protected ImageView role;
-		protected ImageView statusIcon;
-		protected ImageView messageIcon;
-		protected ImageView caps;
-		protected ImageView avatar;
-	}
-	
-	public MucRosterAdapter(Activity activity) {
+	public MucRosterAdapter(Activity activity, String account) {
         super(activity, R.id.name);
+        this.account = account;
         this.activity = activity;
         this.service = JTalkService.getInstance();
         this.prefs = PreferenceManager.getDefaultSharedPreferences(activity);
@@ -88,16 +72,24 @@ public class MucRosterAdapter extends ArrayAdapter<String> {
 	public void update() {
 		clear();
 		
-		Enumeration<String> keys = service.getConferencesHash().keys();
+		Enumeration<String> keys = service.getConferencesHash(account).keys();
 		while (keys.hasMoreElements()) {
 			String group = keys.nextElement();
 			add(group);
 			
 			if (!service.getCollapsedGroups().contains(group)) {
-				List<String>users = SortList.sortParticipants(group);
-				for (String user: users) {
-					add(user);
+				MultiUserChat muc = service.getConferencesHash(account).get(group);
+				
+				Iterator<String> it = muc.getOccupants();
+				while(it.hasNext()) {
+					String ocupant = it.next();
+					add(ocupant);
 				}
+				
+//				List<String> users = SortList.sortParticipants(group);
+//				for (String user: users) {
+//					add(user);
+//				}
 			}
 		}
 	}
@@ -108,11 +100,11 @@ public class MucRosterAdapter extends ArrayAdapter<String> {
 		if (item.contains("/")) {
 			String group = StringUtils.parseBareAddress(item);
 			String nick = StringUtils.parseResource(item);
-			String status = service.getStatus(group + "/" + nick);
-			Presence p = service.getRoster().getPresenceResource(group + "/" + nick);
+//			String status = service.getStatus(group + "/" + nick);
+//			Presence p = service.getRoster().getPresenceResource(group + "/" + nick);
 			String role = "visitor";
-			MUCUser mucUser = (MUCUser) p.getExtension("x", "http://jabber.org/protocol/muc#user");
-			if (mucUser != null) role = mucUser.getItem().getRole();
+//			MUCUser mucUser = (MUCUser) p.getExtension("x", "http://jabber.org/protocol/muc#user");
+//			if (mucUser != null) role = mucUser.getItem().getRole();
 			
 			if (convertView == null || convertView.findViewById(R.id.status) == null) {
 				LayoutInflater inflater = (LayoutInflater) service.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -146,21 +138,21 @@ public class MucRosterAdapter extends ArrayAdapter<String> {
 			
 			ItemHolder holder = (ItemHolder) convertView.getTag();
 			holder.name.setText(nick);
-			if (service.getMessagesHash().containsKey(group + "/" + nick)) {
-				if (service.getMessagesHash().get(group + "/" + nick).size() > 0) holder.name.setTypeface(Typeface.DEFAULT_BOLD);
-			} else holder.name.setTypeface(Typeface.DEFAULT);
+//			if (service.getMessagesHash().containsKey(group + "/" + nick)) {
+//				if (service.getMessagesHash().get(group + "/" + nick).size() > 0) holder.name.setTypeface(Typeface.DEFAULT_BOLD);
+//			} else holder.name.setTypeface(Typeface.DEFAULT);
 			
-			holder.messageIcon.setVisibility(service.getMessagesCount(group + "/" + nick) > 0 ? View.VISIBLE : View.GONE);
-			holder.statusIcon.setImageBitmap(ip.getIconByPresence(p));
+			holder.messageIcon.setVisibility(service.getMessagesCount(account, group + "/" + nick) > 0 ? View.VISIBLE : View.GONE);
+//			holder.statusIcon.setImageBitmap(ip.getIconByPresence(p));
 			
-			holder.status.setText(status);
-	        holder.status.setVisibility((prefs.getBoolean("ShowStatuses", false) && status.length() > 0) ? View.VISIBLE : View.GONE);
+//			holder.status.setText(status);
+//	        holder.status.setVisibility((prefs.getBoolean("ShowStatuses", false) && status.length() > 0) ? View.VISIBLE : View.GONE);
 	        holder.role.setImageBitmap(ip.getRoleIcon(role));
 			
-	        if (holder.caps != null) {
-				String node = service.getNode(group + "/" + nick);
-				ClientIcons.loadClientIcon(activity, holder.caps, node);
-			}
+//	        if (holder.caps != null) {
+//				String node = service.getNode(group + "/" + nick);
+//				ClientIcons.loadClientIcon(activity, holder.caps, node);
+//			}
 	        
 	        if (holder.avatar != null) {
 				Avatars.loadAvatar(activity, group + "%" + nick, holder.avatar);
@@ -168,8 +160,8 @@ public class MucRosterAdapter extends ArrayAdapter<String> {
 	        
 			return convertView;
 		} else {
-			boolean joined = service.getConferencesHash().get(item).isJoined();
-			int count = service.getMessagesCount(item);
+			boolean joined = service.getConferencesHash(account).get(item).isJoined();
+			int count = service.getMessagesCount(account, item);
 			
 			if (convertView == null || convertView.findViewById(R.id.state) == null) {
 				LayoutInflater inflater = (LayoutInflater) service.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

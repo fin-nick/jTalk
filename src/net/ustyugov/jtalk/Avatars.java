@@ -23,6 +23,7 @@ import java.io.FilenameFilter;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smackx.packet.VCard;
 
@@ -60,24 +61,26 @@ public class Avatars {
 					    	} catch (Exception e) { }
 						}
 						
-						if (bitmap != null) {
+						if (bitmap != null && image != null) {
 							image.setImageBitmap(bitmap);
 							image.setVisibility(View.VISIBLE);
-						} else image.setVisibility(View.GONE);
+						} else image.setVisibility(View.INVISIBLE);
 					}
 				});
 			}
 		}.start();
 	}
 	
-	public static void loadAllAvatars(String group) {
-		new LoadAllAvatars(group).execute();
+	public static void loadAllAvatars(XMPPConnection connection, String group) {
+		new LoadAllAvatars(connection, group).execute();
 	}
 	
 	private static class LoadAllAvatars extends AsyncTask<Void, Void, Void> {
 		private String group;
+		private XMPPConnection connection;
 		
-		public LoadAllAvatars(String group) {
+		public LoadAllAvatars(XMPPConnection connection, String group) {
+			this.connection = connection;
 			this.group = group;
 		}
 		
@@ -87,14 +90,14 @@ public class Avatars {
 			file.mkdir();
 			if (file.list(new Filter(group)).length < 1) {
 				JTalkService service = JTalkService.getInstance();
-				Iterator<Presence> it = service.getRoster().getPresences(group);
+				Iterator<Presence> it = service.getRoster(connection.getUser()).getPresences(group);
 				while (it.hasNext()) {
 					try {
 						Presence p = it.next();
 						String jid = p.getFrom();
 						
 						VCard vcard = new VCard();
-						vcard.load(service.getConnection(), jid);
+						vcard.load(connection, jid);
 						byte[] buffer = vcard.getAvatar();
 						
 						if (buffer != null) {

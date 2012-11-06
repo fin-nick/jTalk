@@ -49,6 +49,7 @@ import com.jtalk2.R;
 
 public class MucSearch extends SherlockActivity implements OnClickListener, OnItemClickListener, OnItemLongClickListener {
 	private JTalkService service;
+	private String account;
 	private ImageButton searchButton;
 	private EditText searchInput;
 	private SharedPreferences prefs;
@@ -112,13 +113,13 @@ public class MucSearch extends SherlockActivity implements OnClickListener, OnIt
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		HostedRoom item = (HostedRoom) parent.getItemAtPosition(position);
 		String jid = item.getJid();
-		MucDialogs.joinDialog(this, jid, null);
+		MucDialogs.joinDialog(this, account, jid, null);
 	}
 	
 	@Override
 	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 		HostedRoom item = (HostedRoom) parent.getItemAtPosition(position);
-		BookmarksDialogs.AddDialog(this, item.getJid(), item.getName());
+		BookmarksDialogs.AddDialog(this, account, item.getJid(), item.getName());
         return true;
     }
 	
@@ -127,7 +128,7 @@ public class MucSearch extends SherlockActivity implements OnClickListener, OnIt
 		protected Void doInBackground(String... params) {
 			try {
 				String server = searchInput.getText().toString();
-				Collection<HostedRoom> rooms = MultiUserChat.getHostedRooms(service.getConnection(), server);
+				Collection<HostedRoom> rooms = MultiUserChat.getHostedRooms(service.getConnection(account), server);
 				if (!rooms.isEmpty()) adapter = new MucSearchAdapter(MucSearch.this, rooms);
 			} catch (XMPPException e) { }
 			return null;

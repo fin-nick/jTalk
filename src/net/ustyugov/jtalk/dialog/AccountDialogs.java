@@ -44,6 +44,7 @@ public class AccountDialogs {
 	    final EditText resEdit = (EditText) layout.findViewById(R.id.account_resource);
 	    final EditText serEdit = (EditText) layout.findViewById(R.id.account_server);
 	    final EditText portEdit = (EditText) layout.findViewById(R.id.account_port);
+	    final CheckBox active = (CheckBox) layout.findViewById(R.id.account_active);
 	    final CheckBox tls = (CheckBox) layout.findViewById(R.id.account_tls);
 	    final CheckBox sasl = (CheckBox) layout.findViewById(R.id.account_sasl);
 	    
@@ -57,11 +58,12 @@ public class AccountDialogs {
 				String pass = passEdit.getText().toString();
 				if (pass == null) pass = "";
 				String res = resEdit.getText().toString();
-				if (res == null) res = "Android";
+				if (res == null || res.length() < 1) res = "Android";
 				String ser = serEdit.getText().toString();
 				if (ser == null) ser = "";
 				String port = portEdit.getText().toString();
 				if (port == null) port = "5222";
+				boolean e = active.isChecked();
 				boolean t = tls.isChecked();
 				boolean s = sasl.isChecked();
 				
@@ -72,6 +74,8 @@ public class AccountDialogs {
 	 	            values.put(AccountDbHelper.RESOURCE, res);
 	 	            values.put(AccountDbHelper.SERVER, ser);
 	 	            values.put(AccountDbHelper.PORT, port);
+	 	            if (e) values.put(AccountDbHelper.ENABLED, "1");
+	 	            else values.put(AccountDbHelper.ENABLED, "0");
 	 	            if (t) values.put(AccountDbHelper.TLS, "1");
 	 	            else values.put(AccountDbHelper.TLS, "0");
 	 	            if (s) values.put(AccountDbHelper.SASL, "1");
@@ -97,6 +101,7 @@ public class AccountDialogs {
 		String password = "";
 		String resource = "";
 		String service = "";
+		String e = "";
 		String t = "";
 		String s = "";
 		int port = 5222;
@@ -114,6 +119,7 @@ public class AccountDialogs {
 				port = Integer.parseInt(cursor.getString(cursor.getColumnIndex(AccountDbHelper.PORT)));
 			} catch (NumberFormatException nfc) { }
 				
+			e = cursor.getString(cursor.getColumnIndex(AccountDbHelper.ENABLED));
 			t = cursor.getString(cursor.getColumnIndex(AccountDbHelper.TLS));
 			s = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SASL));
 		}
@@ -136,6 +142,9 @@ public class AccountDialogs {
 	    final EditText portEdit = (EditText) layout.findViewById(R.id.account_port);
 	    portEdit.setText(port+"");
 	    
+	    final CheckBox active = (CheckBox) layout.findViewById(R.id.account_active);
+	    active.setChecked(e.equals("1") ? true : false);
+	    
 	    final CheckBox tls = (CheckBox) layout.findViewById(R.id.account_tls);
 	    tls.setChecked(t.equals("1") ? true : false);
 	    
@@ -152,11 +161,12 @@ public class AccountDialogs {
 				String pass = passEdit.getText().toString();
 				if (pass == null) pass = "";
 				String res = resEdit.getText().toString();
-				if (res == null) res = "Android";
+				if (res == null || res.length() < 1) res = "Android";
 				String ser = serEdit.getText().toString();
 				if (ser == null) ser = "";
 				String port = portEdit.getText().toString();
 				if (port == null) port = "5222";
+				boolean e = active.isChecked();
 				boolean t = tls.isChecked();
 				boolean s = sasl.isChecked();
 				
@@ -167,6 +177,8 @@ public class AccountDialogs {
 	 	            values.put(AccountDbHelper.RESOURCE, res);
 	 	            values.put(AccountDbHelper.SERVER, ser);
 	 	            values.put(AccountDbHelper.PORT, port);
+	 	            if (e) values.put(AccountDbHelper.ENABLED, "1");
+	 	            else values.put(AccountDbHelper.ENABLED, "0");
 	 	            if (t) values.put(AccountDbHelper.TLS, "1");
 	 	            else values.put(AccountDbHelper.TLS, "0");
 	 	            if (s) values.put(AccountDbHelper.SASL, "1");

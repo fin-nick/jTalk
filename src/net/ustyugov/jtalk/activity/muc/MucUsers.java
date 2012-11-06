@@ -60,6 +60,7 @@ public class MucUsers extends SherlockActivity {
 	private static final int CONTEXT_EDIT = 2;
 	private static final int CONTEXT_REMOVE = 3;
 	
+	private String account;
 	private MultiUserChat muc;
 	private ListView ownersList;
 	private ListView adminsList;
@@ -73,7 +74,8 @@ public class MucUsers extends SherlockActivity {
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		String group = getIntent().getStringExtra("group");
-		muc = JTalkService.getInstance().getConferencesHash().get(group);
+		String account = getIntent().getStringExtra("account");
+		muc = JTalkService.getInstance().getConferencesHash(account).get(group);
 		
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
@@ -84,6 +86,8 @@ public class MucUsers extends SherlockActivity {
        	LinearLayout chat_linear = (LinearLayout) findViewById(R.id.linear);
        	chat_linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
 		
+       	account = getIntent().getExtras().getString("account");
+       	
 		LayoutInflater inflater = LayoutInflater.from(MucUsers.this);
 		View ownersPage = inflater.inflate(R.layout.muc_users_page, null);
 		View adminsPage = inflater.inflate(R.layout.muc_users_page, null);
@@ -179,7 +183,7 @@ public class MucUsers extends SherlockActivity {
 				admin.setTo(muc.getRoom());
 				admin.addItem(i);
 				
-				JTalkService.getInstance().getConnection().sendPacket(admin);
+				JTalkService.getInstance().getConnection(account).sendPacket(admin);
 				update();
 				break;
 			case CONTEXT_EDIT:
@@ -226,7 +230,7 @@ public class MucUsers extends SherlockActivity {
 				admin.setTo(muc.getRoom());
 				admin.addItem(i);
 						
-				JTalkService.getInstance().getConnection().sendPacket(admin);
+				JTalkService.getInstance().getConnection(account).sendPacket(admin);
 				update();
 			}
 		});

@@ -22,7 +22,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.ustyugov.jtalk.IconPicker;
+import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.SortList;
+import net.ustyugov.jtalk.db.AccountDbHelper;
+import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
 
 import org.jivesoftware.smack.packet.Presence;
@@ -30,6 +33,7 @@ import org.jivesoftware.smack.util.StringUtils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -41,7 +45,7 @@ import android.widget.TextView;
 
 import com.jtalk2.R;
 
-public class UsersAdapter extends ArrayAdapter<String> {
+public class UsersAdapter extends ArrayAdapter<RosterItem> {
 	private JTalkService service;
 	private String group;
 	
@@ -54,16 +58,22 @@ public class UsersAdapter extends ArrayAdapter<String> {
 	
 	public void update() {
 		clear();
-		List<String> users = new ArrayList<String>();
-		Iterator<Presence> it = service.getRoster().getPresences(group);
-		while (it.hasNext()) {
-			Presence p = it.next();
-			users.add(StringUtils.parseResource(p.getFrom()));
-		}
-		
-		users = SortList.sortParticipantsInChat(group, users);
-		for (String user: users) {
-			add(user);
+		Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
+		cursor.moveToFirst();
+		if (cursor != null && cursor.getCount() > 0) {
+			String account = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
+			List<String> users = new ArrayList<String>();
+			Iterator<Presence> it = service.getRoster(account).getPresences(group);
+			while (it.hasNext()) {
+				Presence p = it.next();
+				users.add(StringUtils.parseResource(p.getFrom()));
+			}
+			
+			users = SortList.sortParticipantsInChat(account, group, users);
+			for (String user: users) {
+				RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
+				item.setName(user);
+			}
 		}
 	}
 	
@@ -71,7 +81,9 @@ public class UsersAdapter extends ArrayAdapter<String> {
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		IconPicker ip = service.getIconPicker();
         View v = convertView;
-        final String nick = getItem(position);
+        RosterItem item = getItem(position);
+        String nick = item.getName();
+        String account = item.getAccount();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
         
         if (v == null) {
@@ -85,7 +97,7 @@ public class UsersAdapter extends ArrayAdapter<String> {
         	label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
         } else label.setTextColor(0xFF232323);
         
-		Presence presence = service.getRoster().getPresenceResource(group + "/" + nick);
+		Presence presence = service.getRoster(account).getPresenceResource(group + "/" + nick);
       	ImageView icon = (ImageView)v.findViewById(R.id.status);
        	icon.setImageBitmap(ip.getIconByPresence(presence));
        	

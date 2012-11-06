@@ -19,12 +19,16 @@ package net.ustyugov.jtalk.adapter;
 
 import net.ustyugov.jtalk.Account;
 import net.ustyugov.jtalk.IconPicker;
+import net.ustyugov.jtalk.db.AccountDbHelper;
+import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
 
 import org.jivesoftware.smack.util.StringUtils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,42 +41,64 @@ import com.jtalk2.R;
 
 public class AccountsAdapter extends ArrayAdapter<Account> {
 	private JTalkService service;
-	private Context context;
+	private Activity activity;
+	private SharedPreferences prefs;
+	private int fontSize;
 	
-	public AccountsAdapter(Context context) {
-		super(context, R.id.item);
-		this.context = context;
+	public AccountsAdapter(Activity activity) {
+		super(activity, R.id.item);
+		this.activity = activity;
         this.service = JTalkService.getInstance();
+        this.prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+        this.fontSize = Integer.parseInt(activity.getResources().getString(R.string.DefaultFontSize));
+		try {
+			this.fontSize = Integer.parseInt(prefs.getString("RosterSize", activity.getResources().getString(R.string.DefaultFontSize)));
+		} catch (NumberFormatException e) { }
+	}
+	
+	public void update() {
+		clear();
+		
+		Cursor cursor = activity.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, null, null, AccountDbHelper._ID);
+		if (cursor != null && cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			do {
+				int id = cursor.getInt(cursor.getColumnIndex(AccountDbHelper._ID));
+				String jid = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID));
+				
+				Account account = new Account(id, jid);
+				add(account);
+			} while (cursor.moveToNext());
+			cursor.close();
+		}
 	}
 	
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		IconPicker ip = service.getIconPicker();
-        View v = convertView;
-        Account account = getItem(position);
-        final String jid = account.getJid();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        
-        if (v == null) {
-            LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            v = vi.inflate(R.layout.selector, null);
-        }
-        
-        TextView label = (TextView) v.findViewById(R.id.item);
-        label.setText(jid);
-        label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
-        
-      	ImageView icon = (ImageView)v.findViewById(R.id.status);
-      	icon.setImageResource(R.drawable.icon_offline);
-      	if (service != null && service.isAuthenticated()) {
-      		if (jid.equals(StringUtils.parseBareAddress(service.getConnection().getUser()))) {
-      			String mode = prefs.getString("currentMode", "available");
-      			icon.setImageBitmap(ip.getIconByMode(mode));
-      		}
-      	}
-       	
-        ImageView close = (ImageView) v.findViewById(R.id.close);
-		close.setVisibility(View.GONE);
-        return v;
-    }
+		View v = convertView;
+		Account account = getItem(position);
+		final String jid = account.getJid();
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+    
+		if (v == null) {
+			LayoutInflater vi = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			v = vi.inflate(R.layout.selector, null);
+		}
+    
+		TextView label = (TextView) v.findViewById(R.id.item);
+		label.setText(jid);
+		label.setTextSize(fontSize);
+		label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
+    
+		ImageView icon = (ImageView)v.findViewById(R.id.status);
+		icon.setImageResource(R.drawable.icon_offline);
+		if (service != null && service.isAuthenticated(account.getJid())) {
+			if (jid.equals(StringUtils.parseBareAddress(service.getConnection(account.getJid()).getUser()))) {
+				String mode = prefs.getString("currentMode", "available");
+				icon.setImageBitmap(ip.getIconByMode(mode));
+			}
+		}
+		return v;
+	}
 }

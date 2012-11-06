@@ -85,10 +85,10 @@ public class MessageLog {
 		}.start();
 	}
 	
-	public static void editMessage(final String jid, final String id, final String text) {
+	public static void editMessage(final String account, final String jid, final String id, final String text) {
 		final JTalkService service = JTalkService.getInstance();
-		if (service.getMessagesHash().containsKey(jid)) {
-			List<MessageItem> l = service.getMessagesHash().get(jid);
+		if (service.getMessagesHash(account).containsKey(jid)) {
+			List<MessageItem> l = service.getMessagesHash(account).get(jid);
 			for (MessageItem item : l) {
 				String i = item.getId();
 				if (i != null && i.equals(id)) {

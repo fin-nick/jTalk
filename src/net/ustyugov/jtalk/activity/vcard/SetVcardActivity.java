@@ -56,6 +56,7 @@ import com.viewpagerindicator.TitlePageIndicator;
 public class SetVcardActivity extends SherlockActivity implements OnClickListener {
 	private static final int IMAGE = 1;
 	
+	private String account;
 	private EditText nick, first, last, middle, bday, url, about, ctry, locality, street, emailHome, phoneHome, org, unit, role, emailWork, phoneWork;
 	private ImageView av;
 	private Button load, clear;
@@ -75,7 +76,8 @@ public class SetVcardActivity extends SherlockActivity implements OnClickListene
        	LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
        	linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
        	
-       	vcard = service.getVCard();
+       	account = getIntent().getStringExtra("account");
+       	vcard = service.getVCard(account);
        	
 		LayoutInflater inflater = LayoutInflater.from(this);
 		View aboutPage = inflater.inflate(R.layout.set_vcard_about, null);
@@ -197,8 +199,8 @@ public class SetVcardActivity extends SherlockActivity implements OnClickListene
 						vcard.setAvatar(bytes);
 					
 						vcard.setType(IQ.Type.SET);
-						vcard.save(service.getConnection());
-						service.setVCard(vcard);
+						vcard.save(service.getConnection(account));
+						service.setVCard(account, vcard);
 						sendBroadcast(new Intent(net.ustyugov.jtalk.Constants.ERROR).putExtra("error", "vCard updated!"));
   				} catch (XMPPException e) {
   					sendBroadcast(new Intent(net.ustyugov.jtalk.Constants.ERROR).putExtra("error", e.getLocalizedMessage()));

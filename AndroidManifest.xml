@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.jtalk2" android:versionName="@string/version" android:installLocation="auto" android:versionCode="346">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.jtalk2" android:versionName="@string/version" android:installLocation="auto" android:versionCode="360">
     <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="16"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -26,7 +26,7 @@
         <activity android:name="net.ustyugov.jtalk.activity.PrivacyRulesActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
         <activity android:name="net.ustyugov.jtalk.activity.Chat"/>
         <activity android:name="net.ustyugov.jtalk.activity.muc.MucSearch" android:configChanges="keyboard|keyboardHidden|orientation"/>
-        <activity android:name="net.ustyugov.jtalk.activity.muc.Muc" android:configChanges="keyboard|keyboardHidden|orientation"/>
+        <activity android:name="net.ustyugov.jtalk.activity.muc.Bookmarks" android:configChanges="keyboard|keyboardHidden|orientation"/>
         <activity android:name="net.ustyugov.jtalk.activity.SendFileActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
         <activity android:name="net.ustyugov.jtalk.activity.ServiceDiscovery" android:configChanges="keyboard|keyboardHidden|orientation"/>
         <activity android:name="net.ustyugov.jtalk.activity.DataFormActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>

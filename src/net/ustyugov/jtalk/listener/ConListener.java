@@ -27,24 +27,29 @@ import android.content.Intent;
 
 public class ConListener implements ConnectionListener {
 	private Context context; 
+	private String account;
+	private JTalkService service;
 
-	public ConListener(Context c) {
-		this.context = c;
+	public ConListener(Context context, String account) {
+		this.context = context;
+		this.account = account;
+		this.service = JTalkService.getInstance();
 	}
 
 	public void connectionClosed() {
-        context.sendBroadcast(new Intent(net.ustyugov.jtalk.Constants.UPDATE));
+        context.sendBroadcast(new Intent(Constants.UPDATE));
         context.sendBroadcast(new Intent(Constants.CONNECTION_STATE));
 	}
 
 	public void connectionClosedOnError(Exception e) {
-		final JTalkService service = JTalkService.getInstance();
-		service.setState("Connection closed");
-        Notify.offlineNotify("Connection closed");
+        if (!service.isAuthenticated()) {
+        	service.setState("Connection closed");
+        	Notify.offlineNotify("Connection closed");
+        }
         
         context.sendBroadcast(new Intent(Constants.UPDATE));
         context.sendBroadcast(new Intent(Constants.CONNECTION_STATE));
-        service.reconnect();
+        service.reconnect(account);
 	}
 
 	public void reconnectingIn(int seconds) { }

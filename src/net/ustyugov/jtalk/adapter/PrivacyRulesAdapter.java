@@ -73,9 +73,6 @@ public class PrivacyRulesAdapter extends ArrayAdapter<PrivacyItem> {
             holder.name = (TextView) convertView.findViewById(R.id.item);
             holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
             holder.icon = (ImageView) convertView.findViewById(R.id.status);
-            holder.close = (ImageView) convertView.findViewById(R.id.close);
-            holder.close.setVisibility(View.GONE);
-            
             convertView.setTag(holder);
         } else {
         	holder = (ViewHolder) convertView.getTag();

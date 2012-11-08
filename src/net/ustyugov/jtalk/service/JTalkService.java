@@ -145,8 +145,8 @@ public class JTalkService extends Service {
 	private static JTalkService js = new JTalkService();
     private static List<String> collapsedGroups = new ArrayList<String>();
     private static List<String> composeList = new ArrayList<String>();
-    private static List<String> messagesList    = new ArrayList<String>();
-    private static List<String> mucHighlightsList = new ArrayList<String>();
+    private static Hashtable<String, List<String>> unreadMessages = new Hashtable<String, List<String>>();
+    private static Hashtable<String, List<String>> mucHighlightsList = new Hashtable<String, List<String>>();
     private static Hashtable<String, String> textHash = new Hashtable<String, String>();
     private static Hashtable<String, Hashtable<String, String>> resourceHash = new Hashtable<String, Hashtable<String, String>>();
     private static Hashtable<String, Integer> positionHash = new Hashtable<String, Integer>();
@@ -159,6 +159,7 @@ public class JTalkService extends Service {
     private static Hashtable<String, DataForm> formHash = new Hashtable<String, DataForm>(); 
     private static Hashtable<String, XMPPConnection> connections = new Hashtable<String, XMPPConnection>();
     private static Hashtable<String, VCard> vcards = new Hashtable<String, VCard>();
+    private static Hashtable<String, ConListener> conListeners = new Hashtable<String, ConListener>();
     private String currentJid = "me";
     private String sidebarMode = "users";
     private String state = "";
@@ -183,6 +184,20 @@ public class JTalkService extends Service {
     private IconPicker iconPicker;
 
     public static JTalkService getInstance() { return js; }
+    
+    private void removeConnectionListener(String account) {
+    	if (conListeners.containsKey(account)) {
+    		ConListener listener = (ConListener) conListeners.remove(account);
+    		XMPPConnection connection = getConnection(account);
+    		if (connection != null) connection.removeConnectionListener(listener);
+    	}
+    }
+    
+    private void addConnectionListener(String account, XMPPConnection connection) {
+    	ConListener listener = new ConListener(this, account);
+    	connection.addConnectionListener(listener);
+    	conListeners.put(account, listener);
+    }
     
     public Collection<XMPPConnection> getAllConnections() {
     	return connections.values();
@@ -212,19 +227,14 @@ public class JTalkService extends Service {
     }
     
     public void addMessagesCount(String account, String jid) {
-    	Hashtable<String, Integer> hash;
-    	if (messagesCount.contains(account)) {
+    	Hashtable<String, Integer> hash = new Hashtable<String, Integer>();
+    	if (messagesCount.containsKey(account)) {
     		hash = messagesCount.get(account);
-    		if (hash.containsKey(jid)) {
-    			hash.put(jid, hash.get(jid).intValue() + 1);
-    		} else {
-    			hash.put(jid, 1);
-    		}
+    		hash.put(jid, getMessagesCount(account, jid) + 1);
     	} else {
-    		hash = new Hashtable<String, Integer>();
     		hash.put(jid, 1);
-    		messagesCount.put(account, hash);
     	}
+    	messagesCount.put(account, hash);
 //    	updateWidget();
     }
     
@@ -287,10 +297,35 @@ public class JTalkService extends Service {
     }
     public Hashtable<String, Conference> getJoinedConferences() { return joinedConferences; }
     public Hashtable<String, Bitmap> getAvatarsHash() { return avatarsHash; }
-    public List<String> getMessagesList() { return messagesList; }
-    public boolean isHighlight(String jid) { return mucHighlightsList.contains(jid); }
-    public void removeHighlight(String jid) { while (mucHighlightsList.contains(jid)) mucHighlightsList.remove(jid); }
-    public void addHighlight(String jid) { mucHighlightsList.add(jid); }
+    public List<String> getMessagesList(String account) { 
+    	if (!unreadMessages.containsKey(account)) unreadMessages.put(account, new ArrayList<String>());
+    	return unreadMessages.get(account); 
+    }
+    
+    public boolean isHighlight(String account, String jid) { 
+    	if (!mucHighlightsList.containsKey(account)) return false;
+    	List<String> list = mucHighlightsList.get(account);
+    	if (list.contains(jid)) return true;
+    	else return false;
+    }
+    
+    public void removeHighlight(String account, String jid) { 
+    	if (!mucHighlightsList.containsKey(account)) return;
+    	List<String> list = mucHighlightsList.get(account);
+    	if (list.contains(jid)) list.remove(jid);
+    	mucHighlightsList.put(account, list);
+    }
+    
+    public void addHighlight(String account, String jid) {
+    	List<String> list = new ArrayList<String>();
+    	if (mucHighlightsList.containsKey(account)) {
+    		list = mucHighlightsList.get(account);
+    		if (!list.contains(jid)) list.add(jid);
+    	} else {
+    		list.add(jid);
+    	}
+    	mucHighlightsList.put(account, list);
+    }
     
     public Hashtable<String, Hashtable<String, List<MessageItem>>> getMessages() { return messages; }
     public Hashtable<String, List<MessageItem>> getMessagesHash(String account) { 
@@ -466,17 +501,16 @@ public class JTalkService extends Service {
     			
     		} 
         	
-        	List<String> list = new ArrayList<String>();
-        	Iterator<Presence> it = getRoster(account).getPresences(user);
-        	while(it.hasNext()) {
-        		Presence presence = it.next();
-        		if (presence.getType() != Presence.Type.unavailable)
-        			if (presence.getStatus() == null) list.add("");
-        			else list.add(presence.getStatus());
+        	Roster roster = getRoster(account);
+        	if (roster != null) {
+        		Iterator<Presence> it = roster.getPresences(user);
+            	while(it.hasNext()) {
+            		Presence presence = it.next();
+            		if (presence.getType() != Presence.Type.unavailable)
+            			if (presence.getStatus() == null) return "";
+            			else return presence.getStatus();
+            	}
         	}
-        	
-        	if (!list.isEmpty()) return list.get(0);
-        	else return "";
     	}
     	return "";
     }
@@ -636,8 +670,9 @@ public class JTalkService extends Service {
     	
     	Collection<XMPPConnection> con = getAllConnections();
 		for (XMPPConnection connection: con) {
-	    	if (isAuthenticated(StringUtils.parseBareAddress(connection.getUser()))) {
-//	    		connection.removeConnectionListener(conListener);
+			String account = StringUtils.parseBareAddress(connection.getUser());
+	    	if (isAuthenticated(account)) {
+	    		removeConnectionListener(account);
 				Presence presence = new Presence(Presence.Type.unavailable, "", 0, null);
 				connection.disconnect(presence);
 	    	} else if (connection != null && connection.isConnected()) connection.disconnect();
@@ -648,6 +683,7 @@ public class JTalkService extends Service {
     public void disconnect(String account) {
     	if (connections.containsKey(account)) {
     		XMPPConnection connection = connections.get(account);
+    		removeConnectionListener(account);
     		connection.disconnect();
     	}
     	sendBroadcast(new Intent(Constants.UPDATE));
@@ -761,7 +797,7 @@ public class JTalkService extends Service {
   					try { 
   						DiscussionHistory h = new DiscussionHistory();
   						h.setMaxStanzas(10);
-  						muc.addParticipantStatusListener(new MucParticipantStatusListener(connection.getUser(), group));
+  						muc.addParticipantStatusListener(new MucParticipantStatusListener(account, group));
   						muc.addParticipantListener(new PacketListener() {
   							@Override
   							public void processPacket(Packet packet) {
@@ -869,7 +905,7 @@ public class JTalkService extends Service {
   		
   	}
   	
-  	public void sendMessage(String account, String user, String message, String resource) {
+  	private void sendMessage(String account, String user, String message, String resource) {
   		if (connections.containsKey(account)) {
   			final XMPPConnection connection = connections.get(account);
   			
@@ -991,13 +1027,14 @@ public class JTalkService extends Service {
   		for (final XMPPConnection connection : connections.values()) {
   			new Thread() {
   	  			public void run() {
-  	  				setPreference(JTalkService.this, "currentPriority", priority);
-  	       			setPreference(JTalkService.this, "currentMode", mode);
-  	       			setPreference(JTalkService.this, "currentStatus", state);
-  					setPreference(JTalkService.this, "currentSelection", getPosition(mode));
-  					setPreference(JTalkService.this, "lastStatus"+mode, state);
+//  	  				setPreference(JTalkService.this, "currentPriority", priority);
+//  	       			setPreference(JTalkService.this, "currentMode", mode);
+//  	       			setPreference(JTalkService.this, "currentStatus", state);
+//  					setPreference(JTalkService.this, "currentSelection", getPosition(mode));
+//  					setPreference(JTalkService.this, "lastStatus"+mode, state);
   						
   	  				if (connection.isAuthenticated()) {
+  	  					String account = StringUtils.parseBareAddress(connection.getUser());
   	  					if (!mode.equals("unavailable")) {
   	  						Presence presence = new Presence(Presence.Type.available);
   	  	  					if (state != null) presence.setStatus(state);
@@ -1014,24 +1051,16 @@ public class JTalkService extends Service {
   	  	  							} catch (IllegalStateException ise) { }
   	  	  						}
   	  	  					}
-  	  	  					Notify.updateNotify(connection.getUser());
+  	  	  					Notify.updateNotify();
   	  					} else {
-//  	  						connection.removeConnectionListener(conListener);
+  	  						removeConnectionListener(account);
   	  						Presence presence = new Presence(Presence.Type.unavailable, state, priority, null);
   	  						connection.disconnect(presence);
-  	  						Notify.offlineNotify(state);
+  	  						if (!isAuthenticated()) Notify.offlineNotify(state);
   	  					}
   	  				} else {
   	  					if (mode.equals("unavailable")) {
-  	  						if (connection != null) {
-//  	  							connection.removeConnectionListener(conListener);
-  	  							if (connection.isAuthenticated()) {
-  	  								Presence presence = new Presence(Presence.Type.unavailable, state, priority, null);
-  	  	  	  						connection.disconnect(presence);
-  	  							}
-  	  							connectionATask.cancel(true);
-  	  						}
-  	  						Notify.offlineNotify(state);
+  	  						if (!isAuthenticated()) Notify.offlineNotify(state);
   	  					}
   	  				}
   	  				
@@ -1052,6 +1081,7 @@ public class JTalkService extends Service {
   			new Thread() {
   	  			public void run() {
   	  				if (connection.isAuthenticated()) {
+  	  					String account = StringUtils.parseBareAddress(connection.getUser());
   	  					if (!mode.equals("unavailable")) {
   	  						Presence presence = new Presence(Presence.Type.available);
   	  	  					if (state != null) presence.setStatus(state);
@@ -1067,23 +1097,15 @@ public class JTalkService extends Service {
   		  						} catch (IllegalStateException ise) { }
   	  	  					}
   	  	  					
-  	  	  					Notify.updateNotify(connection.getUser());
+  	  	  					Notify.updateNotify();
   	  					} else {
-//  	  						connection.removeConnectionListener(conListener);
+  	  						removeConnectionListener(account);
   	  						Presence presence = new Presence(Presence.Type.unavailable, state, priority, null);
   	  						connection.disconnect(presence);
   	  						if (!isAuthenticated()) Notify.offlineNotify(state);
   	  					}
   	  				} else {
   	  					if (mode.equals("unavailable")) {
-  	  						if (connection != null) {
-//  	  							connection.removeConnectionListener(conListener);
-  	  							if (connection.isAuthenticated()) {
-  	  								Presence presence = new Presence(Presence.Type.unavailable, state, priority, null);
-  	  	  	  						connection.disconnect(presence);
-  	  							}
-  	  							connectionATask.cancel(true);
-  	  						}
   	  						if (isAuthenticated()) Notify.offlineNotify(state);
   	  					}
   	  				}
@@ -1213,7 +1235,7 @@ public class JTalkService extends Service {
   		autoStatusTimer.cancel();
         collapsedGroups.clear();
         composeList.clear();
-        messagesList.clear();
+        unreadMessages.clear();
         messages.clear();
         mucMessages.clear();
         conferences.clear();
@@ -1336,172 +1358,165 @@ public class JTalkService extends Service {
 			int port = 5222;
   			try {
 				port = Integer.parseInt(args[6]);
-			} catch (NumberFormatException nfc) { }
-  					
-  	  			if (username == null || username.indexOf("@") < 1) {
-  	        		state = getString(R.string.ConnectionError);
-  	                sendBroadcast(intent);
-  	                Notify.offlineNotify(state);
-  	        		return 0;
-  	        	} else {
-  	        		SmackConfiguration.setPacketReplyTimeout(60000);
-  	        		SmackConfiguration.setKeepAliveInterval(60000);
-  	            	
-  	        		String host = StringUtils.parseServer(username);
-  	  	        	String user = StringUtils.parseName(username);
-  	  	        	
-  	  	        	if (service == null || service.length() < 4) {
-  	            		try {
-  	            			Lookup lookup = new Lookup("_xmpp-client._tcp." + host, Type.SRV);
-  	            			lookup.setCredibility(Credibility.ANY);
-  	                	    Record[] records = lookup.run();
-  	                	    if(lookup.getResult() == Lookup.SUCCESSFUL) {
-  	                	    	if (records.length > 0) {
-  	                	    		SRVRecord record = (SRVRecord) records[0];
-  	                	    		service = record.getTarget().toString();
-  	                	    		service = service.substring(0, service.length()-1);
-  	                	    		port = record.getPort();
-  	                	    	}
-  	                	    }
-  	            		}
-  	            		catch(TextParseException tpe) { }
-  	            	}
-  	  	        	
-  	            	if (service == null || service.length() <= 3) service = host;
-  	            	
-  	            	ConnectionConfiguration cc = new ConnectionConfiguration(service, port, host);
-  	            	cc.setCapsNode("http://jtalk.ustyugov.net/caps");
-  	            	cc.setSelfSignedCertificateEnabled(true);
-  	            	cc.setReconnectionAllowed(false);
-  	            	cc.setRosterLoadedAtLogin(true);
-  	            	cc.setSendPresence(false);
-  	            	cc.setSASLAuthenticationEnabled(sasl.equals("0") ? false : true);
-  	            	cc.setSecurityMode(tls.equals("0") ? SecurityMode.disabled : SecurityMode.enabled);
-  	            	
-  	            	if (service.equals("talk.google.com")) cc.setSASLAuthenticationEnabled(false);
-  	            	else if (service.equals("vkmessenger.com")) cc.setSecurityMode(SecurityMode.disabled);
-  	            	
-  	            	XMPPConnection connection = new XMPPConnection(cc);
-  	            	connection.setSoftName(getString(R.string.app_name));
-  	            	connection.setSoftVersion(getString(R.string.version) + " (" + getString(R.string.build) + ")");
-  	            	connection.addFeature("http://jabber.org/protocol/disco#info");
-  	            	connection.addFeature("http://jabber.org/protocol/muc");
-  	            	connection.addFeature("http://jabber.org/protocol/chatstates");
-  	            	connection.addFeature("http://jabber.org/protocol/bytestreams");
-  	            	connection.addFeature("jabber:iq:version");
-  	            	connection.addFeature("urn:xmpp:receipts");
-  	            	connection.addFeature("urn:xmpp:time");
-  	            	connection.addFeature("urn:xmpp:message-correct:0");
-  	  	    	 
-  	            	int priority = prefs.getInt("currentPriority", 0);
-  	  	    	 	String status  = prefs.getString("currentStatus", "");
-  	  	    	 	String mode  = prefs.getString("currentMode", "available");
-  	  	    	 
-  	  	    	 	try {
-  						if (!connection.isConnected()) connection.connect();
-  	  	    		} catch (XMPPException xe) {
-  	  	    			state = "Error connecting to " + connection.getServiceName();
-  						sendBroadcast(intent);
-  						Notify.offlineNotify(state);
-//  						reconnect();
-  						return 0;
-  					}
-  	    
-  	  	    		if (connection != null && connection.isConnected() && !connection.isAuthenticated()) {
-  	  	    			
-  	  	    			connection.addPacketListener(new MsgListener(JTalkService.this, connection, username), new PacketTypeFilter(Message.class));
-  	  	    			connection.addConnectionListener(new ConListener(JTalkService.this));
-
-  	  	    			try {
-  	  	    				connection.login(user, password, resource);
-  	  	    			} catch (XMPPException e) {
-  	  	    				XMPPError error = e.getXMPPError();
-  	  	    				if (error != null) state = "[" + error.getCode() + "]: " + error.getMessage();
-  	  	    				else state = e.getLocalizedMessage();
-  	    					sendBroadcast(intent);
-  	    					Notify.offlineNotify(state);
-  	    					return 0;
-  	  	    			}
-
-  	    				try {
-  	    					Roster roster = connection.getRoster();
-  	    					roster.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
-  	    					Thread.sleep(2000);
-
-  	    					new PrivacyListManager(connection);
-  	    					new ServiceDiscoveryManager(connection);
-  	    					new AdHocCommandManager(connection);
-  	    					fileTransferManager = new FileTransferManager(connection);
-  	    					fileTransferManager.addFileTransferListener(new IncomingFileListener());
-  	    				
-  	    					connections.put(username, connection);
-  	    					
-  	    					sendPresence(username, status, mode, priority);
-  	    					roster.addRosterListener(new RstListener(username));
-  	    					
-  	    					state = "";
-  	    					Notify.updateNotify(connection.getUser());
-	    		  				
-	    		  				VCard vCard = new VCard();
-	    		  				try {
-	    		  					vCard.load(connection, StringUtils.parseBareAddress(connection.getUser()));
-	    		  				} catch (XMPPException e) {	}
-	    		  				setVCard(username, vCard);
-	    		  				
-	    		  	  	    	try {
-	    							MultiUserChat.addInvitationListener(connection, new InviteListener(username));
-	    						} catch (Exception e) { }
-	    		  	  	    	
-	    		  	  	    	if (!getConferencesHash(username).isEmpty()) {
-	    		  	  	    		Collection<Conference> coll = joinedConferences.values();
-	    		  	  	  	    	for (Conference conf : coll) {
-	    		  	  	  	    		joinRoom(username, conf.getName(), conf.getNick(), conf.getPassword());
-	    		  	  	  	    	}
-	    		  	  	    	} else {
-	    		  	  	    		if (prefs.getBoolean("AutoJoin", false)) {
-	    		  	  	    			try {
-	    		  	  	    				BookmarkManager bm = BookmarkManager.getBookmarkManager(connection);
-	    		  	  	    				for(BookmarkedConference bc : bm.getBookmarkedConferences()) {
-	    		  	  	    					String nick = bc.getNickname();
-	    		  	  	    					if (nick == null || nick.length() < 1) nick = StringUtils.parseName(connection.getUser());
-	    		  	  	    					if (bc.isAutoJoin()) joinRoom(username, bc.getJid(), bc.getNickname(), bc.getPassword());
-	    		  	  	    				}
-	    		  	  	    			} catch (XMPPException e) { }
-	    		  	  	    		}
-	    		  	  	    	}
-	    		  	  	    	
-//	    		  	  	    	if (prefs.getBoolean("Locations", false)) {
-//	    		  	  	    		try {
-//	    		  	  	    		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, Constants.LOCATION_MIN_TIME, Constants.LOCATION_MIN_DIST, locationListener);
-//	    		  	  	    		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, Constants.LOCATION_MIN_TIME, Constants.LOCATION_MIN_DIST, locationListener);
-//	    		  	  	    		} catch (Exception e) {
-//	    		  	  	    			Log.e("LOCATION", e.getLocalizedMessage());
-//	    		  	  	    		}
-//	    		  	  	    	} else {
-//	    		  	  	    		sendLocation(null);
-//	    		  	  	    	}
-	    		  	  	    	
-	    		  	  	    	OfflineMessageManager omm = new OfflineMessageManager(connection);
-	    		  	  	    	try {
-	    		  	  	    		omm.deleteMessages();
-	    		  	  	    	} catch (XMPPException e) {	}
-  	    					
-  	    		  	    	sendBroadcast(new Intent(Constants.CONNECTION_STATE));
-  	    		  	    	Intent updateIn = new Intent(Constants.UPDATE);
-  	    					sendBroadcast(updateIn);
-  	    				
-  	    					resetTimer();
-  	    					new IgnoreList(connection).createIgnoreList();
-  	    				} catch(Exception e) { return 0;}
-  	  	    		}
-        	}
-			return null;
-  			}
+			} catch (NumberFormatException nfc) { }	
   			
+  			if (username == null || username.indexOf("@") < 1) {
+	        	state = getString(R.string.ConnectionError);
+	        	sendBroadcast(intent);
+	        	if (!isAuthenticated()) Notify.offlineNotify(state);
+	        	return 0;
+	        } else {
+	        	SmackConfiguration.setPacketReplyTimeout(60000);
+	        	SmackConfiguration.setKeepAliveInterval(60000);
+	        	
+	        	String host = StringUtils.parseServer(username);
+	        	String user = StringUtils.parseName(username);
+	        	
+	        	if (service == null || service.length() < 4) {
+	        		try {
+	        			Lookup lookup = new Lookup("_xmpp-client._tcp." + host, Type.SRV);
+            			lookup.setCredibility(Credibility.ANY);
+                	    Record[] records = lookup.run();
+                	    if(lookup.getResult() == Lookup.SUCCESSFUL) {
+                	    	if (records.length > 0) {
+                	    		SRVRecord record = (SRVRecord) records[0];
+                	    		service = record.getTarget().toString();
+                	    		service = service.substring(0, service.length()-1);
+                	    		port = record.getPort();
+                	    	}
+                	    }
+            		} catch(TextParseException tpe) { }
+	        	}
+	  	        	
+	            	if (service == null || service.length() <= 3) service = host;
+	            	
+	            	ConnectionConfiguration cc = new ConnectionConfiguration(service, port, host);
+	            	cc.setCapsNode("http://jtalk.ustyugov.net/caps");
+	            	cc.setSelfSignedCertificateEnabled(true);
+	            	cc.setReconnectionAllowed(false);
+	            	cc.setRosterLoadedAtLogin(true);
+	            	cc.setSendPresence(false);
+	            	cc.setSASLAuthenticationEnabled(sasl.equals("0") ? false : true);
+	            	cc.setSecurityMode(tls.equals("0") ? SecurityMode.disabled : SecurityMode.enabled);
+	            	
+	            	if (service.equals("talk.google.com")) cc.setSASLAuthenticationEnabled(false);
+	            	else if (service.equals("vkmessenger.com")) cc.setSecurityMode(SecurityMode.disabled);
+	            	
+	            	XMPPConnection connection = new XMPPConnection(cc);
+	            	connection.setSoftName(getString(R.string.app_name));
+	            	connection.setSoftVersion(getString(R.string.version) + " (" + getString(R.string.build) + ")");
+	            	connection.addFeature("http://jabber.org/protocol/disco#info");
+	            	connection.addFeature("http://jabber.org/protocol/muc");
+	            	connection.addFeature("http://jabber.org/protocol/chatstates");
+	            	connection.addFeature("http://jabber.org/protocol/bytestreams");
+	            	connection.addFeature("jabber:iq:version");
+	            	connection.addFeature("urn:xmpp:receipts");
+	            	connection.addFeature("urn:xmpp:time");
+	            	connection.addFeature("urn:xmpp:message-correct:0");
+	  	    	 
+	            	int priority = prefs.getInt("currentPriority", 0);
+	  	    	 	String status  = prefs.getString("currentStatus", "");
+	  	    	 	String mode  = prefs.getString("currentMode", "available");
+	  	    	 
+	  	    	 	try {
+						if (!connection.isConnected()) connection.connect();
+	  	    		} catch (XMPPException xe) {
+	  	    			state = "Error connecting to " + connection.getServiceName();
+						sendBroadcast(intent);
+						if (!isAuthenticated()) Notify.offlineNotify(state);
+//						reconnect();
+						return 0;
+					}
+	    
+	  	    		if (connection != null && connection.isConnected() && !connection.isAuthenticated()) {
+	  	    			connection.addPacketListener(new MsgListener(JTalkService.this, connection, username), new PacketTypeFilter(Message.class));
+	  	    			addConnectionListener(username, connection);
+
+	  	    			try {
+	  	    				connection.login(user, password, resource);
+	  	    			} catch (XMPPException e) {
+	  	    				XMPPError error = e.getXMPPError();
+	  	    				if (error != null) state = "[" + error.getCode() + "]: " + error.getMessage();
+	  	    				else state = e.getLocalizedMessage();
+	    					sendBroadcast(intent);
+	    					if (!isAuthenticated()) Notify.offlineNotify(state);
+	    					return 0;
+	  	    			}
+
+	    					Roster roster = connection.getRoster();
+	    					roster.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
+
+	    					new PrivacyListManager(connection);
+	    					new ServiceDiscoveryManager(connection);
+	    					new AdHocCommandManager(connection);
+	    					fileTransferManager = new FileTransferManager(connection);
+	    					fileTransferManager.addFileTransferListener(new IncomingFileListener());
+	    				
+	    					connections.put(username, connection);
+	    					sendPresence(username, status, mode, priority);
+	    					roster.addRosterListener(new RstListener(username));
+	    					
+	    					state = "";
+	    					Notify.updateNotify();
+	    					
+	    					VCard vCard = new VCard();
+	    					try {
+		  					vCard.load(connection, username);
+		  				} catch (XMPPException e) {	}
+		  				setVCard(username, vCard);
+		  				
+		  	  	    	try {
+							MultiUserChat.addInvitationListener(connection, new InviteListener(username));
+						} catch (Exception e) { }
+		  	  	    	
+		  	  	    	if (!getConferencesHash(username).isEmpty()) {
+		  	  	    		Collection<Conference> coll = joinedConferences.values();
+		  	  	  	    	for (Conference conf : coll) {
+		  	  	  	    		joinRoom(username, conf.getName(), conf.getNick(), conf.getPassword());
+		  	  	  	    	}
+		  	  	    	} else {
+		  	  	    		if (prefs.getBoolean("AutoJoin", false)) {
+		  	  	    			try {
+		  	  	    				BookmarkManager bm = BookmarkManager.getBookmarkManager(connection);
+		  	  	    				for(BookmarkedConference bc : bm.getBookmarkedConferences()) {
+		  	  	    					String nick = bc.getNickname();
+		  	  	    					if (nick == null || nick.length() < 1) nick = StringUtils.parseName(username);
+		  	  	    					if (bc.isAutoJoin()) joinRoom(username, bc.getJid(), bc.getNickname(), bc.getPassword());
+		  	  	    				}
+		  	  	    			} catch (XMPPException e) { }
+		  	  	    		}
+		  	  	    	}
+		  	  	    	
+		  	  	    	if (prefs.getBoolean("Locations", false)) {
+		  	  	    		try {
+		  	  	    		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, Constants.LOCATION_MIN_TIME, Constants.LOCATION_MIN_DIST, locationListener);
+		  	  	    		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, Constants.LOCATION_MIN_TIME, Constants.LOCATION_MIN_DIST, locationListener);
+		  	  	    		} catch (Exception e) {
+		  	  	    			Log.e("LOCATION", e.getLocalizedMessage());
+		  	  	    		}
+		  	  	    	} else {
+		  	  	    		sendLocation(null);
+		  	  	    	}
+		  	  	    	
+		  	  	    	OfflineMessageManager omm = new OfflineMessageManager(connection);
+		  	  	    	try {
+		  	  	    		omm.deleteMessages();
+		  	  	    	} catch (XMPPException e) {	}
+		  	  	    	
+	    		  	    	sendBroadcast(new Intent(Constants.CONNECTION_STATE));
+	    		  	    	Intent updateIn = new Intent(Constants.UPDATE);
+	    					sendBroadcast(updateIn);
+	    				
+	    					resetTimer();
+	    					new IgnoreList(connection).createIgnoreList();
+	  	    		}
+    	}
+  			return null;
+  		}
 
   		@Override
-  	    protected void onPostExecute(Integer result) { 
-  	    	
-  	    }
-  	 }
+  		protected void onPostExecute(Integer result) { 
+  			
+  		}
+  	}
 }

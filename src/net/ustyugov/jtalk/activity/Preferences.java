@@ -42,7 +42,6 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 //	private CheckBoxPreference compression;
 	private CheckBoxPreference autoCollapse;
 	private EditTextPreference delayAway;
-	private EditTextPreference rosterColumns;
 	private EditTextPreference textAway;
 	private EditTextPreference delayXa;
 	private EditTextPreference textXa;
@@ -96,7 +95,6 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		autoCollapse.setEnabled(prefs.getBoolean("EnableCollapseMessages", true) ? true : false);
 		
 		delayAway = (EditTextPreference) getPreferenceScreen().findPreference("AutoStatusAway");
-		rosterColumns = (EditTextPreference) getPreferenceScreen().findPreference("RosterColumns");
 		textAway = (EditTextPreference) getPreferenceScreen().findPreference("AutoStatusTextAway");
 		delayXa  = (EditTextPreference) getPreferenceScreen().findPreference("AutoStatusXa");
 		textXa   = (EditTextPreference) getPreferenceScreen().findPreference("AutoStatusTextXa");
@@ -114,7 +112,6 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		if (icons.size() == 1) iconspack.setValue("default");
 		
 //		compression.setEnabled(prefs.getBoolean("EnableTls", true) ? true : false);
-		rosterColumns.setEnabled(prefs.getBoolean("ShowGroups", true) ? false : true);
 		delayAway.setEnabled(prefs.getBoolean("AutoStatus", false) ? true : false);
 		textAway.setEnabled(prefs.getBoolean("AutoStatus", false) ? true : false);
 		delayXa.setEnabled(prefs.getBoolean("AutoStatus", false) ? true : false);
@@ -151,7 +148,6 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 	public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
 		smilespack.setEnabled(prefs.getBoolean("ShowSmiles", true) ? true : false);
 		autoCollapse.setEnabled(prefs.getBoolean("EnableCollapseMessages", true) ? true : false);
-		rosterColumns.setEnabled(prefs.getBoolean("ShowGroups", true) ? false : true);
 		delayAway.setEnabled(prefs.getBoolean("AutoStatus", false) ? true : false);
 		textAway.setEnabled(prefs.getBoolean("AutoStatus", false) ? true : false);
 		delayXa.setEnabled(prefs.getBoolean("AutoStatus", false) ? true : false);

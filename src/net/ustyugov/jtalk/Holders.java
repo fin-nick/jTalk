@@ -16,7 +16,6 @@ public class Holders {
 		public TextView name;
 		public TextView status;
 		public TextView counter;
-		public ImageView role;
 		public ImageView statusIcon;
 		public ImageView messageIcon;
 		public ImageView caps;

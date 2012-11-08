@@ -356,7 +356,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 			ItemHolder holder = (ItemHolder) convertView.getTag();
 			holder.name.setTypeface(Typeface.DEFAULT);
 			holder.name.setText(StringUtils.parseName(name));
-			if (service.isHighlight(name)) holder.name.setTextColor(0xFFAA2323);
+			if (service.isHighlight(account, name)) holder.name.setTextColor(0xFFAA2323);
 			else holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFEEEEEE : 0xFF343434);
 			
 			holder.status.setText(subject);

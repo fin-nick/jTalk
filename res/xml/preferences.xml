@@ -8,11 +8,6 @@
            android:key="ShowGroups"
            android:title="@string/ShowGroups"
            android:defaultValue="true" />
-         <EditTextPreference
-           android:key="RosterColumns"
-           android:numeric="integer"
-           android:title="Columns"
-           android:defaultValue="1" />
          <CheckBoxPreference
            android:key="ShowStatuses"
            android:title="@string/ShowStatuses"

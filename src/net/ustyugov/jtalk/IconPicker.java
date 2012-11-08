@@ -17,14 +17,8 @@
 
 package net.ustyugov.jtalk;
 
-import net.ustyugov.jtalk.service.JTalkService;
-
-import org.jivesoftware.smack.Roster;
-import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smack.packet.RosterPacket.ItemType;
 
-import com.jtalk2.R;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -32,6 +26,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
+
+import com.jtalk2.R;
 
 public class IconPicker {
 	private Bitmap online;

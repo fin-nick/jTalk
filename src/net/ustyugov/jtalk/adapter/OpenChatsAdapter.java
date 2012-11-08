@@ -72,11 +72,13 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 				while (chatEnum.hasMoreElements()) {
 					if (service != null && service.getRoster(account) != null && connection != null && connection.isAuthenticated()) {
 						String name = chatEnum.nextElement();
-						Roster roster = service.getRoster(account);
-						RosterEntry entry = roster.getEntry(name);
-						if (entry == null) entry = new RosterEntry(name, name, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-						RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
-						add(item);
+						if (!service.getConferencesHash(account).containsKey(name)) {
+							Roster roster = service.getRoster(account);
+							RosterEntry entry = roster.getEntry(name);
+							if (entry == null) entry = new RosterEntry(name, name, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+							RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
+							add(item);
+						}
 					}
 				}
 				
@@ -159,7 +161,7 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
            	label.setTextSize(fontSize);
             label.setText(name);
            	if (service.getComposeList().contains(jid)) label.setTextColor(0xFFAA2323);
-           	else if (service.isHighlight(jid)) label.setTextColor(0xFFAA2323);
+           	else if (service.isHighlight(account, jid)) label.setTextColor(0xFFAA2323);
     		else label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFEEEEEE : 0xFF343434);
            	
             ImageView icon = (ImageView)v.findViewById(R.id.status_icon);

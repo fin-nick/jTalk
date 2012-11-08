@@ -38,6 +38,7 @@ import net.ustyugov.jtalk.dialog.ChangeChatDialog;
 import net.ustyugov.jtalk.dialog.MessageMenuDialog;
 import net.ustyugov.jtalk.dialog.MucDialogs;
 import net.ustyugov.jtalk.dialog.RosterDialogs;
+import net.ustyugov.jtalk.dialog.SendToResourceDialog;
 import net.ustyugov.jtalk.dialog.UsersDialog;
 import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.view.MyListView;
@@ -64,6 +65,7 @@ import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnKeyListener;
+import android.view.View.OnLongClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
@@ -228,14 +230,16 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
 		nickList.setCacheColorHint(0x00000000);
 		nickList.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long arg3) {
-				if (position > 0) {
+				RosterItem item = (RosterItem) parent.getItemAtPosition(position);
+				if (item.isEntry()) {
 					String separator = prefs.getString("nickSeparator", ", ");
-					String item = (String) parent.getAdapter().getItem(position);
+					
+					String nick = item.getName();
 					String text = messageInput.getText().toString();
 					if (text.length() > 0) {
-						text += " " + item + separator;
+						text += " " + nick + separator + " ";
 					} else {
-						text = item + separator;
+						text = nick + separator + " ";
 					}
 					messageInput.setText(text);
 					messageInput.setSelection(messageInput.getText().length());
@@ -248,8 +252,9 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
 		nickList.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {
-				if (position > 0) {
-					String nick = (String) parent.getItemAtPosition(position);
+				RosterItem item = (RosterItem) parent.getItemAtPosition(position);
+				if (item.isEntry()) {
+					String nick = item.getName();
 					MucDialogs.userMenu(Chat.this, account, jid, nick);
 					return true;
 				} else return false;
@@ -272,6 +277,16 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
 		sendButton  = (Button)findViewById(R.id.SendButton);
 		sendButton.setEnabled(false);
 		sendButton.setOnClickListener(this);
+		sendButton.setOnLongClickListener(new OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				if (!isPrivate && !isMuc) {
+					String message = messageInput.getText().toString();
+					new SendToResourceDialog(Chat.this, account, jid, message).show();
+				}
+				return true;
+			}
+		});
 	}
 
 	@Override
@@ -329,7 +344,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
 		}
 		
 		service.setCurrentJid(jid);
-		service.removeHighlight(jid);
+		service.removeHighlight(account, jid);
 		
 		listView.setOnItemLongClickListener(new MessageMenuDialog(this, account, jid));
 		
@@ -378,9 +393,9 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
 		}
 		service.removeMessagesCount(account, jid);
 		
-    	while (service.getMessagesList().contains(jid)) service.getMessagesList().remove(jid);
+    	while (service.getMessagesList(account).contains(jid)) service.getMessagesList(account).remove(jid);
     	if (service.isAuthenticated()) {
-			Notify.updateNotify(account);
+			Notify.updateNotify();
 		} else {
 			Notify.offlineNotify(service.getState());
 		}
@@ -843,7 +858,8 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
 		}
 		else {
 			String to = jid;
-			if (resource.length() > 0) to = jid + "/" + resource;
+			if (isPrivate) to = jid;
+			else if (resource.length() > 0) to = jid + "/" + resource;
 			service.sendMessage(account, to, message);
 		}
 		updateList();

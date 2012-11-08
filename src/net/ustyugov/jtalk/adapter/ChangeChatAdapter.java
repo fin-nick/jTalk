@@ -65,11 +65,13 @@ public class ChangeChatAdapter extends ArrayAdapter<RosterItem> {
 				while (chatEnum.hasMoreElements()) {
 					if (service != null && service.getRoster(account) != null && connection != null && connection.isAuthenticated()) {
 						String name = chatEnum.nextElement();
-						Roster roster = service.getRoster(account);
-						RosterEntry entry = roster.getEntry(name);
-						if (entry == null) entry = new RosterEntry(name, name, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-						RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
-						add(item);
+						if (!service.getConferencesHash(account).containsKey(name)) {
+							Roster roster = service.getRoster(account);
+							RosterEntry entry = roster.getEntry(name);
+							if (entry == null) entry = new RosterEntry(name, name, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+							RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
+							add(item);
+						}
 					}
 				}
 				
@@ -105,7 +107,7 @@ public class ChangeChatAdapter extends ArrayAdapter<RosterItem> {
         }
         
         TextView label = (TextView) v.findViewById(R.id.item);
-        if (service.isHighlight(jid)) label.setTextColor(0xFFAA2323);
+        if (service.isHighlight(account, jid)) label.setTextColor(0xFFAA2323);
         else {
         	if (Build.VERSION.SDK_INT >= 11) {
             	label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);

@@ -21,15 +21,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import net.ustyugov.jtalk.Holders.GroupHolder;
+import net.ustyugov.jtalk.Holders.ItemHolder;
 import net.ustyugov.jtalk.IconPicker;
-import net.ustyugov.jtalk.SortList;
+import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.service.JTalkService;
 
+import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.packet.RosterPacket;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.packet.MUCUser;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
@@ -43,12 +49,14 @@ import android.widget.TextView;
 
 import com.jtalk2.R;
 
-public class MucUserAdapter extends ArrayAdapter<String> {
+public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 	private String group;
 	private String account;
+	private Activity activity;
 	
-	public MucUserAdapter(Context context, String account, String group) {
-		super(context, R.id.name);
+	public MucUserAdapter(Activity activity, String account, String group) {
+		super(activity, R.id.name);
+		this.activity = activity;
 		this.group = group;
 		this.account = account;
         update();
@@ -59,20 +67,162 @@ public class MucUserAdapter extends ArrayAdapter<String> {
 	}
 	
 	public void update() {
+		List<String> mOnline = new ArrayList<String>();
+		List<String> mChat = new ArrayList<String>();
+		List<String> mAway = new ArrayList<String>();
+		List<String> mXa = new ArrayList<String>();
+		List<String> mDnd = new ArrayList<String>();
+		
+		List<String> pOnline = new ArrayList<String>();
+		List<String> pChat = new ArrayList<String>();
+		List<String> pAway = new ArrayList<String>();
+		List<String> pXa = new ArrayList<String>();
+		List<String> pDnd = new ArrayList<String>();
+		
+		List<String> vOnline = new ArrayList<String>();
+		List<String> vChat = new ArrayList<String>();
+		List<String> vAway = new ArrayList<String>();
+		List<String> vXa = new ArrayList<String>();
+		List<String> vDnd = new ArrayList<String>();
+		
 		JTalkService service = JTalkService.getInstance();
+		Roster roster = service.getRoster(account);
+		XMPPConnection connection = service.getConnection(account);
 		clear();
-		add("");
+
 		if (group != null && service.getConferencesHash(account).containsKey(group)) {
-			List<String> users = new ArrayList<String>();
 			Iterator<Presence> it = service.getRoster(account).getPresences(group);
 			while (it.hasNext()) {
 				Presence p = it.next();
-				users.add(StringUtils.parseResource(p.getFrom()));
+				Presence.Mode m = p.getMode();
+				if (m == null) m = Presence.Mode.available;
+				String role = "visitor";
+				String jid = p.getFrom();
+	    		MUCUser mucUser = (MUCUser) p.getExtension("x", "http://jabber.org/protocol/muc#user");
+	    		if (mucUser != null) {
+	    			role = mucUser.getItem().getRole();
+	    			if (role.equals("visitor")) {
+	    				if (m == Presence.Mode.chat) vChat.add(jid);
+	    				else if (m == Presence.Mode.away) vAway.add(jid);
+	    				else if (m == Presence.Mode.xa) vXa.add(jid);
+	    				else if (m == Presence.Mode.dnd) vDnd.add(jid);
+	    				else if (m == Presence.Mode.available) vOnline.add(jid);
+	    			}
+	    			else if (role.equals("participant")) {
+	    				if (m == Presence.Mode.chat) pChat.add(jid);
+	    				else if (m == Presence.Mode.away) pAway.add(jid);
+	    				else if (m == Presence.Mode.xa) pXa.add(jid);
+	    				else if (m == Presence.Mode.dnd) pDnd.add(jid);
+	    				else if (m == Presence.Mode.available) pOnline.add(jid);
+	    			}
+	    			else if (role.equals("moderator")) {
+	    				if (m == Presence.Mode.chat) mChat.add(jid);
+	    				else if (m == Presence.Mode.away) mAway.add(jid);
+	    				else if (m == Presence.Mode.xa) mXa.add(jid);
+	    				else if (m == Presence.Mode.dnd) mDnd.add(jid);
+	    				else if (m == Presence.Mode.available) mOnline.add(jid);
+	    			}
+	    		}
 			}
 			
-			users = SortList.sortParticipantsInChat(account, group, users);
-			for (String user: users) {
-				add(user);
+			int mCount = mOnline.size() + mAway.size() + mXa.size() + mDnd.size() + mChat.size();
+			int pCount = pOnline.size() + pAway.size() + pXa.size() + pDnd.size() + pChat.size();
+			int vCount = vOnline.size() + vAway.size() + vXa.size() + vDnd.size() + vChat.size();
+			
+			if (mCount > 0) {
+				RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
+				item.setName(service.getString(R.string.moderator) + "(" + mCount + ")");
+				item.setObject("moderator");
+				add(item);
+				for (String jid : mChat) {
+					RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+					RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+					add(i);
+				}
+				for (String jid : mOnline) {
+					RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+					RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+					add(i);
+				}
+				for (String jid : mAway) {
+					RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+					RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+					add(i);
+				}
+				for (String jid : mXa) {
+					RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+					RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+					add(i);
+				}
+				for (String jid : mDnd) {
+					RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+					RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+					add(i);
+				}
+			}
+			
+			if (pCount > 0) {
+				RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
+				item.setName(service.getString(R.string.participant) + "(" + pCount + ")");
+				item.setObject("participant");
+				add(item);
+				for (String jid : pChat) {
+					RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+					RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+					add(i);
+				}
+				for (String jid : pOnline) {
+					RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+					RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+					add(i);
+				}
+				for (String jid : pAway) {
+					RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+					RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+					add(i);
+				}
+				for (String jid : pXa) {
+					RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+					RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+					add(i);
+				}
+				for (String jid : pDnd) {
+					RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+					RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+					add(i);
+				}
+			}
+			
+			if (vCount > 0) {
+				RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
+				item.setName(service.getString(R.string.visitor) + "(" + vCount + ")");
+				item.setObject("visitor");
+				add(item);
+				for (String jid : vChat) {
+					RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+					RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+					add(i);
+				}
+				for (String jid : vOnline) {
+					RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+					RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+					add(i);
+				}
+				for (String jid : vAway) {
+					RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+					RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+					add(i);
+				}
+				for (String jid : vXa) {
+					RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+					RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+					add(i);
+				}
+				for (String jid : vDnd) {
+					RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+					RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+					add(i);
+				}
 			}
 		}
 	}
@@ -88,92 +238,111 @@ public class MucUserAdapter extends ArrayAdapter<String> {
 			fontSize = Integer.parseInt(prefs.getString("RosterSize", service.getResources().getString(R.string.DefaultFontSize)));
 		} catch (NumberFormatException e) { }
 		
-		View v = convertView;
-		if (v == null) {
-            LayoutInflater vi = (LayoutInflater) service.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            v = vi.inflate(R.layout.entry, null);
-        }
-		
-		if (position == 0) {
-			ImageView roleImage = (ImageView) v.findViewById(R.id.role);
-			roleImage.setVisibility(View.GONE);
+		RosterItem item = getItem(position);
+		if (item.isGroup()) {
+			GroupHolder holder;
+			if (convertView == null || convertView.findViewById(R.id.state) == null) {
+				LayoutInflater inflater = activity.getLayoutInflater();
+				convertView = inflater.inflate(R.layout.group, null, false);
+				
+				holder = new GroupHolder();
+				holder.messageIcon = (ImageView) convertView.findViewById(R.id.msg);
+	            holder.text = (TextView) convertView.findViewById(R.id.name);
+	            holder.text.setTextSize(fontSize);
+	            holder.text.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
+	            holder.state = (ImageView) convertView.findViewById(R.id.state);
+	            holder.state.setVisibility(View.GONE);
+	            convertView.setTag(holder);
+	            convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0x77525252 : 0xEEEEEEEE);
+			} else {
+				holder = (GroupHolder) convertView.getTag();
+			}
+	        holder.text.setText(item.getName());
 			
-			ImageView icon = (ImageView)v.findViewById(R.id.status_icon);
-	      	if (minimal && service.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-	      		icon.setVisibility(View.GONE);
-	      	} else {
-	      		icon.setVisibility(View.VISIBLE);
-	      		icon.setImageBitmap(ip.getMucBitmap());
-	      	}
-			
-			TextView label = (TextView) v.findViewById(R.id.name);
-			label.setTypeface(Typeface.DEFAULT_BOLD);
-	       	label.setTextSize(fontSize);
-	        label.setText("Users: " + (getCount()-1));
-	        if (prefs.getBoolean("DarkColors", false)) {
-    			label.setTextColor(0xFFFFFFFF);
-    			v.setBackgroundColor(0x77525252);
-    		}
-    		else {
-    			label.setTextColor(0xFF000000);
-    			v.setBackgroundColor(0xEEEEEEEE);
-    		}
-		} else {
-			v.setBackgroundColor(0x00000000);
-			
+			if (minimal && service.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+				holder.messageIcon.setVisibility(View.GONE);
+			} else {
+				String role = (String) item.getObject();
+				if (role.equals("moderator")) holder.messageIcon.setImageBitmap(ip.getModeratorBitmap());
+				else if (role.equals("participant")) holder.messageIcon.setImageBitmap(ip.getParticipantBitmap());
+				else holder.messageIcon.setImageBitmap(ip.getVisitorBitmap());
+				holder.messageIcon.setVisibility(View.VISIBLE);
+			}
+			return convertView;
+		} else if (item.isEntry()) {
 			boolean color = prefs.getBoolean("ColoredBar", true);
+			String name = item.getName();
+			String jid = item.getEntry().getUser();
+			if (name == null || name.length() <= 0 ) name = jid;
 			
-	        String nick = getItem(position);
+			Presence presence = service.getPresence(item.getAccount(), jid);
+			Presence.Type type = presence.getType();
+	        Presence.Mode mode = presence.getMode();
 			
-	        Presence p = service.getRoster(account).getPresenceResource(group + "/" + nick);
-	        Presence.Type type = p.getType();
-	        Presence.Mode mode = p.getMode();
+			int count = service.getMessagesCount(account, jid);
+			
+			if(convertView == null || convertView.findViewById(R.id.status) == null) {		
+				LayoutInflater inflater = activity.getLayoutInflater();
+				convertView = inflater.inflate(R.layout.entry, null, false);
+				
+				ItemHolder holder = new ItemHolder();
+				holder.name = (TextView) convertView.findViewById(R.id.name);
+				holder.name.setTextSize(fontSize);
+				holder.status = (TextView) convertView.findViewById(R.id.status);
+				holder.status.setVisibility(View.GONE);
+				holder.counter = (TextView) convertView.findViewById(R.id.msg_counter);
+				holder.counter.setTextSize(fontSize);
+				holder.messageIcon = (ImageView) convertView.findViewById(R.id.msg);
+				holder.messageIcon.setImageBitmap(ip.getMsgBitmap());
+				holder.statusIcon = (ImageView) convertView.findViewById(R.id.status_icon);
+				holder.statusIcon.setPadding(3, 3, 0, 0);
+				holder.statusIcon.setVisibility(View.VISIBLE);
+				holder.avatar = (ImageView) convertView.findViewById(R.id.contactlist_pic);
+				holder.avatar.setVisibility(View.GONE);
+				holder.caps = (ImageView) convertView.findViewById(R.id.caps);
+				holder.caps.setVisibility(View.GONE);
+				convertView.setTag(holder);
+			}
+			
+			ItemHolder holder = (ItemHolder) convertView.getTag();
+			holder.name.setText(name);
+			if (service.getComposeList().contains(jid)) holder.name.setTextColor(0xFFAA2323);
+			else holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFEEEEEE : 0xFF343434);
+			
+			if (service.getMessagesHash(account).containsKey(jid)) {
+				if (service.getMessagesHash(account).get(jid).size() > 0) holder.name.setTypeface(Typeface.DEFAULT_BOLD);
+			} else holder.name.setTypeface(Typeface.DEFAULT);
+			
+	        if (count > 0) {
+	        	holder.messageIcon.setVisibility(View.VISIBLE);
+				holder.counter.setVisibility(View.VISIBLE);
+				holder.counter.setText(count+"");
+			} else {
+				holder.messageIcon.setVisibility(View.GONE);
+				holder.counter.setVisibility(View.GONE);
+			}
 	        
-	      	ImageView icon = (ImageView)v.findViewById(R.id.status_icon);
-	      	if (minimal && service.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-	      		icon.setVisibility(View.GONE);
-	      	} else {
-	      		icon.setVisibility(View.VISIBLE);
-	      		icon.setImageBitmap(ip.getIconByPresence(p));
-	      	}
-	       	
-	      	ImageView roleImage = (ImageView) v.findViewById(R.id.role);
-	      	if (minimal && service.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-	      		roleImage.setVisibility(View.GONE);
-	      	} else {
-	      		roleImage.setVisibility(View.VISIBLE);
-	      		String role = "visitor";
-	    		MUCUser mucUser = (MUCUser) p.getExtension("x", "http://jabber.org/protocol/muc#user");
-	    		if (mucUser != null) role = mucUser.getItem().getRole();
-	    		roleImage.setImageBitmap(ip.getRoleIcon(role));
-	      	}
-	       	
-	       	ImageView msg  = (ImageView) v.findViewById(R.id.msg);
-	       	msg.setImageBitmap(ip.getMsgBitmap());
-	        msg.setVisibility(service.getMessagesCount(account, group + "/" + nick) > 0 ? View.VISIBLE : View.GONE);
-			
-	       	TextView label = (TextView) v.findViewById(R.id.name);
-	       	label.setTextSize(fontSize);
-	        label.setText(nick);
-	        if (service.getComposeList().contains(group)) label.setTextColor(0xFFAA2323);
-			else label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFEEEEEE : 0xFF343434);
 	        if (color) {
 	        	if (type == Presence.Type.available) {
 	       			if(mode == Presence.Mode.away) {
-	       				label.setTextColor(0xFF22bcef);
+	       				holder.name.setTextColor(0xFF22bcef);
 	       			} else if (mode == Presence.Mode.xa) {
-	       				label.setTextColor(0xFF3c788c);
+	       				holder.name.setTextColor(0xFF3c788c);
 	       			} else if (mode == Presence.Mode.dnd) {
-	       				label.setTextColor(0xFFee0000);
+	       				holder.name.setTextColor(0xFFee0000);
 	       			} else if (mode == Presence.Mode.chat) {
-	       				label.setTextColor(0xFF008e00);
+	       				holder.name.setTextColor(0xFF008e00);
 	       			}
 	       		}
 	        }
-	       	
-	        if (service.getMessagesHash(account).containsKey(group + "/" + nick)) label.setTypeface(Typeface.DEFAULT_BOLD);
-			else label.setTypeface(Typeface.DEFAULT);
+	        
+	        if (minimal && service.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+				holder.statusIcon.setVisibility(View.INVISIBLE);
+			} else {
+				if (ip != null) holder.statusIcon.setImageBitmap(ip.getIconByPresence(presence));
+			}
+			return convertView;
 		}
-        return v;
+        return null;
     }
 }

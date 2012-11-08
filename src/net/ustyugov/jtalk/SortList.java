@@ -113,50 +113,6 @@ public class SortList {
 		return result;
     }
     
-    public static List<String> sortParticipants(String account, String group) {
-    	JTalkService service = JTalkService.getInstance();
-    	
-    	List<String> online = new ArrayList<String>();
-    	List<String> chat   = new ArrayList<String>();
-    	List<String> away   = new ArrayList<String>();
-    	List<String> xa     = new ArrayList<String>();
-    	List<String> dnd    = new ArrayList<String>();
-    	
-    	if (service.getConferencesHash(account).containsKey(group)) {
-			Iterator<Presence> it = service.getRoster(account).getPresences(group);
-			while (it.hasNext()) {
-				Presence p = it.next();
-				String fjid = p.getFrom();
-				if (p != null) {
-        			Presence.Type t = p.getType();
-            		String mode;
-            		try {
-            			Presence.Mode m = p.getMode();
-            			if (m == null) mode = "available";
-            			else mode = m.name();
-            		} catch(NullPointerException e) {
-            			mode = "available";
-            		}
-            		if (t == Presence.Type.available) {
-            			if (mode.equals("available")) online.add(fjid);
-                		else if (mode.equals("chat")) chat.add(fjid);
-                		else if (mode.equals("away")) away.add(fjid);
-                		else if (mode.equals("xa"))   xa.add(fjid);
-                		else if (mode.equals("dnd"))  dnd.add(fjid);
-            		}
-        		}
-			}
-    	}
-    	
-    	List<String> result = new ArrayList<String>();
-    	result.addAll(chat);
-    	result.addAll(chat.size(),online);
-    	result.addAll(chat.size()+online.size(), away);
-    	result.addAll(chat.size()+online.size()+away.size(), xa);
-    	result.addAll(chat.size()+online.size()+away.size()+xa.size(), dnd);
-		return result;
-    }
-    
     public static List<String> sortParticipantsInChat(String account, String group, List<String> list) {
     	JTalkService service = JTalkService.getInstance();
     	

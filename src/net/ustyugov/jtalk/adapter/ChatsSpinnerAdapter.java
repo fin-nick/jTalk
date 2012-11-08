@@ -77,11 +77,13 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 				while (chatEnum.hasMoreElements()) {
 					if (service != null && service.getRoster(account) != null && connection != null && connection.isAuthenticated()) {
 						String name = chatEnum.nextElement();
-						Roster roster = service.getRoster(account);
-						RosterEntry entry = roster.getEntry(name);
-						if (entry == null) entry = new RosterEntry(name, name, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-						RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
-						add(item);
+						if (!service.getConferencesHash(account).containsKey(name)) {
+							Roster roster = service.getRoster(account);
+							RosterEntry entry = roster.getEntry(name);
+							if (entry == null) entry = new RosterEntry(name, name, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+							RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
+							add(item);
+						}
 					}
 				}
 				
@@ -178,7 +180,7 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 			holder = (ItemHolder) convertView.getTag();
 		}
 		
-		if (item.isEntry() || item.isSelf()) {
+		if (item.isEntry()) {
 			String jid = item.getEntry().getUser();
 			String status = "";
 			String name = jid;
@@ -186,14 +188,13 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 			if (service.getComposeList().contains(jid)) status = service.getString(R.string.Composes);
 			else status = service.getStatus(account, jid);
 			
-			RosterEntry re = item.getEntry();
-			if (re != null) {
-				name = re.getName();
-				if (name == null || name.length() <= 0 ) name = jid;
-			} else {
-				name = StringUtils.parseResource(jid);
-				status = service.getStatus(account, jid);
-			}
+			if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {
+	        	name = StringUtils.parseResource(jid);
+	        } else {
+	        	RosterEntry re = item.getEntry();
+	            if (re != null) name = re.getName();
+	            if (name == null || name.equals("")) name = jid;
+	        }
 			
 			Presence presence = service.getPresence(account, jid);
 			int count = service.getMessagesCount(account, jid);
@@ -241,7 +242,7 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 				joined = muc.isJoined();
 			}
 			
-			if (service.isHighlight(name)) holder.name.setTextColor(0xFFFF0000);
+			if (service.isHighlight(account, name)) holder.name.setTextColor(0xFFFF0000);
 			else holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFEEEEEE : 0xFF343434);
 	        holder.name.setText(StringUtils.parseName(name));
 	        holder.name.setTypeface(Typeface.DEFAULT_BOLD);

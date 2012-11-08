@@ -152,8 +152,8 @@ public class MsgListener implements PacketListener {
                 }
 	        	
 	            if (body.contains(mynick)) {
-	            	if (!service.getCurrentJid().equals(group)) service.addHighlight(group);
-	            	if (!service.getMessagesList().contains(group)) service.getMessagesList().add(group);
+	            	if (!service.getCurrentJid().equals(group)) service.addHighlight(account, group);
+	            	if (!service.getMessagesList(account).contains(group)) service.getMessagesList(account).add(group);
 	            	Notify.messageNotify(account, group, Notify.Type.Direct, body);
 	            }
 	            else Notify.messageNotify(account, group, Notify.Type.Conference, body);
@@ -225,7 +225,7 @@ public class MsgListener implements PacketListener {
 		                    }
 
 		                    if (!service.getCurrentJid().equals(group)) {
-		                    	if (!service.getMessagesList().contains(group)) service.getMessagesList().add(group);
+		                    	if (!service.getMessagesList(account).contains(group)) service.getMessagesList(account).add(group);
 		                    }
 		                        
 		                    Intent intent = new Intent(Constants.NEW_MUC_MESSAGE);
@@ -292,7 +292,7 @@ public class MsgListener implements PacketListener {
 		        	}
 		            
 		            if (!service.getCurrentJid().equals(user)) {
-		            	if (!service.getMessagesList().contains(user)) service.getMessagesList().add(user);
+		            	if (!service.getMessagesList(account).contains(user)) service.getMessagesList(account).add(user);
 		            	service.addMessagesCount(account, user);
 		            }
 		            

@@ -117,8 +117,6 @@ public class MucRosterAdapter extends ArrayAdapter<String> {
 				holder.status = (TextView) convertView.findViewById(R.id.status);
 				holder.status.setTextSize(statusSize);
 				holder.status.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFBBBBBB : 0xFF555555);
-				holder.role = (ImageView) convertView.findViewById(R.id.role);
-				holder.role.setVisibility(View.VISIBLE);
 				holder.statusIcon = (ImageView) convertView.findViewById(R.id.status_icon);
 				holder.statusIcon.setVisibility(View.VISIBLE);
 				
@@ -147,7 +145,6 @@ public class MucRosterAdapter extends ArrayAdapter<String> {
 			
 //			holder.status.setText(status);
 //	        holder.status.setVisibility((prefs.getBoolean("ShowStatuses", false) && status.length() > 0) ? View.VISIBLE : View.GONE);
-	        holder.role.setImageBitmap(ip.getRoleIcon(role));
 			
 //	        if (holder.caps != null) {
 //				String node = service.getNode(group + "/" + nick);

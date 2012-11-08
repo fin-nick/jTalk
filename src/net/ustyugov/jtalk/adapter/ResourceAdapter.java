@@ -67,9 +67,6 @@ public class ResourceAdapter extends ArrayAdapter<String> {
         
 		Presence presence = service.getRoster(account).getPresenceResource(jid + "/" + resource);
         	
-      	ImageView close = (ImageView) v.findViewById(R.id.close);
-      	close.setVisibility(View.GONE);
-      	
       	ImageView icon = (ImageView)v.findViewById(R.id.status);
        	icon.setImageBitmap(ip.getIconByPresence(presence));
         

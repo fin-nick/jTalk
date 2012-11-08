@@ -31,6 +31,7 @@ import net.ustyugov.jtalk.activity.SendFileActivity;
 import net.ustyugov.jtalk.activity.vcard.SetVcardActivity;
 import net.ustyugov.jtalk.activity.vcard.VCardActivity;
 import net.ustyugov.jtalk.adapter.ResourceAdapter;
+import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
 
@@ -48,6 +49,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
+import android.database.Cursor;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -63,7 +65,7 @@ import com.jtalk2.R;
 
 public class RosterDialogs {
 	
-	public static void changeStatusDialog(final Activity a, final String account, final String to) {
+	public static void changeStatusDialog(final Activity a, String acc, final String to) {
 		final JTalkService service = JTalkService.getInstance();
 		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(a);
 		String[] statusArray = a.getResources().getStringArray(R.array.statusArray);
@@ -72,6 +74,22 @@ public class RosterDialogs {
 		LayoutInflater inflater = a.getLayoutInflater();
 		View layout = inflater.inflate(R.layout.set_status_dialog, (ViewGroup) a.findViewById(R.id.set_status_linear));
 	    
+		final Spinner accountsSpinner = (Spinner) layout.findViewById(R.id.accounts);
+		List<String> accounts = new ArrayList<String>();
+		if (to == null || to.length() < 1) {
+			accounts.add("All");
+			for(XMPPConnection connection : service.getAllConnections()) {
+				accounts.add(StringUtils.parseBareAddress(connection.getUser()));
+			}
+		} else {
+			accounts.add(acc);
+			accountsSpinner.setVisibility(View.GONE);
+		}
+		
+		ArrayAdapter<String> accountsAdapter = new ArrayAdapter<String>(a, android.R.layout.simple_spinner_item, accounts);
+	    accountsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		accountsSpinner.setAdapter(accountsAdapter);
+		
 	    ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(a, android.R.layout.simple_spinner_item, statusArray);
 	    arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 	    
@@ -107,8 +125,9 @@ public class RosterDialogs {
 				int pos = spinner.getSelectedItemPosition();
 				String mode = (String) getMode(pos);
 				String text = statusMsg.getText().toString();
-				
-				if (account != null) {
+				String account;
+				account = (String) accountsSpinner.getSelectedItem();
+				if (account != null && !account.equals("All")) {
 					if (service.isStarted() && service.isAuthenticated(account)) {
 						if (to == null) {
 		           			service.sendPresence(account, text, mode, priority);
@@ -116,23 +135,27 @@ public class RosterDialogs {
 		           			service.sendPresenceTo(account, to, text, mode, priority);
 		           		}
 					} else {
-						service.setPreference(a, "currentPriority", priority);
-		        		service.setPreference(a,"currentSelection", pos);
-		        		service.setPreference(a, "currentMode", mode);
-		        		service.setPreference(a, "currentStatus", text);
-		        		service.setPreference(a, "lastStatus"+mode, text);
 		           		service.connect(account);
 					}
 				} else {
-					if (service.isAuthenticated()) {
-						service.sendPresence(text, mode, priority);
-					} else {
-						service.setPreference(a, "currentPriority", priority);
-		        		service.setPreference(a, "currentSelection", pos);
-		        		service.setPreference(a, "currentMode", mode);
-		        		service.setPreference(a, "currentStatus", text);
-		        		service.setPreference(a, "lastStatus"+mode, text);
-		           		service.connect();
+					service.setPreference(a, "currentPriority", priority);
+	        		service.setPreference(a, "currentSelection", pos);
+	        		service.setPreference(a, "currentMode", mode);
+	        		service.setPreference(a, "currentStatus", text);
+	        		service.setPreference(a, "lastStatus"+mode, text);
+	        		
+					Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
+					if (cursor != null && cursor.getCount() > 0) {
+						cursor.moveToFirst();
+						do {
+							String acc = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
+							if (service.isAuthenticated(acc)) {
+								service.sendPresence(acc, text, mode, priority);
+							} else {
+				           		service.connect(acc);
+							}
+						} while(cursor.moveToNext());
+						cursor.close();
 					}
 				}
 			}
@@ -179,7 +202,7 @@ public class RosterDialogs {
 				
 				if (jid.length() > 0) {
 					if (name.length() <= 0) name = jid;
-					if (group.length() <=0) group = null;
+					if (group.length() <= 0) group = null;
 					if (service != null && service.isAuthenticated()) {
 						service.addContact(account, jid, name, group);
 					}
@@ -202,7 +225,7 @@ public class RosterDialogs {
 	    
 		List<String> connections = new ArrayList<String>();
 		for(XMPPConnection connection : service.getAllConnections()) {
-			connections.add(connection.getUser());
+			connections.add(StringUtils.parseBareAddress(connection.getUser()));
 		}
 		
 		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(a, android.R.layout.simple_spinner_item, connections);
@@ -234,7 +257,7 @@ public class RosterDialogs {
 	    
 		AlertDialog.Builder builder = new AlertDialog.Builder(a);
 		builder.setView(layout);
-		builder.setTitle(a.getString(R.string.Add));
+		builder.setTitle(a.getString(R.string.Edit));
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 				String account = (String) spinner.getSelectedItem();
@@ -242,8 +265,8 @@ public class RosterDialogs {
 				String name = nameEdit.getText().toString();
 				
 				if (name.length() <= 0) name = jid;
-				if (group.length() <=0) group = null;
-				if (service != null && service.isAuthenticated()) {
+				if (group.length() <= 0) group = null;
+				if (service != null && service.isAuthenticated(account)) {
 					JTalkService.getInstance().addContact(account, jid, name, group);
 				}
 			}
@@ -538,10 +561,9 @@ public class RosterDialogs {
 	public static void AccountMenuDialog(final Activity activity, final RosterItem item) {
     	final String account = item.getAccount();
     	
-    	CharSequence[] items = new CharSequence[3];
-        items[0] = activity.getString(R.string.Status);
-        items[1] = activity.getString(R.string.vcard);
-        items[2] = activity.getString(R.string.PrivacyLists);
+    	CharSequence[] items = new CharSequence[2];
+        items[0] = activity.getString(R.string.vcard);
+        items[1] = activity.getString(R.string.PrivacyLists);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(account);
@@ -550,12 +572,9 @@ public class RosterDialogs {
 			public void onClick(DialogInterface dialog, int which) {
 		    	switch (which) {
 	        	case 0:
-	        		changeStatusDialog(activity, account, null);
-	        		break;
-	        	case 1:
 	        		activity.startActivity(new Intent(activity, SetVcardActivity.class).putExtra("account", account));
 	        		break;
-	        	case 2:
+	        	case 1:
 	        		activity.startActivity(new Intent(activity, PrivacyListsActivity.class).putExtra("account", account));
 		 	        break;
 		    	}

@@ -104,14 +104,6 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
         gridView.setOnItemLongClickListener(this);
         gridView.setAdapter(rosterAdapter);
         
-//      int columns = 1;
-//      try {
-//			columns = Integer.parseInt(prefs.getString("RosterColumns", 1+""));
-//		} catch (NumberFormatException e) {	}
-//      if (!prefs.getBoolean("ShowGroups", true)) {
-//    	gridView.setNumColumns(columns);
-//    } else gridView.setNumColumns(1);
-  		
        	if (getIntent().getBooleanExtra("file", false)) {
            	if (service.getIncomingRequests().size() > 0) {
            		FileTransferRequest request = service.getIncomingRequests().remove(0);
@@ -250,7 +242,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
     	if (menu != null) {
     		menu.findItem(R.id.add).setEnabled(service.isAuthenticated());
             menu.findItem(R.id.muc).setEnabled(service.isAuthenticated());
-            menu.findItem(R.id.disco).setEnabled(false); // TODO!
+            menu.findItem(R.id.disco).setEnabled(service.isAuthenticated());
             menu.findItem(R.id.offline).setTitle(prefs.getBoolean("hideOffline", false) ? R.string.ShowOfflineContacts : R.string.HideOfflineContacts);
             if (!service.getMessages().isEmpty() || !service.getConferences().isEmpty()) menu.findItem(R.id.chats).setEnabled(true);
             else menu.findItem(R.id.chats).setEnabled(false);

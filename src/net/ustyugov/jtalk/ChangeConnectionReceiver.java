@@ -41,7 +41,7 @@ public class ChangeConnectionReceiver extends BroadcastReceiver {
 				}
 			}
 			
-			if (!nocon && service.isStarted() ) { // TODO! && isAuthenticated!
+			if (!nocon && service.isStarted() && !service.isAuthenticated()) { // TODO! && isAuthenticated!
 				service.reconnect();
 			}
 		}

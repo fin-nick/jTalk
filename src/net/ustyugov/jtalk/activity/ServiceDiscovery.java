@@ -29,8 +29,10 @@ import net.ustyugov.jtalk.dialog.RosterDialogs;
 import net.ustyugov.jtalk.dialog.TextDialog;
 import net.ustyugov.jtalk.service.JTalkService;
 
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.XMPPError;
+import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.jivesoftware.smackx.packet.DiscoverInfo.Feature;
@@ -53,11 +55,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
@@ -86,6 +91,7 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
 	@Override
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
+		service = JTalkService.getInstance();
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
 		setContentView(R.layout.discovery);
@@ -95,16 +101,32 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
         LinearLayout linear = (LinearLayout) findViewById(R.id.discovery_linear);
         linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
 		
-        account = getIntent().getStringExtra("account");
+        List<String> accounts = new ArrayList<String>();
+		for(XMPPConnection connection : service.getAllConnections()) {
+			accounts.add(StringUtils.parseBareAddress(connection.getUser()));
+		}
+		
+		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, accounts);
+	    arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		
+		final Spinner spinner = (Spinner) findViewById(R.id.accounts);
+		spinner.setAdapter(arrayAdapter);
+		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
+				account = (String) parent.getItemAtPosition(position);
+				String host = service.getConnection(account).getServiceName();
+				input.setText(host);
+			}
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {}
+		});
         
 		service = JTalkService.getInstance();
 		
 		progress = (ProgressBar) findViewById(R.id.progress);
 		
-		String host = service.getConnection(account).getServiceName();
-		
 		input = (EditText) findViewById(R.id.input);
-		input.setText(host);
 		input.setOnKeyListener(new OnKeyListener() {
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
 				if (keyCode == KeyEvent.KEYCODE_ENTER) {
@@ -123,6 +145,7 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
         list.setOnItemClickListener(this);
         
         registerForContextMenu(list);
+        spinner.setSelection(0);
 	}
 	
 	@Override
@@ -278,13 +301,15 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
 					else if (var.equals("vcard-temp")) discoItem.setVCard(true);
 					else if (var.equals("http://jabber.org/protocol/muc")) discoItem.setMUC(true);
 				}
-			} catch (final XMPPException e) {
+			} catch (final Exception e) {
 				ServiceDiscovery.this.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
 						String error = "Undefined error";
-						XMPPError xe = e.getXMPPError();
-						if (xe != null) error = "[" + xe.getCode() + "] " + xe.getMessage();
+						if (e instanceof XMPPException) {
+							XMPPError xe = ((XMPPException) e).getXMPPError();
+							if (xe != null) error = "[" + xe.getCode() + "] " + xe.getMessage();
+						}
 						showError(error);
 					}
 				});

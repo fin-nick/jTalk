@@ -49,13 +49,12 @@ public class Accounts extends SherlockActivity {
 	
 	private ListView list;
 	private AccountsAdapter adapter;
-	private SharedPreferences prefs;
-	private BroadcastReceiver refreshReceiver;
+    private BroadcastReceiver refreshReceiver;
 	
 	@Override
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
-		prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
         setContentView(R.layout.accounts);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

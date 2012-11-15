@@ -42,18 +42,17 @@ import com.jtalk2.R;
 public class AccountsAdapter extends ArrayAdapter<Account> {
 	private JTalkService service;
 	private Activity activity;
-	private SharedPreferences prefs;
-	private int fontSize;
+    private int fontSize;
 	
 	public AccountsAdapter(Activity activity) {
 		super(activity, R.id.item);
 		this.activity = activity;
         this.service = JTalkService.getInstance();
-        this.prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
         this.fontSize = Integer.parseInt(activity.getResources().getString(R.string.DefaultFontSize));
 		try {
 			this.fontSize = Integer.parseInt(prefs.getString("RosterSize", activity.getResources().getString(R.string.DefaultFontSize)));
-		} catch (NumberFormatException e) { }
+		} catch (NumberFormatException ignored) { }
 	}
 	
 	public void update() {

@@ -305,8 +305,8 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 		ImageView image = new ImageView(this);
 		image.setTag("cid:" + cid);
 		if (b != null) {
-//			image.getLayoutParams().height = b.getHeight();
-//			image.getLayoutParams().width = b.getWidth();
+			image.getLayoutParams().height = b.getHeight();
+			image.getLayoutParams().width = b.getWidth();
 			image.setImageBitmap(b);
 		}
 		return image;
@@ -368,30 +368,28 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 								String label = ff.getLabel();
 								String value = ff.getValue();
 								String var = ff.getVariable();
-								
-								if (type != null) {
-									if (type.equals("fixed")) {
-										layout.addView(createTextView(value));
-									} 
-									else if(type.equals("hidden")) {
-										layout.addView(createEditText(type, var, value, label));
-									} 
-									else if (type.contains("text")) {
-										layout.addView(createEditText(type, var, value, label));
-									} 
-									else if (type.equals("boolean")) {
-										layout.addView(createCheckBox(label, var, value));
-									}
-									else if (type.equals("list-single")) {
-										layout.addView(createTextView(label));
-										layout.addView(createListSingle(var, ff.getOptions(), value));
-									}
-									else if (type.equals("list-multi")) {
-										layout.addView(createTextView(label));
-										layout.addView(createListMulti(var, ff.getOptions()));
-									}
-								}
-								
+
+                                if (type.equals("fixed")) {
+                                    layout.addView(createTextView(value));
+                                }
+                                else if(type.equals("hidden")) {
+                                    layout.addView(createEditText(type, var, value, label));
+                                }
+                                else if (type.contains("text")) {
+                                    layout.addView(createEditText(type, var, value, label));
+                                }
+                                else if (type.equals("boolean")) {
+                                    layout.addView(createCheckBox(label, var, value));
+                                }
+                                else if (type.equals("list-single")) {
+                                    layout.addView(createTextView(label));
+                                    layout.addView(createListSingle(var, ff.getOptions(), value));
+                                }
+                                else if (type.equals("list-multi")) {
+                                    layout.addView(createTextView(label));
+                                    layout.addView(createListMulti(var, ff.getOptions()));
+                                }
+
 								Iterator<MediaElement> mi = ff.getMedia();
 								while(mi.hasNext()) {
 									MediaElement mediaElement = mi.next();
@@ -431,7 +429,7 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 					form = (DataForm) result.getExtension("jabber:x:data");
 					bob = (BobExtension) result.getExtension("data","urn:xmpp:bob");
 				}
-			} catch (ClassCastException e) { }
+			} catch (ClassCastException ignored) { }
 			createForm();
 			return null;
 		}

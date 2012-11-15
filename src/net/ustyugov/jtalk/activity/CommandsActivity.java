@@ -93,6 +93,7 @@ public class CommandsActivity extends SherlockActivity implements OnItemClickLis
 		Item item = (Item) parent.getItemAtPosition(position);
 		
 		Intent intent = new Intent(this, DataFormActivity.class);
+        intent.putExtra("account", account);
 		intent.putExtra("jid", fullJid);
 		intent.putExtra("node", item.getNode());
 		intent.putExtra("com", true);
@@ -123,7 +124,7 @@ public class CommandsActivity extends SherlockActivity implements OnItemClickLis
 						adapter.add(item);
 					}
 				}
-			} catch (Exception e) {	}
+			} catch (Exception ignored) {	}
 			return null;
 		}
 		

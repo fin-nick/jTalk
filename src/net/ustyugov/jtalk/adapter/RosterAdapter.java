@@ -72,7 +72,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 		this.fontSize = Integer.parseInt(activity.getResources().getString(R.string.DefaultFontSize));
 		try {
 			this.fontSize = Integer.parseInt(prefs.getString("RosterSize", activity.getResources().getString(R.string.DefaultFontSize)));
-		} catch (NumberFormatException e) { }
+		} catch (NumberFormatException ignored) { }
 		this.statusSize = fontSize - 4;
     }
 	

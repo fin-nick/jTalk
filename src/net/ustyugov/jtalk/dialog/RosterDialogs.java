@@ -78,9 +78,15 @@ public class RosterDialogs {
 		List<String> accounts = new ArrayList<String>();
 		if (to == null || to.length() < 1) {
 			accounts.add("All");
-			for(XMPPConnection connection : service.getAllConnections()) {
-				accounts.add(StringUtils.parseBareAddress(connection.getUser()));
-			}
+            Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
+            if (cursor != null && cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                do {
+                    String jid = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID));
+                    accounts.add(jid);
+                } while (cursor.moveToNext());
+                cursor.close();
+            }
 		} else {
 			accounts.add(acc);
 			accountsSpinner.setVisibility(View.GONE);
@@ -102,7 +108,7 @@ public class RosterDialogs {
 	    spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int index, long id) {
-				String mode = (String) getMode(index);
+				String mode = getMode(index);
 				statusMsg.setText(prefs.getString("lastStatus"+mode, ""));
 			}
 			public void onNothingSelected(AdapterView<?> arg0) { }
@@ -123,7 +129,7 @@ public class RosterDialogs {
 					priority = 0;
 				}
 				int pos = spinner.getSelectedItemPosition();
-				String mode = (String) getMode(pos);
+				String mode = getMode(pos);
 				String text = statusMsg.getText().toString();
 				String account;
 				account = (String) accountsSpinner.getSelectedItem();
@@ -203,7 +209,7 @@ public class RosterDialogs {
 				if (jid.length() > 0) {
 					if (name.length() <= 0) name = jid;
 					if (group.length() <= 0) group = null;
-					if (service != null && service.isAuthenticated()) {
+					if (service.isAuthenticated()) {
 						service.addContact(account, jid, name, group);
 					}
 				}
@@ -266,7 +272,7 @@ public class RosterDialogs {
 				
 				if (name.length() <= 0) name = jid;
 				if (group.length() <= 0) group = null;
-				if (service != null && service.isAuthenticated(account)) {
+				if (service.isAuthenticated(account)) {
 					JTalkService.getInstance().addContact(account, jid, name, group);
 				}
 			}
@@ -298,7 +304,7 @@ public class RosterDialogs {
 					String newname = groupEdit.getText().toString();
 					if(newname.length() > 0 && !newname.equals(oldname)) {
 							rg.setName(newname);
-							Intent i = new Intent(net.ustyugov.jtalk.Constants.UPDATE);
+							Intent i = new Intent(Constants.UPDATE);
 							activity.sendBroadcast(i);
 					}
 				}
@@ -338,7 +344,7 @@ public class RosterDialogs {
         				presence.setType(Presence.Type.unsubscribed);
         				break;
         		}
-        		if (service != null && service.isAuthenticated()) {
+        		if (service.isAuthenticated()) {
         			service.sendPacket(account, presence);
         		}
         	}

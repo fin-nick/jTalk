@@ -53,43 +53,43 @@ public class Notify {
 	
     public static void updateNotify() {
     	JTalkService service = JTalkService.getInstance();
-    	if (service.getMessagesCount() < 1) {
+    	if (service.getMessagesList().isEmpty()) {
     		newMessages = false;
         	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
         	String mode = prefs.getString("currentMode", "available");
         	int pos = prefs.getInt("currentSelection", 0);
             String text = prefs.getString("currentStatus", null);
             String[] statusArray = service.getResources().getStringArray(R.array.statusArray);
-            
+
             int icon = R.drawable.stat_online;
-            if (mode.equals("available")) { 
-            	icon = R.drawable.stat_online; 
+            if (mode.equals("available")) {
+            	icon = R.drawable.stat_online;
             }
-            else if (mode.equals("chat")) { 
-            	icon = R.drawable.stat_chat; 
+            else if (mode.equals("chat")) {
+            	icon = R.drawable.stat_chat;
             }
             else if (mode.equals("away")) {
-            	icon = R.drawable.stat_away; 
+            	icon = R.drawable.stat_away;
             }
             else if (mode.equals("xa")) {
-            	icon = R.drawable.stat_xaway; 
+            	icon = R.drawable.stat_xaway;
             }
-            else if (mode.equals("dnd")) { 
-            	icon = R.drawable.stat_dnd; 
+            else if (mode.equals("dnd")) {
+            	icon = R.drawable.stat_dnd;
             }
-      
+
             Intent i = new Intent(service, RosterActivity.class);
             i.setAction(Intent.ACTION_MAIN);
             i.addCategory(Intent.CATEGORY_LAUNCHER);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
-            
+
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
             mBuilder.setSmallIcon(icon);
             mBuilder.setContentTitle(statusArray[pos]);
             mBuilder.setContentText(text);
             mBuilder.setContentIntent(contentIntent);
-            
+
             NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
             mng.notify(NOTIFICATION, mBuilder.build());
     	} else {
@@ -97,17 +97,17 @@ public class Notify {
            	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         	i.putExtra("msg", true);
             PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-            
+
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
             mBuilder.setSmallIcon(R.drawable.stat_msg);
             mBuilder.setLights(0xFF00FF00, 2000, 3000);
             mBuilder.setContentTitle(service.getString(R.string.app_name));
             mBuilder.setContentText(service.getString(R.string.UnreadMessage)).setNumber(service.getMessagesCount());
             mBuilder.setContentIntent(contentIntent);
-            
+
             NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
             inboxStyle.setBigContentTitle(service.getString(R.string.UnreadMessage));
-            
+
             Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
 			if (cursor != null && cursor.getCount() > 0) {
 				cursor.moveToFirst();
@@ -132,9 +132,9 @@ public class Notify {
 				} while(cursor.moveToNext());
 				cursor.close();
 			}
-			
+
             mBuilder.setStyle(inboxStyle);
-            
+
             NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
             mng.notify(NOTIFICATION, mBuilder.build());
     	}
@@ -180,7 +180,7 @@ public class Notify {
     	boolean vibro = false;
     	boolean sound = true;
     	String soundPath = "";
-    	
+
     	if (type == Type.Conference) {
     		String currentJid = JTalkService.getInstance().getCurrentJid();
         	if (!currentJid.equals(from) || currentJid.equals("me")) {
@@ -446,11 +446,12 @@ public class Notify {
     	mng.cancel(NOTIFICATION_FILE_REQUEST);
     }
     
-    public static void captchaNotify(MessageItem message) {
+    public static void captchaNotify(String account, MessageItem message) {
     	JTalkService service = JTalkService.getInstance();
     	service.addDataForm(message.getId(), message.getForm());
     	
     	Intent intent = new Intent(service, DataFormActivity.class);
+        intent.putExtra("account", account);
     	intent.putExtra("id", message.getId());
     	intent.putExtra("cap", true);
         intent.putExtra("jid", message.getName());

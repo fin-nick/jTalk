@@ -58,13 +58,15 @@ public class Avatars {
 									bitmap = BitmapFactory.decodeFile(fname);
 						    		avHash.put(jid, bitmap);
 								}
-					    	} catch (Exception e) { }
+					    	} catch (Exception ignored) { }
 						}
 						
 						if (bitmap != null && image != null) {
 							image.setImageBitmap(bitmap);
 							image.setVisibility(View.VISIBLE);
-						} else image.setVisibility(View.INVISIBLE);
+						} else {
+                            if (image != null) image.setVisibility(View.INVISIBLE);
+                        }
 					}
 				});
 			}
@@ -105,7 +107,7 @@ public class Avatars {
 							fos.write(buffer);
 							fos.close();
 						}
-					} catch (Exception e) { }
+					} catch (Exception ignored) { }
 				}
 			}
 			return null;
@@ -125,8 +127,7 @@ public class Avatars {
 
 			@Override
 			public boolean accept(File dir, String filename) {
-				if (filename.contains(group)) return true;
-				else return false;
+                return filename.contains(group);
 			}
 			
 		}

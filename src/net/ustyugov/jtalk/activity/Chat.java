@@ -89,8 +89,7 @@ import com.jtalk2.R;
 
 public class Chat extends SherlockActivity implements View.OnClickListener, OnScrollListener {
 	public static final int REQUEST_TEMPLATES = 1;
-	public static final int RESOURCE_DIALOG = 2;
-	
+
 	private boolean isMuc = false;
 	private boolean isPrivate = false;
 	private MultiUserChat muc;
@@ -756,6 +755,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     			String text = i.getExtras().getString("text");
     			if (i.getBooleanExtra("jubo", false)) {
     				Intent intent = new Intent();
+                    intent.putExtra("account", account);
     				intent.putExtra("jid", "juick@juick.com");
     				setIntent(intent);
     				onPause();
@@ -854,7 +854,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
 		if (isMuc) {
 			try {
 				muc.sendMessage(message);
-			} catch (Exception e) {}
+			} catch (Exception ignored) {}
 		}
 		else {
 			String to = jid;

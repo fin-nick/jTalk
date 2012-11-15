@@ -60,9 +60,6 @@ public class CommandsAdapter extends ArrayAdapter<Item> {
         
         ImageView icon = (ImageView)v.findViewById(R.id.status);
         icon.setVisibility(View.GONE);
-        
-        ImageView close = (ImageView) v.findViewById(R.id.close);
-		close.setVisibility(View.GONE);
         return v;
     }
 }

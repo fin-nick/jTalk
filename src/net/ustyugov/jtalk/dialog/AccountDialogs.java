@@ -33,6 +33,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.jtalk2.R;
+import net.ustyugov.jtalk.service.JTalkService;
 
 public class AccountDialogs {
 	public static void addDialog(final Activity a) {
@@ -117,8 +118,8 @@ public class AccountDialogs {
 				
 			try {
 				port = Integer.parseInt(cursor.getString(cursor.getColumnIndex(AccountDbHelper.PORT)));
-			} catch (NumberFormatException nfc) { }
-				
+			} catch (NumberFormatException ignored) { }
+
 			e = cursor.getString(cursor.getColumnIndex(AccountDbHelper.ENABLED));
 			t = cursor.getString(cursor.getColumnIndex(AccountDbHelper.TLS));
 			s = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SASL));
@@ -143,13 +144,13 @@ public class AccountDialogs {
 	    portEdit.setText(port+"");
 	    
 	    final CheckBox active = (CheckBox) layout.findViewById(R.id.account_active);
-	    active.setChecked(e.equals("1") ? true : false);
+	    active.setChecked(e.equals("1"));
 	    
 	    final CheckBox tls = (CheckBox) layout.findViewById(R.id.account_tls);
-	    tls.setChecked(t.equals("1") ? true : false);
+	    tls.setChecked(t.equals("1"));
 	    
 	    final CheckBox sasl = (CheckBox) layout.findViewById(R.id.account_sasl);
-	    sasl.setChecked(s.equals("1") ? true : false);
+	    sasl.setChecked(s.equals("1"));
 	    
 		AlertDialog.Builder builder = new AlertDialog.Builder(a);
 		builder.setView(layout);
@@ -185,7 +186,10 @@ public class AccountDialogs {
 	 	            else values.put(AccountDbHelper.SASL, "0");
 	 	            
 	 	            a.getContentResolver().update(JTalkProvider.ACCOUNT_URI, values, "_id = '" + id + "'", null);
-	 	           
+
+                    JTalkService service = JTalkService.getInstance();
+                    if (service.isAuthenticated(jid)) service.disconnect(jid);
+
 	 	            Intent i = new Intent(Constants.UPDATE);
 	             	a.sendBroadcast(i);
 				}

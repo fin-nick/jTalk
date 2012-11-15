@@ -120,7 +120,6 @@ public class JuickMessageMenuDialog implements OnClickListener {
     				break;
         	}
         }
-        
         context.sendBroadcast(intent);
     }
 }

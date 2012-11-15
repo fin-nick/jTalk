@@ -212,7 +212,7 @@ public class MsgListener implements PacketListener {
 			            		mucMsg.setCaptcha(true);
 			            		mucMsg.setForm(captcha.getForm());
 			            		
-			            		Notify.captchaNotify(mucMsg);
+			            		Notify.captchaNotify(account, mucMsg);
 			            	}
 		    	            
 		        			if (service.getMucMessagesHash(account).containsKey(group)) {

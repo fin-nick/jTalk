@@ -17,6 +17,7 @@
 
 package net.ustyugov.jtalk.activity;
 
+import android.widget.AdapterView;
 import net.ustyugov.jtalk.Account;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.adapter.AccountsAdapter;
@@ -70,6 +71,15 @@ public class Accounts extends SherlockActivity {
         list.setDividerHeight(0);
         list.setCacheColorHint(0x00000000);
         list.setAdapter(adapter);
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Account account = (Account) adapterView.getItemAtPosition(i);
+                int id = account.getId();
+                AccountDialogs.editDialog(Accounts.this, id);
+            }
+        });
+
         registerForContextMenu(list);
 	}
 	

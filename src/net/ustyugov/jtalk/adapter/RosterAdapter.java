@@ -89,108 +89,110 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 			do {
 				String account = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
 				XMPPConnection connection = service.getConnection(account);
-				
-				RosterItem acc = new RosterItem(account, RosterItem.Type.account, null);
-				acc.setName(account);
-				add(acc);
-				
-				if (service != null && service.getRoster(account) != null && connection != null && connection.isAuthenticated() && !service.getCollapsedGroups().contains(account)) {
-					Roster roster = service.getRoster(account);
-					
-					// Self
-					RosterItem selfgroup = new RosterItem(account, RosterItem.Type.group, null);
-					selfgroup.setName(service.getString(R.string.SelfGroup));
-					add(selfgroup);
-					
-					if (!service.getCollapsedGroups().contains(service.getString(R.string.SelfGroup))) {
-						Iterator<Presence> it =  roster.getPresences(account);
-						while (it.hasNext()) {
-							Presence p = it.next();
-							if (p.isAvailable()) {
-								String from = p.getFrom();
-								RosterEntry entry = new RosterEntry(from, StringUtils.parseResource(from), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-								RosterItem self = new RosterItem(account, RosterItem.Type.self, entry);
-								add(self);
-							}
-						}
-					} else {
-						selfgroup.setCollapsed(true);
-					}
-					
-					// Add conferences
-					if (!service.getConferencesHash(account).isEmpty()) {
-						RosterItem mucGroup = new RosterItem(account, RosterItem.Type.group, null);
-						mucGroup.setName(service.getString(R.string.MUC));
-						add(mucGroup);
-						
-						if (!service.getCollapsedGroups().contains(service.getString(R.string.MUC))) {
-							Enumeration<String> groupEnum = service.getConferencesHash(account).keys();
-							while(groupEnum.hasMoreElements()) {
-								RosterItem muc = new RosterItem(account, RosterItem.Type.muc, null);
-								muc.setName(groupEnum.nextElement());
-								add(muc);
-							}
-						} else mucGroup.setCollapsed(true);
-					}
-					
-					Collection<RosterGroup> groups = roster.getGroups();
-					for (RosterGroup group: groups) {
-						List<String> list = new ArrayList<String>();
-						Collection<RosterEntry> entrys = group.getEntries();
-						for (RosterEntry re: entrys) {
-							String jid = re.getUser();
-							Presence.Type presenceType = service.getType(account, jid);
-							if (hideOffline) {
-		   		  				if (presenceType != Presence.Type.unavailable) list.add(jid);
-		   		  			} else {
-		   		  				list.add(jid);
-		   		  			}
-						}
-						if (list.size() > 0) {
-							String name = group.getName();
-							RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
-							item.setName(name);
-							add(item);
-							if (service.getCollapsedGroups().contains(name)) item.setCollapsed(true);
-							else {
-								list = SortList.sortSimpleContacts(account, list);
-								for (String jid: list) {
-									RosterEntry re = roster.getEntry(jid);
-									RosterItem i = new RosterItem(account, RosterItem.Type.entry, re);
-									add(i);
-								}
-							}
-						}
-					}
-					
-					List<String> list = new ArrayList<String>();
-					Collection<RosterEntry> entrys = roster.getUnfiledEntries();
-					for (RosterEntry re: entrys) {
-						String jid = re.getUser();
-						Presence.Type presenceType = service.getType(account, jid);
-						if (hideOffline) {
-	   		  				if (presenceType != Presence.Type.unavailable) list.add(jid);
-	   		  			} else {
-	   		  				list.add(jid);
-	   		  			}
-					}
-					
-					if (list.size() > 0) {
-						String name = activity.getString(R.string.Nogroup);
-						RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
-						item.setName(name);
-						add(item);
-						if (service.getCollapsedGroups().contains(name)) item.setCollapsed(true);
-						else {
-							list = SortList.sortSimpleContacts(account, list);
-							for (String jid: list) {
-								RosterEntry re = roster.getEntry(jid);
-								RosterItem i = new RosterItem(account, RosterItem.Type.entry, re);
-								add(i);
-							}
-						}
-					}
-				} else acc.setCollapsed(true);
+
+                if (service != null && service.getRoster(account) != null && connection != null && connection.isAuthenticated()) {
+                    RosterItem acc = new RosterItem(account, RosterItem.Type.account, null);
+                    acc.setName(account);
+                    add(acc);
+
+                    if (!service.getCollapsedGroups().contains(account)) {
+                        Roster roster = service.getRoster(account);
+
+                        // Self
+                        RosterItem selfgroup = new RosterItem(account, RosterItem.Type.group, null);
+                        selfgroup.setName(service.getString(R.string.SelfGroup));
+                        add(selfgroup);
+
+                        if (!service.getCollapsedGroups().contains(service.getString(R.string.SelfGroup))) {
+                            Iterator<Presence> it =  roster.getPresences(account);
+                            while (it.hasNext()) {
+                                Presence p = it.next();
+                                if (p.isAvailable()) {
+                                    String from = p.getFrom();
+                                    RosterEntry entry = new RosterEntry(from, StringUtils.parseResource(from), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+                                    RosterItem self = new RosterItem(account, RosterItem.Type.self, entry);
+                                    add(self);
+                                }
+                            }
+                        } else {
+                            selfgroup.setCollapsed(true);
+                        }
+
+                        // Add conferences
+                        if (!service.getConferencesHash(account).isEmpty()) {
+                            RosterItem mucGroup = new RosterItem(account, RosterItem.Type.group, null);
+                            mucGroup.setName(service.getString(R.string.MUC));
+                            add(mucGroup);
+
+                            if (!service.getCollapsedGroups().contains(service.getString(R.string.MUC))) {
+                                Enumeration<String> groupEnum = service.getConferencesHash(account).keys();
+                                while(groupEnum.hasMoreElements()) {
+                                    RosterItem muc = new RosterItem(account, RosterItem.Type.muc, null);
+                                    muc.setName(groupEnum.nextElement());
+                                    add(muc);
+                                }
+                            } else mucGroup.setCollapsed(true);
+                        }
+
+                        Collection<RosterGroup> groups = roster.getGroups();
+                        for (RosterGroup group: groups) {
+                            List<String> list = new ArrayList<String>();
+                            Collection<RosterEntry> entrys = group.getEntries();
+                            for (RosterEntry re: entrys) {
+                                String jid = re.getUser();
+                                Presence.Type presenceType = service.getType(account, jid);
+                                if (hideOffline) {
+                                    if (presenceType != Presence.Type.unavailable) list.add(jid);
+                                } else {
+                                    list.add(jid);
+                                }
+                            }
+                            if (list.size() > 0) {
+                                String name = group.getName();
+                                RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
+                                item.setName(name);
+                                add(item);
+                                if (service.getCollapsedGroups().contains(name)) item.setCollapsed(true);
+                                else {
+                                    list = SortList.sortSimpleContacts(account, list);
+                                    for (String jid: list) {
+                                        RosterEntry re = roster.getEntry(jid);
+                                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, re);
+                                        add(i);
+                                    }
+                                }
+                            }
+                        }
+
+                        List<String> list = new ArrayList<String>();
+                        Collection<RosterEntry> entrys = roster.getUnfiledEntries();
+                        for (RosterEntry re: entrys) {
+                            String jid = re.getUser();
+                            Presence.Type presenceType = service.getType(account, jid);
+                            if (hideOffline) {
+                                if (presenceType != Presence.Type.unavailable) list.add(jid);
+                            } else {
+                                list.add(jid);
+                            }
+                        }
+
+                        if (list.size() > 0) {
+                            String name = activity.getString(R.string.Nogroup);
+                            RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
+                            item.setName(name);
+                            add(item);
+                            if (service.getCollapsedGroups().contains(name)) item.setCollapsed(true);
+                            else {
+                                list = SortList.sortSimpleContacts(account, list);
+                                for (String jid: list) {
+                                    RosterEntry re = roster.getEntry(jid);
+                                    RosterItem i = new RosterItem(account, RosterItem.Type.entry, re);
+                                    add(i);
+                                }
+                            }
+                        }
+                    } else acc.setCollapsed(true);
+                }
 			} while(cursor.moveToNext());
 			cursor.close();
 		}
@@ -208,6 +210,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 				
 				holder = new GroupHolder();
 				holder.messageIcon = (ImageView) convertView.findViewById(R.id.msg);
+                holder.messageIcon.setImageResource(R.drawable.icon_msg);
 				holder.messageIcon.setVisibility(View.INVISIBLE);
 	            holder.text = (TextView) convertView.findViewById(R.id.name);
 	            holder.text.setTextSize(fontSize);
@@ -219,8 +222,6 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 				holder = (GroupHolder) convertView.getTag();
 			}
 	        holder.text.setText(ri.getName());
-	        holder.messageIcon.setImageResource(R.drawable.icon_msg);
-	        holder.messageIcon.setVisibility(View.INVISIBLE);
 			holder.state.setImageResource(ri.isCollapsed() ? R.drawable.close : R.drawable.open);
 			convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0x77525252 : 0xEEEEEEEE);
 			return convertView;

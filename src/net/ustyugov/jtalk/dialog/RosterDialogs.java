@@ -78,7 +78,7 @@ public class RosterDialogs {
 		List<String> accounts = new ArrayList<String>();
 		if (to == null || to.length() < 1) {
 			accounts.add("All");
-            Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
+            Cursor cursor = a.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
             if (cursor != null && cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 do {
@@ -134,7 +134,7 @@ public class RosterDialogs {
 				String account;
 				account = (String) accountsSpinner.getSelectedItem();
 				if (account != null && !account.equals("All")) {
-					if (service.isStarted() && service.isAuthenticated(account)) {
+					if (service.isAuthenticated(account)) {
 						if (to == null) {
 		           			service.sendPresence(account, text, mode, priority);
 		           		} else {

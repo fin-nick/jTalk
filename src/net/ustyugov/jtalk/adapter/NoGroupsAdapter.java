@@ -25,6 +25,7 @@ import net.ustyugov.jtalk.Avatars;
 import net.ustyugov.jtalk.ClientIcons;
 import net.ustyugov.jtalk.Holders.GroupHolder;
 import net.ustyugov.jtalk.Holders.ItemHolder;
+import net.ustyugov.jtalk.Holders.AccountHolder;
 import net.ustyugov.jtalk.IconPicker;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.SortList;
@@ -85,47 +86,45 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 				String account = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
 				XMPPConnection connection = service.getConnection(account);
 
-                if (service != null && service.getRoster(account) != null && connection != null && connection.isAuthenticated()) {
-                    RosterItem item = new RosterItem(account, RosterItem.Type.account, null);
-                    item.setName(account);
-                    add(item);
+                RosterItem item = new RosterItem(account, RosterItem.Type.account, null);
+                item.setName(account);
+                add(item);
 
-                    if (!service.getCollapsedGroups().contains(account)) {
-                        Roster roster = service.getRoster(account);
+                if (service.getRoster(account) != null && connection != null && connection.isAuthenticated() && !service.getCollapsedGroups().contains(account)) {
+                    Roster roster = service.getRoster(account);
 
-                        // add self contact
-                        RosterEntry entry = new RosterEntry(account, account, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem self = new RosterItem(account, RosterItem.Type.self, entry);
-                        add(self);
+                    // add self contact
+                    RosterEntry entry = new RosterEntry(account, account, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+                    RosterItem self = new RosterItem(account, RosterItem.Type.self, entry);
+                    add(self);
 
-                        // add conferences
-                        Enumeration<String> groupEnum = service.getConferencesHash(account).keys();
-                        while(groupEnum.hasMoreElements()) {
-                            RosterItem muc = new RosterItem(account, RosterItem.Type.muc, null);
-                            muc.setName(groupEnum.nextElement());
-                            add(muc);
+                    // add conferences
+                    Enumeration<String> groupEnum = service.getConferencesHash(account).keys();
+                    while(groupEnum.hasMoreElements()) {
+                        RosterItem muc = new RosterItem(account, RosterItem.Type.muc, null);
+                        muc.setName(groupEnum.nextElement());
+                        add(muc);
+                    }
+
+                    List<String> list = new ArrayList<String>();
+
+                    for (RosterEntry rosterEntry : roster.getEntries()) {
+                        String jid = rosterEntry.getUser();
+                        Presence.Type presenceType = service.getType(account, jid);
+                        if (hideOffline) {
+                            if (presenceType != Presence.Type.unavailable) list.add(jid);
+                        } else {
+                            list.add(jid);
                         }
+                    }
+                    list = SortList.sortSimpleContacts(account, list);
 
-                        List<String> list = new ArrayList<String>();
-
-                        for (RosterEntry rosterEntry : roster.getEntries()) {
-                            String jid = rosterEntry.getUser();
-                            Presence.Type presenceType = service.getType(account, jid);
-                            if (hideOffline) {
-                                if (presenceType != Presence.Type.unavailable) list.add(jid);
-                            } else {
-                                list.add(jid);
-                            }
-                        }
-                        list = SortList.sortSimpleContacts(account, list);
-
-                        for (String jid: list) {
-                            RosterEntry re = roster.getEntry(jid);
-                            RosterItem i = new RosterItem(account, RosterItem.Type.entry, re);
-                            add(i);
-                        }
-                    } else item.setCollapsed(true);
-                }
+                    for (String jid: list) {
+                        RosterEntry re = roster.getEntry(jid);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, re);
+                        add(i);
+                    }
+                } else item.setCollapsed(true);
 			} while (cursor.moveToNext());
 			cursor.close();
 		}
@@ -134,31 +133,36 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		RosterItem item = getItem(position);
+        String account = item.getAccount();
 		if (item.isAccount()) {
-			String account = item.getName();
-			GroupHolder holder;
-			if (convertView == null || convertView.findViewById(R.id.state) == null) {
+			AccountHolder holder;
+			if (convertView == null || convertView.findViewById(R.id.avatar) == null) {
 				LayoutInflater inflater = activity.getLayoutInflater();
-				convertView = inflater.inflate(R.layout.group, null, false);
-				
-				holder = new GroupHolder();
-				holder.messageIcon = (ImageView) convertView.findViewById(R.id.msg);
-	            holder.text = (TextView) convertView.findViewById(R.id.name);
-	            holder.text.setTextSize(fontSize);
-	            holder.text.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
+				convertView = inflater.inflate(R.layout.account, null, false);
+
+				holder = new AccountHolder();
+				holder.avatar = (ImageView) convertView.findViewById(R.id.avatar);
+	            holder.jid = (TextView) convertView.findViewById(R.id.jid);
+	            holder.jid.setTextSize(fontSize);
+	            holder.jid.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
+                holder.status = (TextView) convertView.findViewById(R.id.status);
+                holder.status.setTextSize(statusSize);
+                holder.status.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFBBBBBB : 0xFF555555);
 	            holder.state = (ImageView) convertView.findViewById(R.id.state);
 	            convertView.setTag(holder);
 	            convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0x77525252 : 0xEEEEEEEE);
 			} else {
-				holder = (GroupHolder) convertView.getTag();
+				holder = (AccountHolder) convertView.getTag();
 			}
-	        holder.text.setText(account);
+	        holder.jid.setText(account);
+            String status = service.getState(account);
+            holder.status.setText(status);
+            holder.state.setVisibility(status.length() > 0 ? View.VISIBLE : View.GONE);
 			holder.state.setImageResource(item.isCollapsed() ? R.drawable.close : R.drawable.open);
-			Avatars.loadAvatar(activity, account, holder.messageIcon);
+			Avatars.loadAvatar(activity, account, holder.avatar);
 			return convertView;
 		} else if (item.isEntry() || item.isSelf()) {
 			String name = item.getName();
-			String account = item.getAccount();
 			String jid = item.getEntry().getUser();
 			if (name == null || name.length() <= 0 ) name = jid;
 			if (item.isSelf()) name += " (self)";
@@ -168,7 +172,7 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 			
 			int count = service.getMessagesCount(account, jid);
 			
-			if(convertView == null || convertView.findViewById(R.id.status) == null) {		
+			if(convertView == null || convertView.findViewById(R.id.status_icon) == null) {
 				LayoutInflater inflater = activity.getLayoutInflater();
 				convertView = inflater.inflate(R.layout.entry, null, false);
 				
@@ -224,11 +228,9 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 			return convertView;
 		} else if (item.isMuc()) {
 			String name = item.getName();
-			String account = item.getAccount();
-			
 			int count = service.getMessagesCount(account, name);
 			
-			if(convertView == null || convertView.findViewById(R.id.status) == null) {		
+			if(convertView == null || convertView.findViewById(R.id.status_icon) == null) {
 				LayoutInflater inflater = activity.getLayoutInflater();
 				convertView = inflater.inflate(R.layout.entry, null, false);
 				

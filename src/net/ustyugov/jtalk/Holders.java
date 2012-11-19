@@ -11,6 +11,13 @@ public class Holders {
 		public ImageView state;
 		public ImageView messageIcon;
 	}
+
+    public static class AccountHolder {
+        public TextView jid;
+        public TextView status;
+        public ImageView state;
+        public ImageView avatar;
+    }
 	
 	public static class ItemHolder {
 		public TextView name;

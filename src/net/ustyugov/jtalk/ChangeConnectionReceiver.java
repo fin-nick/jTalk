@@ -22,28 +22,19 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 
 public class ChangeConnectionReceiver extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		JTalkService service = JTalkService.getInstance();
-		
-		boolean failo = intent.getBooleanExtra(ConnectivityManager.EXTRA_IS_FAILOVER, false);
 		boolean nocon = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
-		NetworkInfo ni = (NetworkInfo) intent.getParcelableExtra(ConnectivityManager.EXTRA_OTHER_NETWORK_INFO);
-		
-		if (service != null && service.isStarted()) {
-			if (ni == null || !ni.isConnected() || failo) {
-				if (nocon) {
-					service.disconnect(false);
-				}
-			}
-			
-			if (!nocon && service.isStarted() && !service.isAuthenticated()) { // TODO! && isAuthenticated!
-				service.reconnect();
-			}
-		}
+        if (service != null) {
+            if (!nocon && service.getAllConnections().size() > 0 && !service.isAuthenticated()) {
+                service.connect();
+            } else if (nocon && service.getAllConnections().size() > 0 && service.isAuthenticated()) {
+                service.disconnect(false);
+            }
+        }
 	}
 }

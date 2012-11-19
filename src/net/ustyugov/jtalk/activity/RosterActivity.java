@@ -67,8 +67,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
     
 	private BroadcastReceiver updateReceiver;
     private BroadcastReceiver errorReceiver;
-    private BroadcastReceiver stateReceiver;
-    
+
     private Menu menu = null;
 
     private JTalkService service;
@@ -132,7 +131,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
 //        		startActivity(intent);
 //           	}
 //       	}
-       	
+
        	Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
 		if (cursor != null && cursor.getCount() > 0) {
 			startService(new Intent(this, JTalkService.class));
@@ -158,34 +157,26 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
         updateReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                long now = System.currentTimeMillis();
-                if ((now - lastUpdateReceived) < RosterActivity.UPDATE_INTERVAL)
-                    return;
-                lastUpdateReceived = now;
                 service = JTalkService.getInstance();
+                updateMenu();
+                updateStatus();
 
+                long now = System.currentTimeMillis();
+                if ((now - lastUpdateReceived) < RosterActivity.UPDATE_INTERVAL) return;
+                lastUpdateReceived = now;
                 updateList();
             }
         };
   		
-  		stateReceiver = new BroadcastReceiver() {
-  			@Override
-  			public void onReceive(Context context, Intent intent) {
-  				service = JTalkService.getInstance();
-  				updateMenu();
-  				updateStatus();
-  			}
-  		};
-        
         service = JTalkService.getInstance();
         service.setCurrentJid("me");
   		
   		registerReceiver(errorReceiver, new IntentFilter(Constants.ERROR));
       	registerReceiver(updateReceiver, new IntentFilter(Constants.UPDATE));
-      	registerReceiver(stateReceiver, new IntentFilter(Constants.CONNECTION_STATE));
+      	registerReceiver(updateReceiver, new IntentFilter(Constants.CONNECTION_STATE));
       	registerReceiver(updateReceiver, new IntentFilter(Constants.NEW_MESSAGE));
       	
-        if (service != null && service.isStarted()) service.resetTimer();
+        if (service != null) service.resetTimer();
         updateList();
         updateMenu();
         updateStatus();
@@ -196,7 +187,6 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
     	super.onPause();
     	unregisterReceiver(errorReceiver);
 	    unregisterReceiver(updateReceiver);
-	    unregisterReceiver(stateReceiver);
     }
 
     @Override
@@ -306,37 +296,30 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
 					@Override
 					public void run() {
 						SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(RosterActivity.this);
-						for (XMPPConnection connection : service.getAllConnections()) {
-							if (service != null && connection.isAuthenticated()) {
-								if (prefs.getBoolean("ShowGroups", true)) {
-									if (gridView.getAdapter() instanceof NoGroupsAdapter) gridView.setAdapter(rosterAdapter);
-									rosterAdapter.update();
-							    	rosterAdapter.notifyDataSetChanged();
-								} else {
-					   				if (gridView.getAdapter() instanceof RosterAdapter) gridView.setAdapter(simpleAdapter);
-					   				simpleAdapter.update();
-					   				simpleAdapter.notifyDataSetChanged();
-								}
-						} else {
-							if (prefs.getBoolean("ShowGroups", true)) rosterAdapter.notifyDataSetChanged();
-							else simpleAdapter.notifyDataSetChanged();
-						}
-						}
+                        if (prefs.getBoolean("ShowGroups", true)) {
+                            if (gridView.getAdapter() instanceof NoGroupsAdapter) gridView.setAdapter(rosterAdapter);
+                            rosterAdapter.update();
+                            rosterAdapter.notifyDataSetChanged();
+                        } else {
+                            if (gridView.getAdapter() instanceof RosterAdapter) gridView.setAdapter(simpleAdapter);
+                            simpleAdapter.update();
+                            simpleAdapter.notifyDataSetChanged();
+                        }
 					}
-    			});
+                });
     		}
     	}.start();
     }
     
     private void updateStatus() {
-    	if (service.isAuthenticated() && service.isStarted()) {
+    	if (service.isAuthenticated()) {
    			String status = statusArray[prefs.getInt("currentSelection", 0)];
    			String substatus = prefs.getString("currentStatus", "");
    			getSupportActionBar().setTitle(status);
    			getSupportActionBar().setSubtitle(substatus);
    		} else {
    			getSupportActionBar().setTitle(getString(R.string.NotConnected));
-   			getSupportActionBar().setSubtitle(service.getState());
+   			getSupportActionBar().setSubtitle(service.getGlobalState());
    		}
     }
     

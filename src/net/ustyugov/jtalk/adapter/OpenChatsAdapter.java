@@ -112,8 +112,6 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
         }
         
         if (position == 0) {
-        	ImageView roleImage = (ImageView) v.findViewById(R.id.role);
-			roleImage.setVisibility(View.GONE);
 			TextView counter = (TextView) v.findViewById(R.id.msg_counter);
 			counter.setVisibility(View.GONE);
 			ImageView msg  = (ImageView) v.findViewById(R.id.msg);

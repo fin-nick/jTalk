@@ -396,7 +396,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     	if (service.isAuthenticated()) {
 			Notify.updateNotify();
 		} else {
-			Notify.offlineNotify(service.getState());
+			Notify.offlineNotify(service.getGlobalState());
 		}
 
     	updateChats();

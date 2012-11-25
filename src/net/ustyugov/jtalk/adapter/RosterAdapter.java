@@ -79,7 +79,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 		boolean hideOffline = prefs.getBoolean("hideOffline", false);
 		clear();
 		
-		Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
+		Cursor cursor = activity.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
 		if (cursor != null && cursor.getCount() > 0) {
 			cursor.moveToFirst();
 			do {

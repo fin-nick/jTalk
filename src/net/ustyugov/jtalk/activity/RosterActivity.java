@@ -81,6 +81,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        startService(new Intent(this, JTalkService.class));
         service = JTalkService.getInstance();
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
@@ -133,12 +134,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
 //       	}
 
        	Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
-		if (cursor != null && cursor.getCount() > 0) {
-			startService(new Intent(this, JTalkService.class));
-		} else {
-			Intent preferences = new Intent(this, Accounts.class);
-        	startActivity(preferences);
-		}
+		if (cursor == null || cursor.getCount() < 1) startActivity(new Intent(this, Accounts.class));
     }
     
     @Override

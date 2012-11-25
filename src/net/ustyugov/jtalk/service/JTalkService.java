@@ -126,7 +126,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
@@ -739,7 +738,7 @@ public class JTalkService extends Service {
     public void connect() {
     	if (prefs.getBoolean("WifiLock", false)) wifiLock.acquire();
     	
-		String text  = prefs.getString("currentStatus", "");
+//		String text  = prefs.getString("currentStatus", "");
 		String mode  = prefs.getString("currentMode", "available");
 		
 		if (mode.equals("online")) {

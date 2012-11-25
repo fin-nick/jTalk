@@ -66,7 +66,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         date.setTime(Long.parseLong(System.currentTimeMillis()+""));
         String time = DateFormat.getTimeFormat(service).format(date);
         
-		MessageItem item = new MessageItem();
+		MessageItem item = new MessageItem(account, participant);
         item.setName(nick);
         item.setTime(time);
         item.setType(MessageItem.Type.status);
@@ -94,7 +94,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         date.setTime(Long.parseLong(System.currentTimeMillis()+""));
         String time = DateFormat.getTimeFormat(service).format(date);
         
-   		MessageItem item = new MessageItem();
+   		MessageItem item = new MessageItem(account, p);
 		item.setBody(service.getResources().getString(R.string.ChangedNicknameTo) + " " + newNick);
 		item.setName(nick);
 		item.setTime(time);
@@ -131,7 +131,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         date.setTime(Long.parseLong(System.currentTimeMillis()+""));
         String time = DateFormat.getTimeFormat(service).format(date);
         
-    	MessageItem item = new MessageItem();
+    	MessageItem item = new MessageItem(account, p);
 		item.setBody("banned (" + reason + ")");
 		item.setType(MessageItem.Type.status);
         item.setName(nick);
@@ -160,7 +160,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         date.setTime(Long.parseLong(System.currentTimeMillis()+""));
         String time = DateFormat.getTimeFormat(service).format(date);
         
-    	MessageItem item = new MessageItem();
+    	MessageItem item = new MessageItem(account, p);
 		item.setBody("kicked (" + reason + ")");
 		item.setReceived(false);
         item.setName(nick);
@@ -190,7 +190,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         date.setTime(Long.parseLong(System.currentTimeMillis()+""));
         String time = DateFormat.getTimeFormat(service).format(date);
         
-    	MessageItem item = new MessageItem();
+    	MessageItem item = new MessageItem(account, participant);
 		item.setBody(service.getResources().getString(R.string.UserJoined));
 		item.setType(MessageItem.Type.status);
         item.setName(nick);
@@ -219,7 +219,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         date.setTime(Long.parseLong(System.currentTimeMillis()+""));
         String time = DateFormat.getTimeFormat(service).format(date);
         
-    	MessageItem item = new MessageItem();
+    	MessageItem item = new MessageItem(account, participant);
 		item.setBody(service.getString(R.string.UserLeaved));
 		item.setType(MessageItem.Type.status);
         item.setName(nick);
@@ -272,7 +272,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 	        id = service.getResources().getIdentifier(affiliation, null, null);
 	        if (id > 0) affiliation = service.getResources().getString(id);
 	        
-	    	MessageItem item = new MessageItem();
+	    	MessageItem item = new MessageItem(account, participant);
 			item.setBody(role + " & " + affiliation);
 			item.setType(MessageItem.Type.status);
 	        item.setName(nick);

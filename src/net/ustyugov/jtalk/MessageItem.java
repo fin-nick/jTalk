@@ -25,6 +25,8 @@ import org.jivesoftware.smackx.packet.BobExtension;
 import org.jivesoftware.smackx.packet.DataForm;
 
 public class MessageItem {
+    private String account;
+    private String jid;
 	private String time = null;
 	private String body = "";
 	private String subj = "";
@@ -39,54 +41,57 @@ public class MessageItem {
 	private DataForm form = null;
 	private BobExtension bob = null;
 	
-	public MessageItem(String time, String body, String name, String id ) {
+//	public MessageItem(String account, String time, String body, String name, String id ) {
+//		Date d = new Date();
+//	    DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+//	    this.stamp = df.format(d);
+//	    this.account = account;
+//		this.time = time;
+//		this.body = body;
+//		this.name = name;
+//		this.id = id;
+//		this.edited = false;
+//		this.received = false;
+//		this.collapsed = false;
+//	}
+	
+	public MessageItem(String account, String jid) {
+        this.account = account;
+        this.jid = jid;
 		Date d = new Date();
 	    DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 	    this.stamp = df.format(d);
-	    
-		this.time = time;
-		this.body = body;
-		this.name = name;
-		this.id = id;
-		this.edited = false;
+        this.edited = false;
 		this.received = false;
 		this.collapsed = false;
 	}
-	
-	public MessageItem() {
-		Date d = new Date();
-	    DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-	    this.stamp = df.format(d);
-	}
-	
+
+    public void setName(String name) { this.name = name; }
+    public void setId(String id) { this.id = id; }
+    public void setReceived(Boolean r) { this.received = r;}
+    public void setEdited(Boolean e) { this.edited = e; }
+    public String getTime() { return this.time; }
+    public String getBody() { return this.body; }
+    public String getSubject() { return this.subj; }
+    public String getName() { return this.name; }
+    public void setAccount(String account) { this.account = account; }
+    public String getAccount() { return account; }
+    public String getId() { return this.id; }
+    public void setJid(String jid) { this.jid = jid; }
+    public String getJid() { return jid; }
 	public boolean isCollapsed() { return this.collapsed; }
 	public boolean isReceived() { return this.received; }
 	public boolean isEdited() { return this.edited; }
 	public boolean containsCaptcha() { return this.captcha; }
-	
 	public void setCaptcha(boolean c) { this.captcha = c; }
-	
 	public void setForm(DataForm form) { this.form = form; }
 	public DataForm getForm() { return this.form; }
-	
 	public void setBob(BobExtension bob) { this.bob = bob; }
 	public BobExtension getBob() { return this.bob; }
-	
-	public void setCollapsed(boolean collapsed) {
-		this.collapsed = collapsed;
-	}
-	
-	public void setType(Type type) {
-		if (type != null) this.type = type;
-	}
-	
-	public Type getType() {
-		return this.type;
-	}
-	
-	public void setTime(String time) {
-		this.time = time;
-	}
+	public void setCollapsed(boolean collapsed) { this.collapsed = collapsed; }
+	public void setType(Type type) { if (type != null) this.type = type; }
+	public Type getType() { return this.type; }
+	public void setTime(String time) { this.time = time; }
 	
 	public void setBody(String body) {
 		this.body = body.replaceAll("&lt;", "<");
@@ -99,43 +104,7 @@ public class MessageItem {
 			this.subj = subject.replaceAll(";amp;", "&");
 		}
 	}
-	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	public void setId(String id) {
-		this.id = id;
-	}
-	
-	public void setReceived(Boolean r) {
-		this.received = r;
-	}
-	
-	public void setEdited(Boolean e) {
-		this.edited = e;
-	}
 
-	public String getTime() {
-		return this.time;
-	}
-	
-	public String getBody() {
-		return this.body;
-	}
-	
-	public String getSubject() {
-		return this.subj;
-	}
-	
-	public String getName() {
-		return this.name;
-	}
-	
-	public String getId() {
-		return this.id;
-	}
-	
 	public String toXml() {
 		StringBuilder sb = new StringBuilder();
 		String message = getBody().replaceAll("<", "&lt;").replaceAll("&", ";amp;");

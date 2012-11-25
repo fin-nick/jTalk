@@ -66,7 +66,6 @@ public class MsgListener implements PacketListener {
     	this.account = account;
     	this.prefs = PreferenceManager.getDefaultSharedPreferences(context);
     	this.service = JTalkService.getInstance();
-    	return;
     }
 
 	public void processPacket(Packet packet) {
@@ -124,7 +123,7 @@ public class MsgListener implements PacketListener {
 					 	            values.put(MessageDbHelper.FORM, "NULL");
 					 	            values.put(MessageDbHelper.BOB, "NULL");
 					            	service.getContentResolver().update(JTalkProvider.CONTENT_URI, values, MessageDbHelper.ID + " = '" + pid + "'", null);
-					            } catch (Exception sqle) { }
+					            } catch (Exception ignored) { }
 							}
 						}.start();
 					}
@@ -134,7 +133,7 @@ public class MsgListener implements PacketListener {
 			}
 		}
 		
-		if (body.length() > 0) {
+		if (body != null && body.length() > 0) {
 	        if (type.equals("groupchat")) { // Group Chat Message
 	        	Date date = new java.util.Date();
 				String time = DateFormat.getTimeFormat(context).format(date);
@@ -146,20 +145,9 @@ public class MsgListener implements PacketListener {
 	        	
 	        	String mynick = context.getResources().getString(R.string.Me);
 	        	if (service.getConferencesHash(account).containsKey(group)) mynick = service.getConferencesHash(account).get(group).getNickname();
-	        	
-	        	if (!service.getCurrentJid().equals(group)) {
-                	service.addMessagesCount(account, group);
-                }
-	        	
-	            if (body.contains(mynick)) {
-	            	if (!service.getCurrentJid().equals(group)) service.addHighlight(account, group);
-	            	if (!service.getMessagesList(account).contains(group)) service.getMessagesList(account).add(group);
-	            	Notify.messageNotify(account, group, Notify.Type.Direct, body);
-	            }
-	            else Notify.messageNotify(account, group, Notify.Type.Conference, body);
-	            
+
 	            if (nick != null && nick.length() > 0) {
-	            	MessageItem item = new MessageItem();
+	            	MessageItem item = new MessageItem(account, from);
 					item.setBody(body);
 					item.setId(id);
 					item.setTime(time);
@@ -167,18 +155,31 @@ public class MsgListener implements PacketListener {
 		            item.setName(nick);
 		            
 	            	MessageLog.writeMucMessage(group, nick, item);
-	            	
-	                if (service.getMucMessagesHash(account).containsKey(group)) {
-	                   	List<MessageItem> list = service.getMucMessagesHash(account).get(group);
-	                   	list.add(item);
-	                   	if (list.size() > Constants.MAX_MUC_MESSAGES) list.remove(0);
-	                } else {
-	                	List<MessageItem> list = new ArrayList<MessageItem>();
-	                	list.add(item);
-	                	service.getMucMessagesHash(account).put(group, list);
-	                }
-	                    
-	                Intent intent = new Intent(Constants.NEW_MUC_MESSAGE);
+
+                    if (!service.getCurrentJid().equals(group)) {
+                        service.addMessagesCount(account, group);
+                    }
+
+                    if (service.getMucMessagesHash(account).containsKey(group)) {
+                        List<MessageItem> list = service.getMucMessagesHash(account).get(group);
+                        list.add(item);
+                        if (list.size() > Constants.MAX_MUC_MESSAGES) list.remove(0);
+                    } else {
+                        List<MessageItem> list = new ArrayList<MessageItem>();
+                        list.add(item);
+                        service.getMucMessagesHash(account).put(group, list);
+                    }
+
+                    if (body.contains(mynick)) {
+                        if (!service.getCurrentJid().equals(group)) {
+                            item.setJid(group);
+                            service.addHighlight(account, group);
+                            service.addUnreadMessage(item);
+                            Notify.messageNotify(account, group, Notify.Type.Direct, body);
+                        }
+                    } else Notify.messageNotify(account, group, Notify.Type.Conference, body);
+
+	                Intent intent = new Intent(Constants.NEW_MESSAGE);
 	                intent.putExtra("jid", group);
 	                context.sendBroadcast(intent);
 	            }
@@ -196,21 +197,28 @@ public class MsgListener implements PacketListener {
 		        	if (service.getConferencesHash(account).containsKey(user)) {
 		        		group = StringUtils.parseBareAddress(from);
 		        		name = StringUtils.parseResource(from);
-		        		action = Constants.NEW_MUC_MESSAGE;
+		        		action = Constants.NEW_MESSAGE;
 		        		
 		        		if (name == null || name.length() <= 0) {
-		        			MessageItem mucMsg = new MessageItem();
+                            Date date = new java.util.Date();
+                            date.setTime(Long.parseLong(System.currentTimeMillis()+""));
+                            String time = DateFormat.getTimeFormat(context).format(date);
+
+		        			MessageItem mucMsg = new MessageItem(account, from);
 		    				mucMsg.setBody(body);
 		    				mucMsg.setId(id);
-		    				mucMsg.setTime("");
-		    	            mucMsg.setName(group);
-		    	            
+		    				mucMsg.setTime(time);
+		    	            mucMsg.setName(name);
+                            mucMsg.setReceived(false);
+                            if (prefs.getBoolean("CollapseBigMessages", false) && body.length() > 196) mucMsg.setCollapsed(true);
+
 		    	            CaptchaExtension captcha = (CaptchaExtension) msg.getExtension("captcha", "urn:xmpp:captcha");
 			            	if (captcha != null) {
 			            		BobExtension bob = (BobExtension) msg.getExtension("data","urn:xmpp:bob");
 			            		mucMsg.setBob(bob);
 			            		mucMsg.setCaptcha(true);
 			            		mucMsg.setForm(captcha.getForm());
+                                mucMsg.setName(group);
 			            		
 			            		Notify.captchaNotify(account, mucMsg);
 			            	}
@@ -225,30 +233,14 @@ public class MsgListener implements PacketListener {
 		                    }
 
 		                    if (!service.getCurrentJid().equals(group)) {
-		                    	if (!service.getMessagesList(account).contains(group)) service.getMessagesList(account).add(group);
+		                    	service.addUnreadMessage(mucMsg);
 		                    }
 		                        
-		                    Intent intent = new Intent(Constants.NEW_MUC_MESSAGE);
+		                    Intent intent = new Intent(Constants.NEW_MESSAGE);
 		                    intent.putExtra("jid", group);
 		                    context.sendBroadcast(intent);
 		                    
-		                    // TODO
-		                    Date date = new java.util.Date();
-		    	            date.setTime(Long.parseLong(System.currentTimeMillis()+""));
-		    	            String time = DateFormat.getTimeFormat(context).format(date);
-		    	            
-		                    MessageItem item = new MessageItem();
-		    				item.setBody(body);
-		    				item.setId(id);
-		    				item.setTime(time);
-		    				item.setReceived(false);
-		    	            item.setName(name);
-		    	            
-		    	            if (prefs.getBoolean("CollapseBigMessages", false) && body.length() > 196) {
-		    	            	item.setCollapsed(true);
-		    	            }
-		    	            
-		    	            MessageLog.writeMessage(group, item);
+		    	            MessageLog.writeMessage(group, mucMsg);
 		                    return;
 		        		}
 		        	} else { // from user
@@ -267,7 +259,7 @@ public class MsgListener implements PacketListener {
 		            DelayInformation delayExt = (DelayInformation) msg.getExtension("jabber:x:delay");
 					if (delayExt != null) time = delayExt.getStamp().toLocaleString();
 					
-		            MessageItem item = new MessageItem();
+		            MessageItem item = new MessageItem(account, from);
 		            item.setSubject(msg.getSubject());
 					item.setBody(body);
 					item.setId(id);
@@ -292,8 +284,8 @@ public class MsgListener implements PacketListener {
 		        	}
 		            
 		            if (!service.getCurrentJid().equals(user)) {
-		            	if (!service.getMessagesList(account).contains(user)) service.getMessagesList(account).add(user);
 		            	service.addMessagesCount(account, user);
+                        service.addUnreadMessage(item);
 		            }
 		            
 		            updateComposeList(user, false, false);

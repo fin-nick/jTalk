@@ -20,8 +20,6 @@ package net.ustyugov.jtalk;
 import java.util.List;
 import net.ustyugov.jtalk.activity.DataFormActivity;
 import net.ustyugov.jtalk.activity.RosterActivity;
-import net.ustyugov.jtalk.db.AccountDbHelper;
-import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
@@ -33,7 +31,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -53,7 +50,7 @@ public class Notify {
 	
     public static void updateNotify() {
     	JTalkService service = JTalkService.getInstance();
-    	if (service.getMessagesList().isEmpty()) {
+    	if (service.getUnreadMessages().isEmpty()) {
     		newMessages = false;
         	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
         	String mode = prefs.getString("currentMode", "available");
@@ -108,30 +105,25 @@ public class Notify {
             NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
             inboxStyle.setBigContentTitle(service.getString(R.string.UnreadMessage));
 
-            Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
-			if (cursor != null && cursor.getCount() > 0) {
-				cursor.moveToFirst();
-				do {
-					String account = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
-					List<String> list = service.getMessagesList(account);
-		            for (String jid : list) {
-		            	String n = jid;
-		            	if (service.getConferencesHash(account).containsKey(jid)) {
-		        			n = StringUtils.parseName(jid);
-		        		} else if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {
-		        			n = StringUtils.parseResource(jid);
-		        		} else {
-		        			Roster roster = JTalkService.getInstance().getRoster(account);
-		            		if (roster != null) {
-		            			RosterEntry re = roster.getEntry(jid);
-		            			if (re != null && re.getName() != null) n = re.getName();
-		            		}
-		        		}
-		            	if (n != null && n.length() > 0) inboxStyle.addLine(n + ": " + service.getMessagesCount(account, jid));
-		            }
-				} while(cursor.moveToNext());
-				cursor.close();
-			}
+            List<MessageItem> list = service.getUnreadMessages();
+            for (MessageItem item : list) {
+                String account = item.getAccount();
+                String jid = item.getJid();
+                String n = StringUtils.parseBareAddress(jid);
+                if (service.getConferencesHash(account).containsKey(jid)) {
+                    n = StringUtils.parseName(jid);
+                } else if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {
+                    n = StringUtils.parseResource(jid);
+                } else {
+                    jid = StringUtils.parseBareAddress(jid);
+                    Roster roster = JTalkService.getInstance().getRoster(account);
+                    if (roster != null) {
+                        RosterEntry re = roster.getEntry(n);
+                        if (re != null && re.getName() != null) n = re.getName();
+                    }
+                }
+                if (n != null && n.length() > 0) inboxStyle.addLine(n + ": " + service.getMessagesCount(account, jid));
+            }
 
             mBuilder.setStyle(inboxStyle);
 
@@ -234,31 +226,27 @@ public class Notify {
             
             NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
             inboxStyle.setBigContentTitle(service.getString(R.string.UnreadMessage));
-            
-            Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
-			if (cursor != null && cursor.getCount() > 0) {
-				cursor.moveToFirst();
-				do {
-					String acc = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
-					List<String> list = service.getMessagesList(acc);
-		            for (String jid : list) {
-		            	String n = jid;
-		            	if (service.getConferencesHash(acc).containsKey(jid)) {
-		        			n = StringUtils.parseName(jid);
-		        		} else if (service.getConferencesHash(acc).containsKey(StringUtils.parseBareAddress(jid))) {
-		        			n = StringUtils.parseResource(jid);
-		        		} else {
-		        			Roster roster = JTalkService.getInstance().getRoster(acc);
-		            		if (roster != null) {
-		            			RosterEntry re = roster.getEntry(jid);
-		            			if (re != null && re.getName() != null) n = re.getName();
-		            		}
-		        		}
-		            	if (n != null && n.length() > 0) inboxStyle.addLine(n + ": " + service.getMessagesCount(acc, jid));
-		            }
-				} while(cursor.moveToNext());
-				cursor.close();
-			}
+
+            List<MessageItem> list = service.getUnreadMessages();
+            for (MessageItem item : list) {
+                String acc = item.getAccount();
+                String jid = item.getJid();
+                String n = StringUtils.parseBareAddress(jid);
+                if (service.getConferencesHash(acc).containsKey(jid)) {
+                    n = StringUtils.parseName(jid);
+                } else if (service.getConferencesHash(acc).containsKey(StringUtils.parseBareAddress(jid))) {
+                    n = StringUtils.parseResource(jid);
+                } else {
+                    jid = StringUtils.parseBareAddress(jid);
+                    Roster roster = JTalkService.getInstance().getRoster(acc);
+                    if (roster != null) {
+                        RosterEntry re = roster.getEntry(n);
+                        if (re != null && re.getName() != null) n = re.getName();
+                    }
+                }
+                if (n != null && n.length() > 0) inboxStyle.addLine(n + ": " + service.getMessagesCount(acc, jid));
+            }
+
             mBuilder.setStyle(inboxStyle);
             
             NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);

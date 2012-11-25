@@ -90,7 +90,7 @@ public class RstListener implements RosterListener {
         String time = DateFormat.getTimeFormat(service).format(date);
         
         Intent updateIntent = new Intent(Constants.UPDATE);
-      	MessageItem item = new MessageItem();
+      	MessageItem item = new MessageItem(account, jid);
 		if (presence.isAvailable()) item.setBody(statusArray[getPosition(mode)] + " " + status);
 		else {
 			item.setBody(statusArray[5] + " " + status);

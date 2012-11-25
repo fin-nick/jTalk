@@ -18,6 +18,7 @@
 package net.ustyugov.jtalk.activity;
 
 import net.ustyugov.jtalk.Constants;
+import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.Notify;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.activity.muc.Bookmarks;
@@ -33,7 +34,6 @@ import net.ustyugov.jtalk.dialog.RosterDialogs;
 import net.ustyugov.jtalk.service.JTalkService;
 
 import org.jivesoftware.smack.RosterEntry;
-import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
 
 import android.content.BroadcastReceiver;
@@ -121,18 +121,20 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
        		
        		new InviteDialog(this, account, room, from, reason, password).show();
        	}
-       	
-//       	if (getIntent().getBooleanExtra("msg", false)) {
-//           	if (service.getMessagesList().size() >= 1) {
-//           		String jid = service.getMessagesList().get(0);
-//           		
-//        		Intent intent = new Intent(this, Chat.class);
-//        		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//        		intent.putExtra("jid", jid);
-//        		startActivity(intent);
-//           	}
-//       	}
 
+        if (getIntent().getBooleanExtra("msg", false)) {
+            MessageItem item = service.getUnreadMessage();
+            if (item != null) {
+                String jid = item.getJid();
+                String account = item.getAccount();
+
+                Intent intent = new Intent(this, Chat.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("account", account);
+                intent.putExtra("jid", jid);
+                startActivity(intent);
+            }
+        }
        	Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
 		if (cursor == null || cursor.getCount() < 1) startActivity(new Intent(this, Accounts.class));
     }

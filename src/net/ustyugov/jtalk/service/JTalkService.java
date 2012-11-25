@@ -144,7 +144,7 @@ public class JTalkService extends Service {
 	private static JTalkService js = new JTalkService();
     private static List<String> collapsedGroups = new ArrayList<String>();
     private static List<String> composeList = new ArrayList<String>();
-    private static Hashtable<String, List<String>> unreadMessages = new Hashtable<String, List<String>>();
+    private static List<MessageItem> unreadMessages = new ArrayList<MessageItem>();
     private static Hashtable<String, List<String>> mucHighlightsList = new Hashtable<String, List<String>>();
     private static Hashtable<String, String> textHash = new Hashtable<String, String>();
     private static Hashtable<String, String> stateHash = new Hashtable<String, String>();
@@ -305,17 +305,36 @@ public class JTalkService extends Service {
     public Hashtable<String, Conference> getJoinedConferences() { return joinedConferences; }
     public Hashtable<String, Bitmap> getAvatarsHash() { return avatarsHash; }
 
-    public List<String> getMessagesList() {
-        List<String> list = new ArrayList<String>();
-        for (List<String> l : unreadMessages.values()) {
-            list.addAll(l);
+    public void addUnreadMessage(MessageItem item) {
+        String account = item.getAccount();
+        String jid = item.getJid();
+        for (MessageItem i : unreadMessages) {
+            if (i.getAccount().equals(account) && i.getJid().equals(jid)) return;
         }
-        return list;
+        unreadMessages.add(item);
     }
 
-    public List<String> getMessagesList(String account) { 
-    	if (!unreadMessages.containsKey(account)) unreadMessages.put(account, new ArrayList<String>());
-    	return unreadMessages.get(account); 
+    public MessageItem getUnreadMessage() {
+        if (!unreadMessages.isEmpty()) return unreadMessages.remove(0);
+        else return null;
+    }
+
+    public void removeUnreadMesage(String account, String jid) {
+        for (MessageItem i : unreadMessages) {
+            String a = i.getAccount();
+            String j = i.getJid();
+            if (!getConferencesHash(account).containsKey(j) && !getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid)))
+                j = StringUtils.parseBareAddress(j);
+            Log.i("removeUnread", jid + " = " + j);
+            if (a.equals(account) && j.equals(jid)) {
+                unreadMessages.remove(i);
+                return;
+            }
+        }
+    }
+
+    public List<MessageItem> getUnreadMessages() {
+        return unreadMessages;
     }
     
     public boolean isHighlight(String account, String jid) { 
@@ -941,7 +960,7 @@ public class JTalkService extends Service {
   	        date.setTime(Long.parseLong(mil));
   	        String time = DateFormat.getTimeFormat(this).format(date);
   	        
-  	  		MessageItem msgItem = new MessageItem();
+  	  		MessageItem msgItem = new MessageItem(account, user);
   	  		msgItem.setTime(time);
   	  		msgItem.setName(getResources().getString(R.string.Me));
   	  		msgItem.setId(mil);

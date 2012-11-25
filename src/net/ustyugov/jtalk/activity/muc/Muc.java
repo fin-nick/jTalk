@@ -104,7 +104,7 @@ public class Muc extends SherlockActivity implements OnKeyListener, OnItemClickL
 	        	updateList();
 	        }
 	    };
-	    registerReceiver(messageReceiver, new IntentFilter(Constants.NEW_MUC_MESSAGE));
+	    registerReceiver(messageReceiver, new IntentFilter(Constants.NEW_MESSAGE));
 		updateList();
 	}
 	

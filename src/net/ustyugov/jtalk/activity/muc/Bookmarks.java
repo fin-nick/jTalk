@@ -140,8 +140,9 @@ public class Bookmarks extends SherlockActivity {
 		        	        		break;
 		        	        	case 2:
 		        	        		try {
+                                        BookmarkedConference bc = (BookmarkedConference) item.getObject();
 		        	        			BookmarkManager bm = BookmarkManager.getBookmarkManager(service.getConnection(account));
-		        	            		bm.removeBookmarkedConference(item.getName());
+		        	            		bm.removeBookmarkedConference(bc.getJid());
 		        	            	} catch (Exception e) {	Log.e("Remove", e.getLocalizedMessage()); }
 		        	            	updateBookmarks();
 		        		 	        break;

@@ -358,12 +358,16 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 if (length > 0) sendButton.setEnabled(true); else sendButton.setEnabled(false);
 
                 if (!isMuc) {
-                    if (length > 0 && !compose) {
-                        compose = true;
-                        service.setChatState(account, jid, ChatState.composing);
-                    } else if (length == 0 && compose) {
-                        compose = false;
-                        service.setChatState(account, jid, ChatState.active);
+                    if (length > 0) {
+                        if (!compose) {
+                            compose = true;
+                            service.setChatState(account, jid, ChatState.composing);
+                        }
+                    } else if (length == 0) {
+                        if (compose) {
+                            compose = false;
+                            service.setChatState(account, jid, ChatState.active);
+                        }
                     }
                 }
             }
@@ -529,7 +533,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 smiles.showDialog();
                 break;
             case R.id.nick:
-                new UsersDialog(this, jid).show();
+                new UsersDialog(this, account, jid).show();
                 break;
             case R.id.subj:
                 MucDialogs.subjectDialog(this, account, jid);

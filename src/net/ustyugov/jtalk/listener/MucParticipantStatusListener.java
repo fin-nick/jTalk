@@ -46,7 +46,6 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 		this.account = account;
 		this.g = group;	
 		this.service = JTalkService.getInstance();
-		return;
 	}
 	
 	public void statusChanged(String participant) {
@@ -58,9 +57,8 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 		Presence.Mode mode = p.getMode();
 		if (mode == null) mode = Presence.Mode.available;
 		String status = p.getStatus();
-		if (status != null && status.length() > 0) {
-			status = "(" + status + ")";
-		} else status = "";
+		if (status != null && status.length() > 0) status = "(" + status + ")";
+		else status = "";
 		
     	Date date = new java.util.Date();
         date.setTime(Long.parseLong(System.currentTimeMillis()+""));
@@ -117,7 +115,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         		File newFile = new File(Constants.PATH + "/" + g + "%" + newNick);
         		oldFile.renameTo(newFile);
         	}
-        } catch (Exception e) { }
+        } catch (Exception ignored) { }
         
     	Intent intent = new Intent(Constants.PRESENCE_CHANGED);
     	intent.putExtra("update", true);
@@ -185,13 +183,26 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 	
 	public void joined(String participant) { 
 		String nick = StringUtils.parseResource(participant);
+        String jid = "";
+        String stat = "";
 		
     	Date date = new java.util.Date();
         date.setTime(Long.parseLong(System.currentTimeMillis()+""));
         String time = DateFormat.getTimeFormat(service).format(date);
-        
+
+        Presence p = service.getConferencesHash(account).get(g).getOccupantPresence(participant);
+        MUCUser mucUser = (MUCUser) p.getExtension("x", "http://jabber.org/protocol/muc#user");
+        if (mucUser != null) {
+            MUCUser.Item item = mucUser.getItem();
+            String affi = item.getAffiliation();
+            String role = item.getRole();
+            if (affi != null && role != null) stat = " " + affi + " " + service.getString(R.string.and) + " " + role + " ";
+            String j = item.getJid();
+            if (j != null && j.length() > 3) jid = " (" + j + ")";
+        }
+
     	MessageItem item = new MessageItem(account, participant);
-		item.setBody(service.getResources().getString(R.string.UserJoined));
+		item.setBody(service.getResources().getString(R.string.UserJoined) + jid);
 		item.setType(MessageItem.Type.status);
         item.setName(nick);
         item.setTime(time);
@@ -214,13 +225,21 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 	
 	public void left(String participant) { 
 		String nick = StringUtils.parseResource(participant);
+        String jid = "";
 		
     	Date date = new java.util.Date();
         date.setTime(Long.parseLong(System.currentTimeMillis()+""));
         String time = DateFormat.getTimeFormat(service).format(date);
-        
+
+        Presence p = service.getConferencesHash(account).get(g).getOccupantPresence(participant);
+        MUCUser mucUser = (MUCUser) p.getExtension("x", "http://jabber.org/protocol/muc#user");
+        if (mucUser != null) {
+            String j = mucUser.getItem().getJid();
+            if (j != null && j.length() > 3) jid = " (" + j + ")";
+        }
+
     	MessageItem item = new MessageItem(account, participant);
-		item.setBody(service.getString(R.string.UserLeaved));
+		item.setBody(service.getString(R.string.UserLeaved) + jid);
 		item.setType(MessageItem.Type.status);
         item.setName(nick);
         item.setTime(time);

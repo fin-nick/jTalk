@@ -35,6 +35,7 @@
     <string name="View">Вид</string>
     <string name="Composes">Печатает...</string>
     <string name="Templates">Шаблоны</string>
+    <string name="and">и</string>
     
     <!--  Service Discovery -->
     <string name="Registration">Регистрация</string>
@@ -195,7 +196,7 @@
     <string name="Join">Войти</string>
     <string name="Open">Открыть</string>
     <string name="Leave">Покинуть</string>
-    <string name="UserJoined">вошел</string>
+    <string name="UserJoined">вошел как</string>
     <string name="UserLeaved">отключился</string>
     <string name="ChangedNicknameTo">сменил ник на</string>
     <string name="owner">хозяин</string>

@@ -35,6 +35,7 @@ import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smackx.packet.MUCUser;
 import org.jivesoftware.smackx.packet.VCard;
 import org.jivesoftware.smackx.packet.Version;
 
@@ -89,7 +90,16 @@ public class VCardActivity extends SherlockActivity {
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 	    setTitle("vCard");
 	    getSupportActionBar().setSubtitle(jid);
-	    
+
+        if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {
+            Presence p = service.getConferencesHash(account).get(StringUtils.parseBareAddress(jid)).getOccupantPresence(jid);
+            MUCUser mucUser = (MUCUser) p.getExtension("x", "http://jabber.org/protocol/muc#user");
+            if (mucUser != null) {
+                String j = mucUser.getItem().getJid();
+                if (j != null && j.length() > 3) getSupportActionBar().setSubtitle(j);
+            }
+        }
+
 		LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
        	linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
 		

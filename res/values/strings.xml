@@ -42,6 +42,7 @@
     <string name="View">View</string>
     <string name="Composes">Composes message...</string>
     <string name="Templates">Templates</string>
+    <string name="and">and</string>
     
     <!--  Service Discovery -->
     <string name="Registration">Registration</string>
@@ -204,7 +205,7 @@
     <string name="Browse">Browse</string>
     <string name="Open">Open</string>
     <string name="Leave">Leave</string>
-    <string name="UserJoined">joined</string>
+    <string name="UserJoined">joined as</string>
     <string name="UserLeaved">disconnected</string>
     <string name="ChangedNicknameTo">changed nickname to</string>
     <string name="owner">owner</string>

@@ -25,6 +25,7 @@ import java.util.Iterator;
 
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.packet.VCard;
 
 import net.ustyugov.jtalk.service.JTalkService;
@@ -80,10 +81,12 @@ public class Avatars {
 	private static class LoadAllAvatars extends AsyncTask<Void, Void, Void> {
 		private String group;
 		private XMPPConnection connection;
+        private String account;
 		
 		public LoadAllAvatars(XMPPConnection connection, String group) {
 			this.connection = connection;
 			this.group = group;
+            this.account = StringUtils.parseBareAddress(connection.getUser());
 		}
 		
 		@Override
@@ -92,7 +95,7 @@ public class Avatars {
 			file.mkdir();
 			if (file.list(new Filter(group)).length < 1) {
 				JTalkService service = JTalkService.getInstance();
-				Iterator<Presence> it = service.getRoster(connection.getUser()).getPresences(group);
+				Iterator<Presence> it = service.getRoster(account).getPresences(group);
 				while (it.hasNext()) {
 					try {
 						Presence p = it.next();

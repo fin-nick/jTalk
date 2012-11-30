@@ -48,9 +48,11 @@ import com.jtalk2.R;
 public class UsersAdapter extends ArrayAdapter<RosterItem> {
 	private JTalkService service;
 	private String group;
+    private String account;
 	
-	public UsersAdapter(Context context, String group) {
+	public UsersAdapter(Context context, String account, String group) {
 		super(context, R.id.item);
+        this.account = account;
 		this.group = group;
         this.service = JTalkService.getInstance();
         update();
@@ -58,23 +60,18 @@ public class UsersAdapter extends ArrayAdapter<RosterItem> {
 	
 	public void update() {
 		clear();
-		Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
-		cursor.moveToFirst();
-		if (cursor != null && cursor.getCount() > 0) {
-			String account = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
-			List<String> users = new ArrayList<String>();
-			Iterator<Presence> it = service.getRoster(account).getPresences(group);
-			while (it.hasNext()) {
-				Presence p = it.next();
-				users.add(StringUtils.parseResource(p.getFrom()));
-			}
-			
-			users = SortList.sortParticipantsInChat(account, group, users);
-			for (String user: users) {
-				RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
-				item.setName(user);
-			}
-		}
+        List<String> users = new ArrayList<String>();
+        Iterator<Presence> it = service.getRoster(account).getPresences(group);
+        while (it.hasNext()) {
+            Presence p = it.next();
+            users.add(StringUtils.parseResource(p.getFrom()));
+        }
+
+        users = SortList.sortParticipantsInChat(account, group, users);
+        for (String user: users) {
+            RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
+            item.setName(user);
+        }
 	}
 	
 	@Override

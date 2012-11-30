@@ -32,15 +32,17 @@ import android.preference.PreferenceManager;
 public class UsersDialog implements DialogInterface.OnClickListener {
 	private Context context;
 	private UsersAdapter adapter;
+    private String account;
 	private String group;
 
-	public UsersDialog(Context context, String group) {
+	public UsersDialog(Context context, String account, String group) {
 		this.context = context;
+        this.account = account;
 		this.group = group;
 	}
 	
 	public void show() {
-		adapter = new UsersAdapter(context, group);
+		adapter = new UsersAdapter(context, account, group);
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setTitle(R.string.PasteNick);

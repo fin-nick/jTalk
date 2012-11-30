@@ -129,6 +129,22 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                         } else mucGroup.setCollapsed(true);
                     }
 
+                    // Add privates
+                    List<String> privates = service.getPrivateMessages(account);
+                    if (!privates.isEmpty()) {
+                        RosterItem group = new RosterItem(account, RosterItem.Type.group, null);
+                        group.setName(service.getString(R.string.Privates));
+                        add(group);
+
+                        if (!service.getCollapsedGroups().contains(service.getString(R.string.Privates))) {
+                            for (String jid : privates) {
+                                RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+                                RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
+                                add(item);
+                            }
+                        } else group.setCollapsed(true);
+                    }
+
                     Collection<RosterGroup> groups = roster.getGroups();
                     for (RosterGroup group: groups) {
                         List<String> list = new ArrayList<String>();

@@ -356,11 +356,13 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
 		RosterItem item = (RosterItem) parent.getItemAtPosition(position);
 		if (item.isGroup()) {
 			String name = item.getName();
-			if (!name.equals(getString(R.string.Nogroup)) && !name.equals(getString(R.string.SelfGroup)) && !name.equals(getString(R.string.MUC))) RosterDialogs.renameGroupDialog(this, item.getAccount(), item.getName());
+			if (!name.equals(getString(R.string.Nogroup)) && !name.equals(getString(R.string.SelfGroup)) && !name.equals(getString(R.string.MUC)) && !name.equals(getString(R.string.Privates))) RosterDialogs.renameGroupDialog(this, item.getAccount(), item.getName());
 		} else if (item.isAccount()) {
 			RosterDialogs.AccountMenuDialog(this, item);
-		} else if (item.isEntry()) { 
-			RosterDialogs.ContactMenuDialog(this, item);
+		} else if (item.isEntry()) {
+            String j = item.getEntry().getUser();
+			if (!service.getPrivateMessages(item.getAccount()).contains(j)) RosterDialogs.ContactMenuDialog(this, item);
+            else RosterDialogs.PrivateMenuDialog(this, item);
 		} else if (item.isSelf()) {
 			RosterDialogs.SelfContactMenuDialog(this, item);
 		} else if (item.isMuc()) {

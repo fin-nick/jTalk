@@ -28,17 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 
-import net.ustyugov.jtalk.AutoAwayStatus;
-import net.ustyugov.jtalk.AutoXaStatus;
-import net.ustyugov.jtalk.Avatars;
-import net.ustyugov.jtalk.ChangeConnectionReceiver;
-import net.ustyugov.jtalk.Conference;
-import net.ustyugov.jtalk.Constants;
-import net.ustyugov.jtalk.IconPicker;
-import net.ustyugov.jtalk.IgnoreList;
-import net.ustyugov.jtalk.MessageItem;
-import net.ustyugov.jtalk.MessageLog;
-import net.ustyugov.jtalk.Notify;
+import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.RosterActivity;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
@@ -60,11 +50,7 @@ import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
-import org.jivesoftware.smack.packet.IQ;
-import org.jivesoftware.smack.packet.Message;
-import org.jivesoftware.smack.packet.Packet;
-import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smack.packet.XMPPError;
+import org.jivesoftware.smack.packet.*;
 import org.jivesoftware.smack.provider.PrivacyProvider;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.StringUtils;
@@ -367,6 +353,18 @@ public class JTalkService extends Service {
     		messages.put(account, new Hashtable<String, List<MessageItem>>());
     		return messages.get(account);
     	}
+    }
+
+    public List<String> getPrivateMessages(String account) {
+        List<String> list = new ArrayList<String>();
+        Enumeration<String> chatEnum = getMessagesHash(account).keys();
+        while (chatEnum.hasMoreElements()) {
+            String jid = chatEnum.nextElement();
+            if (getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {
+                list.add(jid);
+            }
+        }
+        return list;
     }
     
     public Hashtable<String, List<MessageItem>> getMucMessagesHash(String account) { 

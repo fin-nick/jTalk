@@ -21,14 +21,10 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import net.ustyugov.jtalk.Avatars;
-import net.ustyugov.jtalk.ClientIcons;
+import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.Holders.GroupHolder;
 import net.ustyugov.jtalk.Holders.ItemHolder;
 import net.ustyugov.jtalk.Holders.AccountHolder;
-import net.ustyugov.jtalk.IconPicker;
-import net.ustyugov.jtalk.RosterItem;
-import net.ustyugov.jtalk.SortList;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -98,12 +94,32 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
                     RosterItem self = new RosterItem(account, RosterItem.Type.self, entry);
                     add(self);
 
-                    // add conferences
-                    Enumeration<String> groupEnum = service.getConferencesHash(account).keys();
-                    while(groupEnum.hasMoreElements()) {
-                        RosterItem muc = new RosterItem(account, RosterItem.Type.muc, null);
-                        muc.setName(groupEnum.nextElement());
-                        add(muc);
+                    // add conferences and privates
+                    if (!service.getConferencesHash(account).isEmpty()) {
+                        if (prefs.getBoolean("ShowMucGroup", false)) {
+                            RosterItem mucGroup = new RosterItem(account, RosterItem.Type.group, null);
+                            mucGroup.setName(service.getString(R.string.MUC));
+                            add(mucGroup);
+                            if (service.getCollapsedGroups().contains(service.getString(R.string.MUC))) mucGroup.setCollapsed(true);
+                        } else {
+                            while (service.getCollapsedGroups().contains(service.getString(R.string.MUC))) service.getCollapsedGroups().remove(service.getString(R.string.MUC));
+                        }
+
+                        if (!service.getCollapsedGroups().contains(service.getString(R.string.MUC))) {
+                            Enumeration<String> groupEnum = service.getConferencesHash(account).keys();
+                            while(groupEnum.hasMoreElements()) {
+                                RosterItem muc = new RosterItem(account, RosterItem.Type.muc, null);
+                                muc.setName(groupEnum.nextElement());
+                                add(muc);
+                            }
+
+                            List<String> privates = service.getPrivateMessages(account);
+                            for (String jid : privates) {
+                                RosterEntry e = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+                                RosterItem i = new RosterItem(account, RosterItem.Type.entry, e);
+                                add(i);
+                            }
+                        }
                     }
 
                     List<String> list = new ArrayList<String>();
@@ -134,33 +150,57 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		RosterItem item = getItem(position);
         String account = item.getAccount();
-		if (item.isAccount()) {
-			AccountHolder holder;
-			if (convertView == null || convertView.findViewById(R.id.avatar) == null) {
-				LayoutInflater inflater = activity.getLayoutInflater();
-				convertView = inflater.inflate(R.layout.account, null, false);
+        if (item.isGroup()) {
+            GroupHolder holder;
+            if (convertView == null || convertView.findViewById(R.id.group_layout) == null) {
+                LayoutInflater inflater = activity.getLayoutInflater();
+                convertView = inflater.inflate(R.layout.group, null, false);
 
-				holder = new AccountHolder();
-				holder.avatar = (ImageView) convertView.findViewById(R.id.avatar);
-	            holder.jid = (TextView) convertView.findViewById(R.id.jid);
-	            holder.jid.setTextSize(fontSize);
-	            holder.jid.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
+                holder = new GroupHolder();
+                holder.messageIcon = (ImageView) convertView.findViewById(R.id.msg);
+                holder.messageIcon.setVisibility(View.INVISIBLE);
+                holder.text = (TextView) convertView.findViewById(R.id.name);
+                holder.text.setTextSize(fontSize);
+                holder.text.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
+                holder.state = (ImageView) convertView.findViewById(R.id.state);
+                convertView.setTag(holder);
+                convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0x77525252 : 0xEEEEEEEE);
+            } else {
+                holder = (GroupHolder) convertView.getTag();
+            }
+            holder.text.setText(item.getName());
+            holder.messageIcon.setImageResource(R.drawable.icon_msg);
+            holder.messageIcon.setVisibility(View.INVISIBLE);
+            holder.state.setImageResource(item.isCollapsed() ? R.drawable.close : R.drawable.open);
+            convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0x77525252 : 0xEEEEEEEE);
+            return convertView;
+        } else if (item.isAccount()) {
+            Holders.AccountHolder holder;
+            if (convertView == null || convertView.findViewById(R.id.avatar) == null) {
+                LayoutInflater inflater = activity.getLayoutInflater();
+                convertView = inflater.inflate(R.layout.account, null, false);
+
+                holder = new Holders.AccountHolder();
+                holder.avatar = (ImageView) convertView.findViewById(R.id.avatar);
+                holder.jid = (TextView) convertView.findViewById(R.id.jid);
+                holder.jid.setTextSize(fontSize);
+                holder.jid.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
                 holder.status = (TextView) convertView.findViewById(R.id.status);
                 holder.status.setTextSize(statusSize);
                 holder.status.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFBBBBBB : 0xFF555555);
-	            holder.state = (ImageView) convertView.findViewById(R.id.state);
-	            convertView.setTag(holder);
-	            convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0x77525252 : 0xEEEEEEEE);
-			} else {
-				holder = (AccountHolder) convertView.getTag();
-			}
-	        holder.jid.setText(account);
+                holder.state = (ImageView) convertView.findViewById(R.id.state);
+                convertView.setTag(holder);
+                convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0x77999999 : 0xEECCCCCC);
+            } else {
+                holder = (Holders.AccountHolder) convertView.getTag();
+            }
+            holder.jid.setText(account);
             String status = service.getState(account);
             holder.status.setText(status);
             holder.state.setVisibility(status.length() > 0 ? View.VISIBLE : View.GONE);
-			holder.state.setImageResource(item.isCollapsed() ? R.drawable.close : R.drawable.open);
-			Avatars.loadAvatar(activity, account, holder.avatar);
-			return convertView;
+            holder.state.setImageResource(item.isCollapsed() ? R.drawable.close : R.drawable.open);
+            Avatars.loadAvatar(activity, account, holder.avatar);
+            return convertView;
 		} else if (item.isEntry() || item.isSelf()) {
 			String name = item.getName();
 			String jid = item.getEntry().getUser();

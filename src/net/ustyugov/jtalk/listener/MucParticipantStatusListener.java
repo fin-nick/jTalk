@@ -202,7 +202,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         }
 
     	MessageItem item = new MessageItem(account, participant);
-		item.setBody(service.getResources().getString(R.string.UserJoined) + jid);
+		item.setBody(service.getResources().getString(R.string.UserJoined) + stat + jid);
 		item.setType(MessageItem.Type.status);
         item.setName(nick);
         item.setTime(time);

@@ -9,6 +9,10 @@
            android:title="@string/ShowGroups"
            android:defaultValue="true" />
          <CheckBoxPreference
+           android:key="ShowMucGroup"
+           android:title="Always show MUC group"
+           android:defaultValue="false" />
+         <CheckBoxPreference
            android:key="ShowStatuses"
            android:title="@string/ShowStatuses"
            android:defaultValue="false" />

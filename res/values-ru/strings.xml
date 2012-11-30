@@ -209,6 +209,7 @@
     <string name="Configuration">Конфигурация</string>
     <string name="Administration">Управление</string>
     <string name="Users">Пользователи</string>
+    <string name="Privates">Приватные чаты</string>
     
     <!--  Files statuses -->
     <string name="Downloading">Загрузка</string>

@@ -469,6 +469,72 @@ public class RosterDialogs {
         });
         builder.create().show();
     }
+
+    public static void PrivateMenuDialog(final Activity activity, final RosterItem item) {
+        final JTalkService service = JTalkService.getInstance();
+        final String account = item.getAccount();
+        final RosterEntry entry = item.getEntry();
+
+        CharSequence[] items;
+        if (service.getMessagesHash(account).containsKey(entry.getUser())) {
+            items = new CharSequence[6];
+            items[5] = activity.getString(R.string.Close);
+        }
+        else items = new CharSequence[5];
+        items[0] = activity.getString(R.string.Info);
+        items[1] = activity.getString(R.string.SendFile);
+        items[2] = activity.getString(R.string.AddInIgnoreList);
+        items[3] = activity.getString(R.string.ExecuteCommand);
+        items[4] = activity.getString(R.string.DeleteHistory);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(entry.getUser());
+        builder.setItems(items, new OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String jid = entry.getUser();
+                String name = entry.getName();
+
+                switch (which) {
+                    case 0:
+                        Intent infoIntent = new Intent(activity, VCardActivity.class);
+                        infoIntent.putExtra("jid", jid);
+                        infoIntent.putExtra("account", account);
+                        activity.startActivity(infoIntent);
+                        break;
+                    case 1:
+                        Intent intent = new Intent(activity, SendFileActivity.class);
+                        intent.putExtra("account", account);
+                        intent.putExtra("jid", jid);
+                        activity.startActivity(intent);
+                        break;
+                    case 2:
+                        new IgnoreList(account).updateIgnoreList(jid);
+                        break;
+                    case 3:
+                        Intent com = new Intent(activity, CommandsActivity.class);
+                        com.putExtra("account", account);
+                        com.putExtra("jid", jid + "/" + name);
+                        activity.startActivity(com);
+                        break;
+                    case 4:
+                        activity.getContentResolver().delete(JTalkProvider.CONTENT_URI, "jid = '" + jid + "'", null);
+                        if (service.getMessagesHash(account).containsKey(jid)) {
+                            service.getMessagesHash(account).remove(jid);
+                        }
+                        service.sendBroadcast(new Intent(Constants.UPDATE));
+                        break;
+                    case 5:
+                        service.setChatState(account, jid, ChatState.gone);
+                        if (service.getMessagesHash(account).containsKey(jid)) service.getMessagesHash(account).remove(jid);
+                        if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));
+                        else service.sendBroadcast(new Intent(Constants.UPDATE));
+                        break;
+                }
+            }
+        });
+        builder.create().show();
+    }
 	
 	public static void MucContactMenuDialog(final Activity activity, final String account, final String group, final String nick) {
     	final JTalkService service = JTalkService.getInstance();

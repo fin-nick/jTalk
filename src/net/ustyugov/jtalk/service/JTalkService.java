@@ -201,8 +201,8 @@ public class JTalkService extends Service {
     }
 
     public void setState(String account, String state) {
-        if (state == null) state = "";
-        stateHash.put(account, state);
+        if (state == null) state = "null";
+        if (account != null) stateHash.put(account, state);
     }
 
     public String getState(String account) {
@@ -325,7 +325,6 @@ public class JTalkService extends Service {
             String j = i.getJid();
             if (!getConferencesHash(account).containsKey(j) && !getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid)))
                 j = StringUtils.parseBareAddress(j);
-            Log.i("removeUnread", jid + " = " + j);
             if (a.equals(account) && j.equals(jid)) {
                 unreadMessages.remove(i);
                 return;

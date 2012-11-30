@@ -163,7 +163,8 @@ public class MsgListener implements PacketListener {
                     if (service.getMucMessagesHash(account).containsKey(group)) {
                         List<MessageItem> list = service.getMucMessagesHash(account).get(group);
                         list.add(item);
-                        if (list.size() > Constants.MAX_MUC_MESSAGES) list.remove(0);
+                        int max = Integer.parseInt(prefs.getString("MaxMucMessages", "100"));
+                        if (list.size() > max) list.remove(0);
                     } else {
                         List<MessageItem> list = new ArrayList<MessageItem>();
                         list.add(item);

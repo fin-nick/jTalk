@@ -72,7 +72,7 @@
          	<EditTextPreference
            		android:key="SmilesSize"
            		android:title="@string/Size"
-           		android:defaultValue="24" 
+           		android:defaultValue="18"
            		android:numeric="integer"/>
          	<EditTextPreference
                 android:key="SmilesColumns"
@@ -88,6 +88,12 @@
             android:key="AutoJoin"
             android:title="@string/AutoJoin"
             android:defaultValue="false" />
+        <EditTextPreference
+                android:key="MaxMucMessages"
+                android:title="Number messages"
+                android:summary="Keep messages in log"
+                android:defaultValue="100"
+                android:numeric="integer"/>
         <EditTextPreference
             android:key="nickSeparator"
             android:title="Add after nick"

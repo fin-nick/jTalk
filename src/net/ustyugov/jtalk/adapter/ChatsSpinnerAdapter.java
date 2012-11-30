@@ -75,16 +75,15 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 				
 				Enumeration<String> chatEnum = service.getMessagesHash(account).keys();
 				while (chatEnum.hasMoreElements()) {
-					if (service != null && service.getRoster(account) != null && connection != null && connection.isAuthenticated()) {
-						String name = chatEnum.nextElement();
-						if (!service.getConferencesHash(account).containsKey(name)) {
-							Roster roster = service.getRoster(account);
-							RosterEntry entry = roster.getEntry(name);
-							if (entry == null) entry = new RosterEntry(name, name, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-							RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
-							add(item);
-						}
-					}
+                    String name = chatEnum.nextElement();
+                    if (!service.getConferencesHash(account).containsKey(name)) {
+                        RosterEntry entry = null;
+                        Roster roster = service.getRoster(account);
+                        if (roster != null) entry = roster.getEntry(name);
+                        if (entry == null) entry = new RosterEntry(name, name, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+                        RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
+                        add(item);
+                    }
 				}
 				
 				Enumeration<String> groupEnum = service.getConferencesHash(account).keys();

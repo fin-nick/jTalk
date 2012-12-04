@@ -779,8 +779,11 @@ public class JTalkService extends Service {
 					String port = cursor.getString(cursor.getColumnIndex(AccountDbHelper.PORT));
 
                     ConnectionTask task = new ConnectionTask();
-                    task.execute(username, password, resource, service, tls, port);
-                    connectionTasks.put(username, task);
+                    if (connectionTasks.containsKey(username)) task = connectionTasks.get(username);
+                    if (task.getStatus() != AsyncTask.Status.RUNNING) {
+                        task.execute(username, password, resource, service, tls, port);
+                        connectionTasks.put(username, task);
+                    }
 				} while(cursor.moveToNext());
 				cursor.close();
 			}
@@ -1517,7 +1520,7 @@ public class JTalkService extends Service {
                 } catch (Exception ignored) {	}
 
                 if (connectionTasks.containsKey(username)) connectionTasks.remove(username);
-                setState(username, "");
+                setState(username, status);
                 Notify.updateNotify();
                 new IgnoreList(connection).createIgnoreList();
                 resetTimer();

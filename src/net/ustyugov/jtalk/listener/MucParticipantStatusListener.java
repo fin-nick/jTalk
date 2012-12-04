@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import android.util.Log;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.MessageLog;
@@ -223,23 +224,15 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         service.sendBroadcast(intent);
 	}
 	
-	public void left(String participant) { 
+	public void left(String participant) {
 		String nick = StringUtils.parseResource(participant);
-        String jid = "";
-		
+
     	Date date = new java.util.Date();
         date.setTime(Long.parseLong(System.currentTimeMillis()+""));
         String time = DateFormat.getTimeFormat(service).format(date);
 
-        Presence p = service.getConferencesHash(account).get(g).getOccupantPresence(participant);
-        MUCUser mucUser = (MUCUser) p.getExtension("x", "http://jabber.org/protocol/muc#user");
-        if (mucUser != null) {
-            String j = mucUser.getItem().getJid();
-            if (j != null && j.length() > 3) jid = " (" + j + ")";
-        }
-
     	MessageItem item = new MessageItem(account, participant);
-		item.setBody(service.getString(R.string.UserLeaved) + jid);
+		item.setBody(service.getString(R.string.UserLeaved));
 		item.setType(MessageItem.Type.status);
         item.setName(nick);
         item.setTime(time);

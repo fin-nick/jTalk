@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/smile"
+          android:icon="@drawable/ic_menu_emoticons"
+          android:showAsAction="ifRoom"
+          android:title="@string/PasteSmile" />
     <item android:id="@+id/sidebar"
         android:showAsAction="always"
         android:icon="@drawable/ic_menu_sidebar"
         android:title="@string/HideSidebar"/>
-    <item android:id="@+id/smile"
-        android:icon="@drawable/ic_menu_emoticons"
-          android:showAsAction="ifRoom"
-          android:title="@string/PasteSmile" />
     <item android:id="@+id/nick"
           android:showAsAction="never"
           android:title="@string/PasteNick" />

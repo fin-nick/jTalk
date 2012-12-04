@@ -67,9 +67,6 @@ public class AffiliateAdapter extends ArrayAdapter<Affiliate> {
       	if (aff.equals("outcast")) icon.setImageBitmap(ip.getVisitorBitmap());
       	else if (aff.equals("member")) icon.setImageBitmap(ip.getParticipantBitmap());
       	else icon.setImageBitmap(ip.getModeratorBitmap());
-       	
-        ImageView close = (ImageView) v.findViewById(R.id.close);
-		close.setVisibility(View.GONE);
         return v;
     }
 }

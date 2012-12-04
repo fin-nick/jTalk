@@ -86,11 +86,13 @@ public class MucDialogs {
 		        		break;
 		        	case 3:
 		        		Intent uIntent = new Intent(activity, MucUsers.class);
+                        uIntent.putExtra("account", account);
 		           	 	uIntent.putExtra("group", group);
 		           	 	activity.startActivity(uIntent);
 		        		break;
 		        	case 4:
 		        		Intent cIntent = new Intent(activity, DataFormActivity.class);
+                        cIntent.putExtra("account", account);
 		           	 	cIntent.putExtra("group", group);
 		           	 	cIntent.putExtra("muc", true);
 		           	 	activity.startActivity(cIntent);

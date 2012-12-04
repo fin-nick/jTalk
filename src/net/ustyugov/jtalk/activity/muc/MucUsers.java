@@ -74,7 +74,7 @@ public class MucUsers extends SherlockActivity {
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		String group = getIntent().getStringExtra("group");
-		String account = getIntent().getStringExtra("account");
+		account = getIntent().getStringExtra("account");
 		muc = JTalkService.getInstance().getConferencesHash(account).get(group);
 		
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);

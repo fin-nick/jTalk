@@ -432,14 +432,16 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         account = null;
     }
 
-//	@Override
-//	public boolean onKeyUp(int key, KeyEvent event) {
-//		if (event.getKeyCode() == KeyEvent.KEYCODE_SEARCH) {
-//			MenuItem item = menu.findItem(R.id.search);
-//			item.expandActionView();
-//			return true;
-//		} else return false;
-//	}
+    @Override
+    public boolean onKeyUp(int key, KeyEvent event) {
+        if (Build.VERSION.SDK_INT >= 14) {
+            if (key == KeyEvent.KEYCODE_SEARCH) {
+                MenuItem item = menu.findItem(R.id.search);
+                item.expandActionView();
+            }
+        }
+        return super.onKeyUp(key, event);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

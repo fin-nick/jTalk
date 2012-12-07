@@ -50,14 +50,14 @@ import android.widget.TextView;
 
 import com.jtalk2.R;
 
-public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
+public class SearchAdapter extends ArrayAdapter<RosterItem> {
 	private JTalkService service;
 	private Activity activity;
 	private IconPicker iconPicker;
 	private SharedPreferences prefs;
 	private int fontSize, statusSize;
 
-	public NoGroupsAdapter(Activity activity) {
+	public SearchAdapter(Activity activity) {
         super(activity, R.id.name);
         this.activity = activity;
         this.prefs = PreferenceManager.getDefaultSharedPreferences(activity);
@@ -68,10 +68,10 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 		this.statusSize = fontSize - 4;
     }
 	
-	public void update() {
+	public void update(String search) {
+        search = search.toLowerCase();
 		this.service = JTalkService.getInstance();
 		this.iconPicker = service.getIconPicker();
-		boolean hideOffline = prefs.getBoolean("hideOffline", false);
 		clear();
 		
 		Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
@@ -88,33 +88,23 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
                 if (service.getRoster(account) != null && connection != null && connection.isAuthenticated() && !service.getCollapsedGroups().contains(account)) {
                     Roster roster = service.getRoster(account);
 
-                    // add self contact
-                    RosterEntry entry = new RosterEntry(account, account, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                    RosterItem self = new RosterItem(account, RosterItem.Type.self, entry);
-                    add(self);
-
                     // add conferences and privates
                     if (!service.getConferencesHash(account).isEmpty()) {
-                        if (prefs.getBoolean("ShowMucGroup", false)) {
-                            RosterItem mucGroup = new RosterItem(account, RosterItem.Type.group, null);
-                            mucGroup.setName(service.getString(R.string.MUC));
-                            add(mucGroup);
-                            if (service.getCollapsedGroups().contains(service.getString(R.string.MUC))) mucGroup.setCollapsed(true);
-                        } else {
-                            while (service.getCollapsedGroups().contains(service.getString(R.string.MUC))) service.getCollapsedGroups().remove(service.getString(R.string.MUC));
-                        }
-
-                        if (!service.getCollapsedGroups().contains(service.getString(R.string.MUC))) {
-                            Enumeration<String> groupEnum = service.getConferencesHash(account).keys();
-                            while(groupEnum.hasMoreElements()) {
+                        Enumeration<String> groupEnum = service.getConferencesHash(account).keys();
+                        while(groupEnum.hasMoreElements()) {
+                            String group = groupEnum.nextElement().toLowerCase();
+                            if (group.contains(search)) {
                                 RosterItem muc = new RosterItem(account, RosterItem.Type.muc, null);
-                                muc.setName(groupEnum.nextElement());
+                                muc.setName(group);
                                 add(muc);
                             }
+                        }
 
-                            List<String> privates = service.getPrivateMessages(account);
-                            for (String jid : privates) {
-                                RosterEntry e = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+                        List<String> privates = service.getPrivateMessages(account);
+                        for (String jid : privates) {
+                            String nick = StringUtils.parseResource(jid);
+                            if (nick.toLowerCase().contains(search)) {
+                                RosterEntry e = new RosterEntry(jid, nick, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
                                 RosterItem i = new RosterItem(account, RosterItem.Type.entry, e);
                                 add(i);
                             }
@@ -124,14 +114,12 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
                     List<String> list = new ArrayList<String>();
 
                     for (RosterEntry rosterEntry : roster.getEntries()) {
-                        String jid = rosterEntry.getUser();
+                        String jid = rosterEntry.getUser().toLowerCase();
                         String name = rosterEntry.getName();
                         if (name == null) name = jid;
-                        Presence.Type presenceType = service.getType(account, jid);
-                        if (hideOffline) {
-                            if (presenceType != Presence.Type.unavailable) list.add(jid);
-                        } else {
-                            list.add(jid);
+                        if (search.length() < 1) list.add(jid);
+                        else {
+                            if (jid.contains(search) || name.toLowerCase().contains(search)) list.add(jid);
                         }
                     }
                     list = SortList.sortSimpleContacts(account, list);

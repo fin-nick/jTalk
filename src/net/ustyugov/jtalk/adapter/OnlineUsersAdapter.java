@@ -40,6 +40,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jtalk2.R;
+import org.jivesoftware.smack.util.StringUtils;
 
 public class OnlineUsersAdapter extends ArrayAdapter<RosterItem> {
 	private JTalkService service;
@@ -54,7 +55,7 @@ public class OnlineUsersAdapter extends ArrayAdapter<RosterItem> {
 		clear();
 		for (XMPPConnection connection : service.getAllConnections()) {
 			if (connection.getUser() != null) {
-				String account = connection.getUser();
+				String account = StringUtils.parseBareAddress(connection.getUser());
 				Roster roster = service.getRoster(account);
 				if (roster != null) {
 					Collection<RosterEntry> users = roster.getEntries();
@@ -95,9 +96,6 @@ public class OnlineUsersAdapter extends ArrayAdapter<RosterItem> {
 		Presence presence = service.getRoster(item.getAccount()).getPresence(entry.getUser());
       	ImageView icon = (ImageView)v.findViewById(R.id.status);
        	icon.setImageBitmap(ip.getIconByPresence(presence));
-       	
-        ImageView close = (ImageView) v.findViewById(R.id.close);
-		close.setVisibility(View.GONE);
         return v;
     }
 

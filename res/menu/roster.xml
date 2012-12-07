@@ -16,6 +16,10 @@
     <item android:id="@+id/offline"
         android:showAsAction="never"
         android:title=""/>
+    <item android:id="@+id/search"
+          android:title="@android:string/search_go"
+          android:actionViewClass="android.widget.SearchView"
+          android:showAsAction="never|collapseActionView"/>
     <item android:id="@+id/accounts"
         android:showAsAction="never"
         android:title="@string/Accounts"/>

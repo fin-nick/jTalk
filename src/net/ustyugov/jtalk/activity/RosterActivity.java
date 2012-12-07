@@ -17,6 +17,10 @@
 
 package net.ustyugov.jtalk.activity;
 
+import android.content.*;
+import android.os.Build;
+import android.view.KeyEvent;
+import android.widget.*;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.Notify;
@@ -24,6 +28,7 @@ import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.activity.muc.Bookmarks;
 import net.ustyugov.jtalk.adapter.NoGroupsAdapter;
 import net.ustyugov.jtalk.adapter.RosterAdapter;
+import net.ustyugov.jtalk.adapter.SearchAdapter;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.dialog.ChangeChatDialog;
@@ -36,27 +41,17 @@ import net.ustyugov.jtalk.service.JTalkService;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.GridView;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
 
@@ -74,9 +69,11 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
     private SharedPreferences prefs;
 
     private GridView gridView;
+    private SearchAdapter searchAdapter;
     private NoGroupsAdapter simpleAdapter;
     private RosterAdapter rosterAdapter;
     private String[] statusArray;
+    private String searchString;
     
     @Override
     public void onCreate(Bundle icicle) {
@@ -96,6 +93,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
         statusArray = getResources().getStringArray(R.array.statusArray);
         rosterAdapter = new RosterAdapter(this);
         simpleAdapter = new NoGroupsAdapter(this);
+        searchAdapter = new SearchAdapter(this);
         
         gridView = (GridView) findViewById(R.id.users);
         gridView.setNumColumns(1);
@@ -142,6 +140,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
     @Override
     public void onResume() {
         super.onResume();
+        searchString = null;
         
         errorReceiver = new BroadcastReceiver() {
     		@Override
@@ -178,6 +177,17 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
         updateList();
         updateMenu();
         updateStatus();
+    }
+
+    @Override
+    public boolean onKeyUp(int key, KeyEvent event) {
+        if (Build.VERSION.SDK_INT >= 14) {
+            if (key == KeyEvent.KEYCODE_SEARCH) {
+                MenuItem item = menu.findItem(R.id.search);
+                item.expandActionView();
+            }
+        }
+        return super.onKeyUp(key, event);
     }
 
     @Override
@@ -219,8 +229,6 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getSupportMenuInflater();
-        inflater.inflate(R.menu.roster, menu);
         this.menu = menu;
         updateMenu();
         return true;
@@ -228,12 +236,59 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
     
     private void updateMenu() {
     	if (menu != null) {
+            menu.clear();
+            getSupportMenuInflater().inflate(R.menu.roster, menu);
     		menu.findItem(R.id.add).setEnabled(service.isAuthenticated());
             menu.findItem(R.id.muc).setEnabled(service.isAuthenticated());
             menu.findItem(R.id.disco).setEnabled(service.isAuthenticated());
             menu.findItem(R.id.offline).setTitle(prefs.getBoolean("hideOffline", false) ? R.string.ShowOfflineContacts : R.string.HideOfflineContacts);
             if (!service.getMessages().isEmpty() || !service.getConferences().isEmpty()) menu.findItem(R.id.chats).setEnabled(true);
             else menu.findItem(R.id.chats).setEnabled(false);
+
+            if (Build.VERSION.SDK_INT >= 14) {
+                MenuItem.OnActionExpandListener listener = new MenuItem.OnActionExpandListener() {
+                    @Override
+                    public boolean onMenuItemActionCollapse(MenuItem item) {
+                        searchString = null;
+                        updateList();
+                        updateMenu();
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onMenuItemActionExpand(MenuItem item) {
+                        getSupportMenuInflater().inflate(R.menu.find_menu, menu);
+                        menu.removeItem(R.id.prev);
+                        menu.removeItem(R.id.next);
+                        menu.removeItem(R.id.chats);
+
+                        searchString = "";
+                        updateList();
+                        return true;
+                    }
+                };
+
+                MenuItem item = menu.findItem(R.id.search);
+                item.setOnActionExpandListener(listener);
+
+                final SearchView searchView = (SearchView) item.getActionView();
+                searchView.setQueryHint(getString(android.R.string.search_go));
+                searchView.setSubmitButtonEnabled(false);
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        searchString = newText;
+                        updateList();
+                        return true;
+                    }
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        return true;
+                    }
+                });
+            } else {
+                menu.removeItem(R.id.search);
+            }
             super.onCreateOptionsMenu(menu);
     	}
     }
@@ -294,14 +349,19 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
 					@Override
 					public void run() {
 						SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(RosterActivity.this);
-                        if (prefs.getBoolean("ShowGroups", true)) {
-                            if (gridView.getAdapter() instanceof NoGroupsAdapter) gridView.setAdapter(rosterAdapter);
-                            rosterAdapter.update();
-                            rosterAdapter.notifyDataSetChanged();
+                        if (searchString != null) {
+                            searchAdapter.update(searchString);
+                            gridView.setAdapter(searchAdapter);
                         } else {
-                            if (gridView.getAdapter() instanceof RosterAdapter) gridView.setAdapter(simpleAdapter);
-                            simpleAdapter.update();
-                            simpleAdapter.notifyDataSetChanged();
+                            if (prefs.getBoolean("ShowGroups", true)) {
+                                if (gridView.getAdapter() instanceof NoGroupsAdapter || gridView.getAdapter() instanceof SearchAdapter) gridView.setAdapter(rosterAdapter);
+                                rosterAdapter.update();
+                                rosterAdapter.notifyDataSetChanged();
+                            } else {
+                                if (gridView.getAdapter() instanceof RosterAdapter || gridView.getAdapter() instanceof SearchAdapter) gridView.setAdapter(simpleAdapter);
+                                simpleAdapter.update();
+                                simpleAdapter.notifyDataSetChanged();
+                            }
                         }
 					}
                 });

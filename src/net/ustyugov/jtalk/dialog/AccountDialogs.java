@@ -39,7 +39,7 @@ public class AccountDialogs {
 	public static void addDialog(final Activity a) {
 		LayoutInflater inflater = a.getLayoutInflater();
 		View layout = inflater.inflate(R.layout.account_dialog, (ViewGroup) a.findViewById(R.id.add_account_linear));
-	    
+
 	    final EditText jidEdit = (EditText) layout.findViewById(R.id.account_jid);
 	    final EditText passEdit = (EditText) layout.findViewById(R.id.account_password);
 	    final EditText resEdit = (EditText) layout.findViewById(R.id.account_resource);

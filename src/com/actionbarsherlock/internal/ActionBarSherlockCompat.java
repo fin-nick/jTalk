@@ -2,13 +2,12 @@ package com.actionbarsherlock.internal;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static com.actionbarsherlock.internal.ResourcesCompat.getResources_getBoolean;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.jtalk2.R;
 import org.xmlpull.v1.XmlPullParser;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -33,7 +32,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-
 import com.actionbarsherlock.ActionBarSherlock;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.internal.app.ActionBarImpl;
@@ -49,13 +47,13 @@ import com.actionbarsherlock.internal.widget.IcsProgressBar;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.jtalk2.R;
 
 @ActionBarSherlock.Implementation(api = 7)
 public class ActionBarSherlockCompat extends ActionBarSherlock implements MenuBuilder.Callback, com.actionbarsherlock.view.Window.Callback, MenuPresenter.Callback, android.view.MenuItem.OnMenuItemClickListener {
     /** Window features which are enabled by default. */
     protected static final int DEFAULT_FEATURES = 0;
 
+    static private final String PANELS_TAG = "sherlock:Panels";
 
     public ActionBarSherlockCompat(Activity activity, int flags) {
         super(activity, flags);
@@ -75,8 +73,6 @@ public class ActionBarSherlockCompat extends ActionBarSherlock implements MenuBu
     private MenuBuilder mMenu;
     /** Map between native options items and sherlock items. */
     protected HashMap<android.view.MenuItem, MenuItemImpl> mNativeItemMap;
-    /** Indication of a long-press on the hardware menu key. */
-    private boolean mMenuKeyIsLongPress = false;
 
     /** Parent view of the window decoration (action bar, mode, etc.). */
     private ViewGroup mDecor;
@@ -297,7 +293,10 @@ public class ActionBarSherlockCompat extends ActionBarSherlock implements MenuBu
             return false;
         }
 
-        return wActionBar.hideOverflowMenu();
+        if (wActionBar != null) {
+            return wActionBar.hideOverflowMenu();
+        }
+        return false;
     }
 
     @Override
@@ -428,27 +427,8 @@ public class ActionBarSherlockCompat extends ActionBarSherlock implements MenuBu
             }
         }
 
-        boolean result = false;
-        if (keyCode == KeyEvent.KEYCODE_MENU && isReservingOverflow()) {
-            if (event.getAction() == KeyEvent.ACTION_DOWN && event.isLongPress()) {
-                mMenuKeyIsLongPress = true;
-            } else if (event.getAction() == KeyEvent.ACTION_UP) {
-                if (!mMenuKeyIsLongPress) {
-                    if (mActionMode == null && wActionBar != null) {
-                        if (wActionBar.isOverflowMenuShowing()) {
-                            wActionBar.hideOverflowMenu();
-                        } else {
-                            wActionBar.showOverflowMenu();
-                        }
-                    }
-                    result = true;
-                }
-                mMenuKeyIsLongPress = false;
-            }
-        }
-
-        if (DEBUG) Log.d(TAG, "[dispatchKeyEvent] returning " + result);
-        return result;
+        if (DEBUG) Log.d(TAG, "[dispatchKeyEvent] returning false");
+        return false;
     }
 
     @Override
@@ -456,6 +436,19 @@ public class ActionBarSherlockCompat extends ActionBarSherlock implements MenuBu
         mIsDestroyed = true;
     }
 
+    @Override
+    public void dispatchSaveInstanceState(Bundle outState) {
+        if (mMenu != null) {
+            mMenuFrozenActionViewState = new Bundle();
+            mMenu.saveActionViewStates(mMenuFrozenActionViewState);
+        }
+        outState.putParcelable(PANELS_TAG, mMenuFrozenActionViewState);
+    }
+
+    @Override
+    public void dispatchRestoreInstanceState(Bundle savedInstanceState) {
+        mMenuFrozenActionViewState = savedInstanceState.getParcelable(PANELS_TAG);
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Menu callback lifecycle and creation

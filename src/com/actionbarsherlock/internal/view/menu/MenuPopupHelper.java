@@ -17,7 +17,6 @@
 package com.actionbarsherlock.internal.view.menu;
 
 import java.util.ArrayList;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.DataSetObserver;
@@ -33,12 +32,11 @@ import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListAdapter;
 import android.widget.PopupWindow;
-
+import com.jtalk2.R;
 import com.actionbarsherlock.internal.view.View_HasStateListenerSupport;
 import com.actionbarsherlock.internal.view.View_OnAttachStateChangeListener;
 import com.actionbarsherlock.internal.widget.IcsListPopupWindow;
 import com.actionbarsherlock.view.MenuItem;
-import com.jtalk2.R;
 
 /**
  * Presents a menu as a small, simple popup anchored to another view.

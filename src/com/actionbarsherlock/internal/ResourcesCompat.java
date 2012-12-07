@@ -3,8 +3,7 @@ package com.actionbarsherlock.internal;
 import android.content.Context;
 import android.os.Build;
 import android.util.DisplayMetrics;
-
-import com.jtalk2.R;
+import com.jtalk2.R;;
 
 public final class ResourcesCompat {
     //No instances
@@ -16,7 +15,7 @@ public final class ResourcesCompat {
      * can use to simulate filtering based on width and smallest width
      * qualifiers on pre-3.2.
      *
-     * @param context Context to load booleanss from on 3.2+ and to fetch the
+     * @param context Context to load booleans from on 3.2+ and to fetch the
      * display metrics.
      * @param id Id of boolean to load.
      * @return Associated boolean value as reflected by the current display

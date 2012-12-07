@@ -21,8 +21,6 @@ import com.actionbarsherlock.internal.widget.IcsLinearLayout;
 import com.actionbarsherlock.internal.widget.IcsListPopupWindow;
 import com.actionbarsherlock.view.ActionProvider;
 import com.actionbarsherlock.widget.ActivityChooserModel.ActivityChooserModelClient;
-import com.jtalk2.R;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -43,6 +41,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import com.jtalk2.R;
 
 /**
  * This class is a view for choosing an activity for handling a given {@link Intent}.
@@ -406,7 +405,11 @@ class ActivityChooserView extends ViewGroup implements ActivityChooserModelClien
         super.onDetachedFromWindow();
         ActivityChooserModel dataModel = mAdapter.getDataModel();
         if (dataModel != null) {
-            dataModel.unregisterObserver(mModelDataSetOberver);
+            try {
+                dataModel.unregisterObserver(mModelDataSetOberver);
+            } catch (IllegalStateException e) {
+                //Oh, well... fixes issue #557
+            }
         }
         ViewTreeObserver viewTreeObserver = getViewTreeObserver();
         if (viewTreeObserver.isAlive()) {
@@ -527,6 +530,7 @@ class ActivityChooserView extends ViewGroup implements ActivityChooserModelClien
             mActivityChooserContent.setBackgroundDrawable(mActivityChooserContentBackground);
         } else {
             mActivityChooserContent.setBackgroundDrawable(null);
+            mActivityChooserContent.setPadding(0, 0, 0, 0);
         }
     }
 
@@ -649,7 +653,11 @@ class ActivityChooserView extends ViewGroup implements ActivityChooserModelClien
         public void setDataModel(ActivityChooserModel dataModel) {
             ActivityChooserModel oldDataModel = mAdapter.getDataModel();
             if (oldDataModel != null && isShown()) {
-                oldDataModel.unregisterObserver(mModelDataSetOberver);
+                try {
+                    oldDataModel.unregisterObserver(mModelDataSetOberver);
+                } catch (IllegalStateException e) {
+                    //Oh, well... fixes issue #557
+                }
             }
             mDataModel = dataModel;
             if (dataModel != null && isShown()) {

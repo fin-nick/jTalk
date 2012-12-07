@@ -7,7 +7,6 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.widget.LinearLayout;
-
 import com.jtalk2.R;
 
 public class FakeDialogPhoneWindow extends LinearLayout {

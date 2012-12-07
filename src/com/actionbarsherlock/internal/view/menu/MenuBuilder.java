@@ -43,7 +43,7 @@ import com.actionbarsherlock.view.ActionProvider;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.SubMenu;
-import com.jtalk2.R;
+import com.jtalk2.R;;
 
 /**
  * Implementation of the {@link android.view.Menu} interface for creating a

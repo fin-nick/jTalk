@@ -20,7 +20,11 @@ package net.ustyugov.jtalk.activity;
 import android.content.*;
 import android.os.Build;
 import android.view.KeyEvent;
-import android.widget.*;
+import android.widget.AdapterView;
+import android.widget.GridView;
+import android.widget.LinearLayout;
+import android.widget.Toast;
+import com.actionbarsherlock.widget.SearchView;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.Notify;
@@ -181,12 +185,12 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
 
     @Override
     public boolean onKeyUp(int key, KeyEvent event) {
-        if (Build.VERSION.SDK_INT >= 14) {
+//        if (Build.VERSION.SDK_INT >= 14) {
             if (key == KeyEvent.KEYCODE_SEARCH) {
                 MenuItem item = menu.findItem(R.id.search);
                 item.expandActionView();
             }
-        }
+//        }
         return super.onKeyUp(key, event);
     }
 
@@ -245,7 +249,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
             if (!service.getMessages().isEmpty() || !service.getConferences().isEmpty()) menu.findItem(R.id.chats).setEnabled(true);
             else menu.findItem(R.id.chats).setEnabled(false);
 
-            if (Build.VERSION.SDK_INT >= 14) {
+            if (Build.VERSION.SDK_INT >= 8) {
                 MenuItem.OnActionExpandListener listener = new MenuItem.OnActionExpandListener() {
                     @Override
                     public boolean onMenuItemActionCollapse(MenuItem item) {
@@ -268,10 +272,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
                     }
                 };
 
-                MenuItem item = menu.findItem(R.id.search);
-                item.setOnActionExpandListener(listener);
-
-                final SearchView searchView = (SearchView) item.getActionView();
+                SearchView searchView = new SearchView(getSupportActionBar().getThemedContext());
                 searchView.setQueryHint(getString(android.R.string.search_go));
                 searchView.setSubmitButtonEnabled(false);
                 searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -286,9 +287,12 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
                         return true;
                     }
                 });
-            } else {
-                menu.removeItem(R.id.search);
-            }
+
+                MenuItem item = menu.findItem(R.id.search);
+                item.setActionView(searchView);
+                item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+                item.setOnActionExpandListener(listener);
+            } else menu.removeItem(R.id.search);
             super.onCreateOptionsMenu(menu);
     	}
     }
@@ -311,6 +315,9 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
   	    	case R.id.add:
   	    		RosterDialogs.addDialog(this, null);
   	    		break;
+            case R.id.search:
+                item.expandActionView();
+                break;
   	    	case R.id.muc:
   	    		Intent mucIntent = new Intent(this, Bookmarks.class);
   	    		startActivity(mucIntent);

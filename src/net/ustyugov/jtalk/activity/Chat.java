@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.actionbarsherlock.widget.SearchView;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.Notify;
@@ -71,7 +72,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.SearchView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
@@ -462,7 +462,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 else menu.findItem(R.id.resource).setVisible(true);
             }
 
-            if (Build.VERSION.SDK_INT >= 14) {
+            if (Build.VERSION.SDK_INT >= 8) {
                 OnActionExpandListener listener = new OnActionExpandListener() {
                     @Override
                     public boolean onMenuItemActionCollapse(MenuItem item) {
@@ -484,10 +484,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                     }
                 };
 
-                MenuItem item = menu.findItem(R.id.search);
-                item.setOnActionExpandListener(listener);
-
-                final SearchView searchView = (SearchView) item.getActionView();
+                SearchView searchView = new com.actionbarsherlock.widget.SearchView(getSupportActionBar().getThemedContext());
                 searchView.setQueryHint(getString(android.R.string.search_go));
                 searchView.setSubmitButtonEnabled(false);
                 searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -505,9 +502,12 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                         return true;
                     }
                 });
-            } else {
-                menu.removeItem(R.id.search);
-            }
+
+                MenuItem item = menu.findItem(R.id.search);
+                item.setActionView(searchView);
+                item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+                item.setOnActionExpandListener(listener);
+            } else menu.removeItem(R.id.search);
 
             if (prefs.getBoolean("InMUC", false)) menu.removeItem(R.id.sidebar);
             else {
@@ -630,6 +630,9 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
             case R.id.leave:
                 finish();
                 service.leaveRoom(account, jid);
+                break;
+            case R.id.search:
+                item.expandActionView();
                 break;
             case R.id.prev:
                 int prevPosition = -1;

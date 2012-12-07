@@ -24,9 +24,7 @@
           android:title="@string/History"
           android:showAsAction="never"/>
     <item android:id="@+id/search"
-          android:title="@android:string/search_go"
-          android:actionViewClass="android.widget.SearchView"
-          android:showAsAction="never|collapseActionView"/>
+          android:title="@android:string/search_go"/>
     <item android:id="@+id/clear"
           android:title="@string/Clear"
           android:showAsAction="never"/>

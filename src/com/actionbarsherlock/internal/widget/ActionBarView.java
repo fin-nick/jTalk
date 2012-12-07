@@ -16,10 +16,7 @@
 
 package com.actionbarsherlock.internal.widget;
 
-import static com.actionbarsherlock.internal.ResourcesCompat.getResources_getBoolean;
-
 import org.xmlpull.v1.XmlPullParser;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -49,6 +46,7 @@ import android.widget.LinearLayout;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
+import com.jtalk2.R;;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
 import com.actionbarsherlock.internal.ActionBarSherlockCompat;
@@ -64,7 +62,8 @@ import com.actionbarsherlock.view.CollapsibleActionView;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
-import com.jtalk2.R;
+
+import static com.actionbarsherlock.internal.ResourcesCompat.getResources_getBoolean;
 
 /**
  * @hide

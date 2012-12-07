@@ -71,6 +71,7 @@ public class UsersAdapter extends ArrayAdapter<RosterItem> {
         for (String user: users) {
             RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
             item.setName(user);
+            add(item);
         }
 	}
 	
@@ -97,9 +98,6 @@ public class UsersAdapter extends ArrayAdapter<RosterItem> {
 		Presence presence = service.getRoster(account).getPresenceResource(group + "/" + nick);
       	ImageView icon = (ImageView)v.findViewById(R.id.status);
        	icon.setImageBitmap(ip.getIconByPresence(presence));
-       	
-        ImageView close = (ImageView) v.findViewById(R.id.close);
-		close.setVisibility(View.GONE);
         return v;
     }
 

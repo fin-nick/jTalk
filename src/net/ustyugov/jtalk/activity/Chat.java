@@ -27,11 +27,7 @@ import net.ustyugov.jtalk.Notify;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.Smiles;
 import net.ustyugov.jtalk.activity.vcard.VCardActivity;
-import net.ustyugov.jtalk.adapter.ChatAdapter;
-import net.ustyugov.jtalk.adapter.ChatsSpinnerAdapter;
-import net.ustyugov.jtalk.adapter.MucChatAdapter;
-import net.ustyugov.jtalk.adapter.MucUserAdapter;
-import net.ustyugov.jtalk.adapter.OpenChatsAdapter;
+import net.ustyugov.jtalk.adapter.*;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.db.MessageDbHelper;
 import net.ustyugov.jtalk.dialog.ChangeChatDialog;
@@ -39,7 +35,6 @@ import net.ustyugov.jtalk.dialog.MessageMenuDialog;
 import net.ustyugov.jtalk.dialog.MucDialogs;
 import net.ustyugov.jtalk.dialog.RosterDialogs;
 import net.ustyugov.jtalk.dialog.SendToResourceDialog;
-import net.ustyugov.jtalk.dialog.UsersDialog;
 import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.view.MyListView;
 
@@ -533,7 +528,21 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 smiles.showDialog();
                 break;
             case R.id.nick:
-                new UsersDialog(this, account, jid).show();
+                final UsersAdapter adapter = new UsersAdapter(this, account, jid);
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.PasteNick);
+                builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(Chat.this);
+                        String separator = prefs.getString("nickSeparator", ", ");
+                        String nick = adapter.getItem(which).getName();
+
+                        messageInput.setText(messageInput.getText() + nick + separator);
+                        messageInput.setSelection(messageInput.getText().length());
+                    }
+                });
+                builder.create().show();
                 break;
             case R.id.subj:
                 MucDialogs.subjectDialog(this, account, jid);
@@ -553,9 +562,9 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 CharSequence[] array = new CharSequence[list.size()];
                 for (int i = 0; i < list.size(); i++) array[i] = list.get(i);
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(R.string.SelectResource);
-                builder.setItems(array, new DialogInterface.OnClickListener() {
+                AlertDialog.Builder b = new AlertDialog.Builder(this);
+                b.setTitle(R.string.SelectResource);
+                b.setItems(array, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         String res = "" ;
                         if (which > 0) {
@@ -572,7 +581,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                         onResume();
                     }
                 });
-                builder.create().show();
+                b.create().show();
                 break;
             case R.id.sidebar:
                 boolean showSidebar = prefs.getBoolean("EnabledSidebar", true);
@@ -582,11 +591,13 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 break;
             case R.id.info:
                 Intent infoIntent = new Intent(this, VCardActivity.class);
+                infoIntent.putExtra("account", account);
                 infoIntent.putExtra("jid", jid);
                 startActivity(infoIntent);
                 break;
             case R.id.file:
                 Intent intent = new Intent(this, SendFileActivity.class);
+                intent.putExtra("account", account);
                 intent.putExtra("jid", jid);
                 startActivity(intent);
                 break;

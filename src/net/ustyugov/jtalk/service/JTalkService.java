@@ -1409,7 +1409,7 @@ public class JTalkService extends Service {
                 cc.setSASLAuthenticationEnabled(true);
                 cc.setSecurityMode(tls.equals("0") ? SecurityMode.disabled : SecurityMode.enabled);
 
-                if (service.equals("talk.google.com")) cc.setSASLAuthenticationEnabled(false);
+                if (service.equals("talk.google.com") || host.equals("gmail.com")) cc.setSASLAuthenticationEnabled(false);
                 else if (service.equals("vkmessenger.com")) cc.setSecurityMode(SecurityMode.disabled);
 
                 XMPPConnection connection = new XMPPConnection(cc);

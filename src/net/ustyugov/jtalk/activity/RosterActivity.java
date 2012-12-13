@@ -251,6 +251,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
                 MenuItem.OnActionExpandListener listener = new MenuItem.OnActionExpandListener() {
                     @Override
                     public boolean onMenuItemActionCollapse(MenuItem item) {
+                        gridView.setAdapter(null);
                         searchString = null;
                         updateList();
                         updateMenu();
@@ -259,11 +260,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
 
                     @Override
                     public boolean onMenuItemActionExpand(MenuItem item) {
-                        getSupportMenuInflater().inflate(R.menu.find_menu, menu);
-                        menu.removeItem(R.id.prev);
-                        menu.removeItem(R.id.next);
-                        menu.removeItem(R.id.chats);
-
+                        gridView.setAdapter(searchAdapter);
                         searchString = "";
                         updateList();
                         return true;
@@ -314,6 +311,10 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
   	    		RosterDialogs.addDialog(this, null);
   	    		break;
             case R.id.search:
+                getSupportMenuInflater().inflate(R.menu.find_menu, menu);
+                menu.removeItem(R.id.prev);
+                menu.removeItem(R.id.next);
+                menu.removeItem(R.id.chats);
                 item.expandActionView();
                 break;
   	    	case R.id.muc:
@@ -354,16 +355,16 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
 					@Override
 					public void run() {
 						SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(RosterActivity.this);
-                        if (searchString != null) {
+                        if (gridView.getAdapter() != null && gridView.getAdapter() instanceof  SearchAdapter) {
                             searchAdapter.update(searchString);
-                            gridView.setAdapter(searchAdapter);
+                            searchAdapter.notifyDataSetChanged();
                         } else {
                             if (prefs.getBoolean("ShowGroups", true)) {
-                                if (gridView.getAdapter() instanceof NoGroupsAdapter || gridView.getAdapter() instanceof SearchAdapter) gridView.setAdapter(rosterAdapter);
+                                if (gridView.getAdapter() instanceof NoGroupsAdapter || gridView.getAdapter() == null) gridView.setAdapter(rosterAdapter);
                                 rosterAdapter.update();
                                 rosterAdapter.notifyDataSetChanged();
                             } else {
-                                if (gridView.getAdapter() instanceof RosterAdapter || gridView.getAdapter() instanceof SearchAdapter) gridView.setAdapter(simpleAdapter);
+                                if (gridView.getAdapter() instanceof RosterAdapter || gridView.getAdapter() == null) gridView.setAdapter(simpleAdapter);
                                 simpleAdapter.update();
                                 simpleAdapter.notifyDataSetChanged();
                             }

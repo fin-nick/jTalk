@@ -621,10 +621,12 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 service.leaveRoom(account, jid);
                 break;
             case R.id.search:
-                getSupportMenuInflater().inflate(R.menu.find_menu, menu);
-                menu.removeItem(R.id.sidebar);
-                menu.removeItem(R.id.smile);
-                item.expandActionView();
+                if (!item.isActionViewExpanded()) {
+                    getSupportMenuInflater().inflate(R.menu.find_menu, menu);
+                    menu.removeItem(R.id.sidebar);
+                    menu.removeItem(R.id.smile);
+                    item.expandActionView();
+                }
                 break;
             case R.id.prev:
                 int prevPosition = -1;
@@ -804,7 +806,8 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         receivedReceiver =  new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                listAdapter.notifyDataSetChanged();
+                if (!isMuc) listAdapter.notifyDataSetChanged();
+                else listMucAdapter.notifyDataSetChanged();
             }
         };
 

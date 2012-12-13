@@ -41,11 +41,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import org.jivesoftware.smack.util.StringUtils;
 
 public class MessageDialogs {
 	private static Pattern pattern = Pattern.compile("(ht|f)tps?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*", Pattern.CASE_INSENSITIVE);
 	
-	public static void QuoteDialog(final Activity activity, final MessageItem message) {
+	public static void QuoteDialog(final Activity activity, final String jid, final MessageItem message) {
 		final String body = message.getBody();
 		final List<String> urls = new ArrayList<String>();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
@@ -84,8 +85,16 @@ public class MessageDialogs {
                         String str = "";
                         JTalkService service = JTalkService.getInstance();
                         List<MessageItem> msgList = new ArrayList<MessageItem>();
-                        if (service.getMessagesHash(message.getAccount()).containsKey(message.getJid())) {
-                            msgList = service.getMessagesHash(message.getAccount()).get(message.getJid());
+
+                        String account = message.getAccount();
+                        if (service.getConferencesHash(account).containsKey(jid)) {
+                            if (service.getMucMessagesHash(account).containsKey(jid)) {
+                                msgList = service.getMucMessagesHash(account).get(jid);
+                            }
+                        } else {
+                            if (service.getMessagesHash(account).containsKey(jid)) {
+                                msgList = service.getMessagesHash(account).get(jid);
+                            }
                         }
                         for (MessageItem item : msgList) {
                             if (item.isSelected()) {
@@ -95,10 +104,9 @@ public class MessageDialogs {
                                 String t = "(" + time + ")";
                                 if (showtime) str += "> " + t + " " + name + ": " + body + "\n\n";
                                 else str += "> " + name + ": " + body + "\n\n";
-
-                                if (str.length() > 0) intent.putExtra("text", str);
                             }
                         }
+                        intent.putExtra("text", str);
                         break;
                     case 1:
                         intent.putExtra("text", "> " + text + "\n");
@@ -117,7 +125,7 @@ public class MessageDialogs {
         builder.create().show();
 	}
 
-	public static void CopyDialog(final Activity activity, final MessageItem message) {
+	public static void CopyDialog(final Activity activity, final String jid, final MessageItem message) {
 		final String body = message.getBody();
 		final List<String> urls = new ArrayList<String>();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
@@ -156,8 +164,15 @@ public class MessageDialogs {
                         String str = "";
                         JTalkService service = JTalkService.getInstance();
                         List<MessageItem> msgList = new ArrayList<MessageItem>();
-                        if (service.getMessagesHash(message.getAccount()).containsKey(message.getJid())) {
-                            msgList = service.getMessagesHash(message.getAccount()).get(message.getJid());
+                        String account = message.getAccount();
+                        if (service.getConferencesHash(account).containsKey(jid)) {
+                            if (service.getMucMessagesHash(account).containsKey(jid)) {
+                                msgList = service.getMucMessagesHash(account).get(jid);
+                            }
+                        } else {
+                            if (service.getMessagesHash(account).containsKey(jid)) {
+                                msgList = service.getMessagesHash(account).get(jid);
+                            }
                         }
                         for (MessageItem item : msgList) {
                             if (item.isSelected()) {
@@ -167,10 +182,9 @@ public class MessageDialogs {
                                 String t = "(" + time + ")";
                                 if (showtime) str += "> " + t + " " + name + ": " + body + "\n\n";
                                 else str += "> " + name + ": " + body + "\n\n";
-
-                                if (str.length() > 0) clipboard.setText(str);
                             }
                         }
+                        if (str.length() > 0) clipboard.setText(str);
                         break;
                     case 1:
                         clipboard.setText(text);

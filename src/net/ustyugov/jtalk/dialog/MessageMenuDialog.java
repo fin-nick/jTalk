@@ -86,10 +86,10 @@ public class MessageMenuDialog implements OnItemLongClickListener, OnClickListen
                 activity.sendBroadcast(new Intent(Constants.RECEIVED));
                 break;
         	case 1:
-            	MessageDialogs.QuoteDialog(activity, message);
+            	MessageDialogs.QuoteDialog(activity, jid, message);
         		break;
         	case 2:
-        		MessageDialogs.CopyDialog(activity, message);
+        		MessageDialogs.CopyDialog(activity, jid, message);
  	        	break;
         	case 3:
         		MessageDialogs.SelectTextDialog(activity, message);

@@ -434,11 +434,9 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
 
     @Override
     public boolean onKeyUp(int key, KeyEvent event) {
-        if (Build.VERSION.SDK_INT >= 14) {
-            if (key == KeyEvent.KEYCODE_SEARCH) {
-                MenuItem item = menu.findItem(R.id.search);
-                item.expandActionView();
-            }
+        if (key == KeyEvent.KEYCODE_SEARCH) {
+            MenuItem item = menu.findItem(R.id.search);
+            item.expandActionView();
         }
         return super.onKeyUp(key, event);
     }
@@ -466,20 +464,14 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 OnActionExpandListener listener = new OnActionExpandListener() {
                     @Override
                     public boolean onMenuItemActionCollapse(MenuItem item) {
-                        if (!isMuc) {
-                            listAdapter.search("");
-                        } else {
-
-                        }
+                        if (!isMuc) listAdapter.search("");
+                        else listMucAdapter.search("");
                         createOptionMenu();
                         return true;
                     }
 
                     @Override
                     public boolean onMenuItemActionExpand(MenuItem item) {
-                        inflater.inflate(R.menu.find_menu, menu);
-                        menu.removeItem(R.id.sidebar);
-                        menu.removeItem(R.id.smile);
                         return true;
                     }
                 };
@@ -490,11 +482,8 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                     @Override
                     public boolean onQueryTextChange(String newText) {
-                        if (!isMuc) {
-                            listAdapter.search(newText);
-                        } else {
-                            listMucAdapter.search(newText);
-                        }
+                        if (!isMuc) listAdapter.search(newText);
+                        else listMucAdapter.search(newText);
                         return true;
                     }
                     @Override
@@ -632,6 +621,9 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 service.leaveRoom(account, jid);
                 break;
             case R.id.search:
+                getSupportMenuInflater().inflate(R.menu.find_menu, menu);
+                menu.removeItem(R.id.sidebar);
+                menu.removeItem(R.id.smile);
                 item.expandActionView();
                 break;
             case R.id.prev:
@@ -778,7 +770,11 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                     onPause();
                     onResume();
                 }
-                messageInput.setText(messageInput.getText() + text);
+
+                int pos = messageInput.getSelectionEnd();
+                String oldText = messageInput.getText().toString();
+                String newText = oldText.substring(0, pos) + text + oldText.substring(pos);
+                messageInput.setText(newText);
                 messageInput.setSelection(messageInput.getText().length());
             }
         };

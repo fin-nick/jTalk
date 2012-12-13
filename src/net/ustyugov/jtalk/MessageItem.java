@@ -40,6 +40,7 @@ public class MessageItem {
 	private boolean captcha = false;
 	private DataForm form = null;
 	private BobExtension bob = null;
+    private boolean selected = false;
 	
 //	public MessageItem(String account, String time, String body, String name, String id ) {
 //		Date d = new Date();
@@ -92,8 +93,11 @@ public class MessageItem {
 	public void setType(Type type) { if (type != null) this.type = type; }
 	public Type getType() { return this.type; }
 	public void setTime(String time) { this.time = time; }
-	
-	public void setBody(String body) {
+
+    public void select(boolean isSelected) { this.selected = isSelected; }
+    public boolean isSelected() {return selected;}
+
+    public void setBody(String body) {
 		this.body = body.replaceAll("&lt;", "<");
 		this.body = body.replaceAll(";amp;", "&");
 	}

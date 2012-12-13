@@ -177,10 +177,9 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
 			fontSize = Integer.parseInt(prefs.getString("FontSize", context.getResources().getString(R.string.DefaultFontSize)));
 		} catch (NumberFormatException e) {	}
 		
-        View v = convertView;
-        if (v == null) {
-            LayoutInflater vi = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            v = vi.inflate(R.layout.chat_item, null, false);
+        if (convertView == null) {
+            LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.chat_item, null, false);
         }
 
         final MessageItem item = getItem(position);
@@ -243,11 +242,11 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         	}
         }
 
-        LinearLayout linear = (LinearLayout) v.findViewById(R.id.chat_item);
+        LinearLayout linear = (LinearLayout) convertView.findViewById(R.id.chat_item);
         linear.setMinimumHeight(Integer.parseInt(prefs.getString("SmilesSize", "24")));
         
-        final ImageView expand = (ImageView) v.findViewById(R.id.expand);
-        final MyTextView textView = (MyTextView) v.findViewById(R.id.chat1);
+        final ImageView expand = (ImageView) convertView.findViewById(R.id.expand);
+        final MyTextView textView = (MyTextView) convertView.findViewById(R.id.chat1);
         textView.setOnTextLinkClickListener(this);
         textView.setLinkTextColor(linkColor);
         if (enableCollapse) {
@@ -316,7 +315,10 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         }
         
         textView.setTextSize(fontSize);
-        return v;
+
+        if (item.isSelected()) convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0x77525252 : 0xFFDDDDDD);
+        else convertView.setBackgroundColor(0X00000000);
+        return convertView;
     }
 	
 	public void onTextLinkClick(View textView, String s) {

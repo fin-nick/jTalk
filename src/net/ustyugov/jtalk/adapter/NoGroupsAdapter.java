@@ -177,7 +177,7 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
             return convertView;
         } else if (item.isAccount()) {
             Holders.AccountHolder holder;
-            if (convertView == null || convertView.findViewById(R.id.avatar) == null) {
+            if (convertView == null || convertView.findViewById(R.id.account_layout) == null) {
                 LayoutInflater inflater = activity.getLayoutInflater();
                 convertView = inflater.inflate(R.layout.account, null, false);
 
@@ -213,7 +213,7 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 			
 			int count = service.getMessagesCount(account, jid);
 			
-			if(convertView == null || convertView.findViewById(R.id.status_icon) == null) {
+			if(convertView == null || convertView.findViewById(R.id.entry_layout) == null) {
 				LayoutInflater inflater = activity.getLayoutInflater();
 				convertView = inflater.inflate(R.layout.entry, null, false);
 				
@@ -271,7 +271,7 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 			String name = item.getName();
 			int count = service.getMessagesCount(account, name);
 			
-			if(convertView == null || convertView.findViewById(R.id.status_icon) == null) {
+			if(convertView == null || convertView.findViewById(R.id.entry_layout) == null) {
 				LayoutInflater inflater = activity.getLayoutInflater();
 				convertView = inflater.inflate(R.layout.entry, null, false);
 				

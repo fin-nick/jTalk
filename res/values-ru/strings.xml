@@ -112,9 +112,11 @@
     <string name="SendStatus">Отправить статус</string>
     <string name="OpenedChats">Открытые чаты</string>
     <string name="Quote">Цитировать</string>
-    <string name="CopyAll">Скопировать все</string>
+    <string name="CopySelectedMessages">Скопировать выбранные сообщения</string>
+    <string name="CopyTextMessage">Скопировать текст сообщения</string>
     <string name="CopyMessage">Скопировать сообщение</string>
-    <string name="QuoteAll">Цитировать все</string>
+    <string name="QuoteSelectedMessages">Цитировать выбранные сообщения</string>
+    <string name="QuoteTextMessage">Цитировать текст сообщения</string>
     <string name="QuoteMessage">Цитировать сообщение</string>
     <string name="DeleteHistory">Удалить историю</string>
     <string name="SelectText">Выбрать текст</string>
@@ -150,6 +152,8 @@
     <string name="PrivacyLists">Списки приватности</string>
     <string name="HideOfflineContacts">Спрятать отключенных</string>
     <string name="ShowOfflineContacts">Показать отключенных</string>
+    <string name="SelectMessage">Выбрать сообщение</string>
+    <string name="DeselectMessage">Снять выделение</string>
     
     <!-- Dialogs -->
     <string name="Room">Комната</string>

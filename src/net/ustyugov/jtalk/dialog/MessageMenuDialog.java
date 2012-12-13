@@ -51,24 +51,26 @@ public class MessageMenuDialog implements OnItemLongClickListener, OnClickListen
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
     	CharSequence[] items;
     	message = (MessageItem) parent.getAdapter().getItem(position);
-    	
+
     	if (message.getName().equals(activity.getResources().getString(R.string.Me))) {
-    		items = new CharSequence[4];
-    		items[3] = activity.getString(R.string.Edit);
+    		items = new CharSequence[5];
+    		items[4] = activity.getString(R.string.Edit);
     	}
     	else if (message.containsCaptcha()) { 
-    		items = new CharSequence[4];
-    		items[3] = "Captcha";
+    		items = new CharSequence[5];
+    		items[4] = "Captcha";
     	}
     	else if (service.getConferencesHash(account).containsKey(jid)) { 
-    		items = new CharSequence[4];
-    		items[3] = activity.getString(R.string.Reply);
+    		items = new CharSequence[5];
+    		items[4] = activity.getString(R.string.Reply);
     	}
-    	else items = new CharSequence[3];
+    	else items = new CharSequence[4];
 
-    	items[0] = activity.getString(R.string.Quote);
-        items[1] = activity.getString(R.string.Copy);
-        items[2] = activity.getString(R.string.SelectText);
+        if (message.isSelected()) items[0] = activity.getString(R.string.DeselectMessage);
+        else items[0] = activity.getString(R.string.SelectMessage);
+    	items[1] = activity.getString(R.string.Quote);
+        items[2] = activity.getString(R.string.Copy);
+        items[3] = activity.getString(R.string.SelectText);
         
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(R.string.Actions);
@@ -79,16 +81,20 @@ public class MessageMenuDialog implements OnItemLongClickListener, OnClickListen
 
     public void onClick(DialogInterface dialog, int which) { 
         switch (which) {
-        	case 0:
+            case 0:
+                message.select(!message.isSelected());
+                activity.sendBroadcast(new Intent(Constants.RECEIVED));
+                break;
+        	case 1:
             	MessageDialogs.QuoteDialog(activity, message);
         		break;
-        	case 1:
+        	case 2:
         		MessageDialogs.CopyDialog(activity, message);
  	        	break;
-        	case 2:
+        	case 3:
         		MessageDialogs.SelectTextDialog(activity, message);
         	 	break;
-        	case 3:
+        	case 4:
         		if (message.containsCaptcha()) {
         			String id = message.getId(); 
                 	

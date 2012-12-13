@@ -1395,7 +1395,7 @@ public class JTalkService extends Service {
                                 port = record.getPort();
                             }
                         }
-                    } catch(TextParseException ignored) { }
+                    } catch(Exception ignored) { }
                 }
 
                 if (service == null || service.length() <= 3) service = host;

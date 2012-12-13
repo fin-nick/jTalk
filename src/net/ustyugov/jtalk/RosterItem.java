@@ -34,7 +34,7 @@ public class RosterItem {
 		this.type = type;
 		this.entry = entry;
 	}
-	
+
 	public boolean isGroup() {return type == Type.group;}
 	public boolean isAccount() {return type == Type.account;}
 	public boolean isEntry() {return type == Type.entry;}
@@ -45,7 +45,6 @@ public class RosterItem {
 	
 	public void setCollapsed(boolean isExpanded) {this.isCollapsed= isExpanded;}
 	
-	public void setEntry(RosterEntry re) {this.entry = re;}
 	public RosterEntry getEntry() {return this.entry;}
 	
 	public void setName(String name) { this.name = name; }
@@ -56,8 +55,6 @@ public class RosterItem {
 	}
 
 	public String getAccount() { return this.account; }
-	public void setAccount(String account) { this.account = account; }
-	
 	public Object getObject() { return object; }
 	public void setObject(Object object) { this.object = object; } 
 }

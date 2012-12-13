@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.service.JTalkService;
 
@@ -44,17 +45,17 @@ import android.widget.EditText;
 public class MessageDialogs {
 	private static Pattern pattern = Pattern.compile("(ht|f)tps?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*", Pattern.CASE_INSENSITIVE);
 	
-	public static void QuoteDialog(final Activity activity, MessageItem message) {
+	public static void QuoteDialog(final Activity activity, final MessageItem message) {
 		final String body = message.getBody();
 		final List<String> urls = new ArrayList<String>();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
-    	boolean showtime = prefs.getBoolean("ShowTime", false);
+    	final boolean showtime = prefs.getBoolean("ShowTime", false);
 		
 		String time = message.getTime();
         String name = message.getName();
         String t = "(" + time + ")";
         if (showtime) name = t + " " + name;
-        final String text = name + ": " + body;;
+        final String text = name + ": " + body;
         
         Matcher m = pattern.matcher(body);
 		while (m.find()) {
@@ -63,12 +64,13 @@ public class MessageDialogs {
 			urls.add(body.substring(start, end));
 		}
 		
-		CharSequence[] items = new CharSequence[urls.size() + 2];
-		
-        items[0] = activity.getResources().getString(R.string.QuoteAll);
+		CharSequence[] items = new CharSequence[urls.size() + 3];
+
+        items[0] = activity.getResources().getString(R.string.QuoteSelectedMessages);
         items[1] = activity.getResources().getString(R.string.QuoteMessage);
+        items[2] = activity.getResources().getString(R.string.QuoteTextMessage);
         for (int i = 0; i < urls.size(); i++) {
-        	items[i+2] = activity.getResources().getString(R.string.Quote) + " " + urls.get(i);
+        	items[i+3] = activity.getResources().getString(R.string.Quote) + " " + urls.get(i);
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -76,17 +78,37 @@ public class MessageDialogs {
         builder.setItems(items, new OnClickListener() {
         	@Override
         	public void onClick(DialogInterface dialog, int which) {
-        		Intent intent = new Intent(net.ustyugov.jtalk.Constants.PASTE_TEXT);
+        		Intent intent = new Intent(Constants.PASTE_TEXT);
         		switch(which) {
-        		case 0:
-            		intent.putExtra("text", ">" + text + "\n");
-        			break;
-        		case 1:
-        			intent.putExtra("text", ">" + body + "\n");
-        			break;
+                    case 0:
+                        String str = "";
+                        JTalkService service = JTalkService.getInstance();
+                        List<MessageItem> msgList = new ArrayList<MessageItem>();
+                        if (service.getMessagesHash(message.getAccount()).containsKey(message.getJid())) {
+                            msgList = service.getMessagesHash(message.getAccount()).get(message.getJid());
+                        }
+                        for (MessageItem item : msgList) {
+                            if (item.isSelected()) {
+                                String time = item.getTime();
+                                String name = item.getName();
+                                String body = item.getBody();
+                                String t = "(" + time + ")";
+                                if (showtime) str += "> " + t + " " + name + ": " + body + "\n\n";
+                                else str += "> " + name + ": " + body + "\n\n";
+
+                                if (str.length() > 0) intent.putExtra("text", str);
+                            }
+                        }
+                        break;
+                    case 1:
+                        intent.putExtra("text", "> " + text + "\n");
+                        break;
+                    case 2:
+                        intent.putExtra("text", "> " + body + "\n");
+                        break;
         		}
-        		if (which >= 2) {
-        			which = which - 2;
+        		if (which >= 3) {
+        			which = which - 3;
         			intent.putExtra("text", urls.get(which));
         		} 
         		activity.sendBroadcast(intent);
@@ -95,11 +117,11 @@ public class MessageDialogs {
         builder.create().show();
 	}
 
-	public static void CopyDialog(final Activity activity, MessageItem message) {
+	public static void CopyDialog(final Activity activity, final MessageItem message) {
 		final String body = message.getBody();
 		final List<String> urls = new ArrayList<String>();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
-    	boolean showtime = prefs.getBoolean("ShowTime", false);
+    	final boolean showtime = prefs.getBoolean("ShowTime", false);
 		
 		String time = message.getTime();
         String name = message.getName();
@@ -114,12 +136,13 @@ public class MessageDialogs {
 			urls.add(body.substring(start, end));
 		}
 		
-		CharSequence[] items = new CharSequence[urls.size() + 2];
-		
-        items[0] = activity.getResources().getString(R.string.CopyAll);
+		CharSequence[] items = new CharSequence[urls.size() + 3];
+
+        items[0] = activity.getResources().getString(R.string.CopySelectedMessages);
         items[1] = activity.getResources().getString(R.string.CopyMessage);
+        items[2] = activity.getResources().getString(R.string.CopyTextMessage);
         for (int i = 0; i < urls.size(); i++) {
-        	items[i+2] = activity.getResources().getString(R.string.Copy) + " " + urls.get(i);
+        	items[i+3] = activity.getResources().getString(R.string.Copy) + " " + urls.get(i);
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -127,20 +150,40 @@ public class MessageDialogs {
         builder.setItems(items, new OnClickListener() {
         	@Override
         	public void onClick(DialogInterface dialog, int which) {
-        		ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
-        		switch(which) {
-        		case 0:
-        			clipboard.setText(text);
-        			break;
-        		case 1:
-        			clipboard.setText(body);
-        			break;
-        		}
-        		if (which >= 2) {
-        			which = which - 2;
-        			clipboard.setText(urls.get(which));
-        		} 
-        	}
+                ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+                switch(which) {
+                    case 0:
+                        String str = "";
+                        JTalkService service = JTalkService.getInstance();
+                        List<MessageItem> msgList = new ArrayList<MessageItem>();
+                        if (service.getMessagesHash(message.getAccount()).containsKey(message.getJid())) {
+                            msgList = service.getMessagesHash(message.getAccount()).get(message.getJid());
+                        }
+                        for (MessageItem item : msgList) {
+                            if (item.isSelected()) {
+                                String time = item.getTime();
+                                String name = item.getName();
+                                String body = item.getBody();
+                                String t = "(" + time + ")";
+                                if (showtime) str += "> " + t + " " + name + ": " + body + "\n\n";
+                                else str += "> " + name + ": " + body + "\n\n";
+
+                                if (str.length() > 0) clipboard.setText(str);
+                            }
+                        }
+                        break;
+                    case 1:
+                        clipboard.setText(text);
+                        break;
+                    case 2:
+                        clipboard.setText(body);
+                        break;
+                }
+                if (which >= 3) {
+                    which = which - 3;
+                    clipboard.setText(urls.get(which));
+                }
+            }
         });
         builder.create().show();
 	}

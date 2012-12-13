@@ -185,12 +185,10 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
 
     @Override
     public boolean onKeyUp(int key, KeyEvent event) {
-//        if (Build.VERSION.SDK_INT >= 14) {
-            if (key == KeyEvent.KEYCODE_SEARCH) {
-                MenuItem item = menu.findItem(R.id.search);
-                item.expandActionView();
-            }
-//        }
+        if (key == KeyEvent.KEYCODE_SEARCH) {
+            MenuItem item = menu.findItem(R.id.search);
+            item.expandActionView();
+        }
         return super.onKeyUp(key, event);
     }
 

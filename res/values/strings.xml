@@ -121,9 +121,11 @@
     <string name="SendStatus">Send status</string>
     <string name="OpenedChats">Opened Chats</string>
     <string name="Quote">Quote</string>
-    <string name="CopyAll">Copy all</string>
+    <string name="CopySelectedMessages">Copy of selected messages</string>
+    <string name="CopyTextMessage">Copy text of message</string>
     <string name="CopyMessage">Copy message</string>
-    <string name="QuoteAll">Quote all</string>
+    <string name="QuoteSelectedMessages">Quote of selected messages</string>
+    <string name="QuoteTextMessage">Quote text of message</string>
     <string name="QuoteMessage">Quote message</string>
     <string name="DeleteHistory">Delete History</string>
     <string name="SelectText">Select text</string>
@@ -157,6 +159,8 @@
     <string name="PrivacyLists">Privacy Lists</string>
     <string name="HideOfflineContacts">Hide offline contacts</string>
     <string name="ShowOfflineContacts">Show offline contacts</string>
+    <string name="SelectMessage">Select message</string>
+    <string name="DeselectMessage">Deselect message</string>
     
     <!-- Dialogs -->
     <string name="Room">Room</string>

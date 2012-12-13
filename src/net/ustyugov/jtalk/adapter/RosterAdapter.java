@@ -239,7 +239,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 			return convertView;
 		} else if (ri.isAccount()) {
             Holders.AccountHolder holder;
-            if (convertView == null || convertView.findViewById(R.id.avatar) == null) {
+            if (convertView == null || convertView.findViewById(R.id.account_layout) == null) {
                 LayoutInflater inflater = activity.getLayoutInflater();
                 convertView = inflater.inflate(R.layout.account, null, false);
 
@@ -277,7 +277,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 			int count = service.getMessagesCount(account, jid);
 			
 			ItemHolder holder;
-			if (convertView == null || convertView.findViewById(R.id.status_icon) == null) {
+			if (convertView == null || convertView.findViewById(R.id.entry_layout) == null) {
 				LayoutInflater inflater = activity.getLayoutInflater();
 				convertView = inflater.inflate(R.layout.entry, null, false);
 				holder = new ItemHolder();
@@ -337,7 +337,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 			
 			int count = service.getMessagesCount(account, name);
 			
-			if(convertView == null || convertView.findViewById(R.id.status) == null) {		
+			if(convertView == null || convertView.findViewById(R.id.entry_layout) == null) {
 				LayoutInflater inflater = activity.getLayoutInflater();
 				convertView = inflater.inflate(R.layout.entry, null, false);
 				

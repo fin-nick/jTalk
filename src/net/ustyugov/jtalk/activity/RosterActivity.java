@@ -77,7 +77,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
     private NoGroupsAdapter simpleAdapter;
     private RosterAdapter rosterAdapter;
     private String[] statusArray;
-    private String searchString;
+    private String searchString = "";
     
     @Override
     public void onCreate(Bundle icicle) {
@@ -144,8 +144,6 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
     @Override
     public void onResume() {
         super.onResume();
-        searchString = null;
-        
         errorReceiver = new BroadcastReceiver() {
     		@Override
     		public void onReceive(Context context, Intent intent) {
@@ -238,6 +236,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
     
     private void updateMenu() {
     	if (menu != null) {
+            if (gridView.getAdapter() instanceof SearchAdapter) return;
             menu.clear();
             getSupportMenuInflater().inflate(R.menu.roster, menu);
     		menu.findItem(R.id.add).setEnabled(service.isAuthenticated());

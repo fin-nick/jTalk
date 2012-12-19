@@ -42,7 +42,7 @@ public class JTalkProvider  extends ContentProvider {
 		wdg_db = new WidgetDbHelper(getContext()).getWritableDatabase();
 		acc_db = new AccountDbHelper(getContext()).getWritableDatabase();
 		tmp_db = new TemplatesDbHelper(getContext()).getWritableDatabase();
-		return (msg_db == null) ? false : true;
+		return (msg_db != null);
 	}
 	
 	@Override

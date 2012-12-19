@@ -1478,7 +1478,7 @@ public class JTalkService extends Service {
                 VCard vCard = new VCard();
                 try {
                     vCard.load(connection, username);
-                } catch (XMPPException ignored) {	}
+                } catch (XMPPException ignored) { }
                 setVCard(username, vCard);
 
                 try {

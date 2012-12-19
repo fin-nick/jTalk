@@ -372,16 +372,23 @@ public class RosterDialogs {
 		        builder.setAdapter(adapter, new OnClickListener() {
 		        	@Override
 		        	public void onClick(DialogInterface dialog, int which) {
+                        String fullJid = jid;
 	        			String resource = list.get(which);
+                        if (resource != null && resource.length() > 0) fullJid = jid + "/" + resource;
 	        			Intent intent = new Intent(activity, CommandsActivity.class);
 	        			intent.putExtra("account", account);
-	        			intent.putExtra("jid", jid + "/" + resource);
+	        			intent.putExtra("jid", fullJid);
 	        	        activity.startActivity(intent);
 		        	}
 		        });
 		        builder.create().show();
 			}
-		}
+		} else {
+            Intent intent = new Intent(activity, CommandsActivity.class);
+            intent.putExtra("account", account);
+            intent.putExtra("jid", jid);
+            activity.startActivity(intent);
+        }
 	}
 	
 	public static void ContactMenuDialog(final Activity activity, final RosterItem item) {
@@ -606,10 +613,13 @@ public class RosterDialogs {
 	        		activity.startActivity(intent);
 	        		break;
 	        	case 2:
-	        		Intent comIntent = new Intent(activity, CommandsActivity.class);
-        			comIntent.putExtra("account", account);
-        			comIntent.putExtra("jid", jid);
-        	        activity.startActivity(comIntent);
+                    if (!jid.contains("/")) RosterDialogs.resourceDialog(activity, account, jid);
+                    else {
+                        Intent comIntent = new Intent(activity, CommandsActivity.class);
+                        comIntent.putExtra("account", account);
+                        comIntent.putExtra("jid", jid);
+                        activity.startActivity(comIntent);
+                    }
 	        		break;
 	        	case 3:
 	        		activity.getContentResolver().delete(JTalkProvider.CONTENT_URI, "jid = '" + jid + "'", null);

@@ -19,6 +19,8 @@ package net.ustyugov.jtalk.adapter;
 
 import net.ustyugov.jtalk.service.JTalkService;
 
+import org.jivesoftware.smackx.commands.AdHocCommandManager;
+import org.jivesoftware.smackx.packet.DiscoverItems;
 import org.jivesoftware.smackx.packet.DiscoverItems.Item;
 
 import android.content.Context;
@@ -33,12 +35,25 @@ import android.widget.TextView;
 
 import com.jtalk2.R;
 
+import java.util.Iterator;
+
 public class CommandsAdapter extends ArrayAdapter<Item> {
-	private JTalkService service;
-	
-	public CommandsAdapter(Context context) {
+    private JTalkService service;
+
+	public CommandsAdapter(Context context, String account, String jid) {
 		super(context, R.id.item);
-        this.service = JTalkService.getInstance();
+        service = JTalkService.getInstance();
+        AdHocCommandManager manager = AdHocCommandManager.getAddHocCommandsManager(service.getConnection(account));
+        if (manager != null) {
+            try {
+                DiscoverItems items = manager.discoverCommands(jid);
+                Iterator<Item> it = items.getItems();
+                while(it.hasNext()){
+                    Item item = it.next();
+                    add(item);
+                }
+            } catch (Exception ignored) { }
+        }
 	}
 	
 	@Override
@@ -59,7 +74,8 @@ public class CommandsAdapter extends ArrayAdapter<Item> {
         label.setText(name);
         
         ImageView icon = (ImageView)v.findViewById(R.id.status);
-        icon.setVisibility(View.GONE);
+        icon.setImageResource(R.drawable.icon_online);
+        icon.setVisibility(View.INVISIBLE);
         return v;
     }
 }

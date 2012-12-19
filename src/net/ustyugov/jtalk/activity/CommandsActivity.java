@@ -17,13 +17,9 @@
 
 package net.ustyugov.jtalk.activity;
 
-import java.util.Iterator;
-
 import net.ustyugov.jtalk.adapter.CommandsAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
 
-import org.jivesoftware.smackx.commands.AdHocCommandManager;
-import org.jivesoftware.smackx.packet.DiscoverItems;
 import org.jivesoftware.smackx.packet.DiscoverItems.Item;
 
 import android.content.Intent;
@@ -44,24 +40,21 @@ import com.jtalk2.R;
 
 public class CommandsActivity extends SherlockActivity implements OnItemClickListener {
 	private JTalkService service;
-	private String fullJid;
+	private String jid;
 	private String account;
 	private ProgressBar progress;
 	private ListView list;
-	private Init task;
 	private CommandsAdapter adapter;
-	private AdHocCommandManager ahcm;
-	
+
 	@Override
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
-		fullJid = getIntent().getStringExtra("jid");
+		jid = getIntent().getStringExtra("jid");
 		account = getIntent().getStringExtra("account");
 		service = JTalkService.getInstance();
-		ahcm = AdHocCommandManager.getAddHocCommandsManager(service.getConnection(account));
-		
+
 		setContentView(R.layout.list_activity);
 		setTitle(R.string.ExecuteCommand);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -77,9 +70,7 @@ public class CommandsActivity extends SherlockActivity implements OnItemClickLis
         list.setDividerHeight(0);
         list.setCacheColorHint(0x00000000);
         
-        if (task != null && task.getStatus() == AsyncTask.Status.RUNNING) task.cancel(true);
-  		task = new Init();
-  		task.execute(null, null, null);
+        new Init().execute(null, null, null);
 	}
 	
 	@Override
@@ -91,10 +82,10 @@ public class CommandsActivity extends SherlockActivity implements OnItemClickLis
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		Item item = (Item) parent.getItemAtPosition(position);
-		
+
 		Intent intent = new Intent(this, DataFormActivity.class);
         intent.putExtra("account", account);
-		intent.putExtra("jid", fullJid);
+		intent.putExtra("jid", jid);
 		intent.putExtra("node", item.getNode());
 		intent.putExtra("com", true);
 		startActivity(intent);
@@ -113,18 +104,7 @@ public class CommandsActivity extends SherlockActivity implements OnItemClickLis
 	private class Init extends AsyncTask<String, Void, Void> {
 		@Override
 		protected Void doInBackground(String... params) {
-			try {
-				adapter = new CommandsAdapter(CommandsActivity.this);
-				
-				if (ahcm != null) {
-					DiscoverItems items = ahcm.discoverCommands(fullJid);
-					Iterator<Item> it = items.getItems();
-					while(it.hasNext()){
-						Item item = it.next();
-						adapter.add(item);
-					}
-				}
-			} catch (Exception ignored) {	}
+            adapter = new CommandsAdapter(CommandsActivity.this, account, jid);
 			return null;
 		}
 		

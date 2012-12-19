@@ -19,11 +19,14 @@ package net.ustyugov.jtalk.activity;
 
 import java.util.Iterator;
 
+import android.view.ViewGroup;
+import com.actionbarsherlock.view.MenuItem;
 import net.ustyugov.jtalk.adapter.OptionsSpinnerAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.view.MyEditText;
 
 import org.jivesoftware.smack.PacketCollector;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.packet.IQ;
@@ -66,7 +69,6 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 	private DataForm form;
 	private JTalkService service = JTalkService.getInstance();
 	private LinearLayout layout;
-	private String id;
 	private String jid;
 	private String account;
 	private boolean reg = false;
@@ -80,10 +82,6 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 	private Button okButton;
 	private Button cancelButton;
 	private BobExtension bob = null;
-	private RegistrationTask regTask;
-	private CaptchaTask capTask;
-	private CommandTask comTask;
-	private MucTask mucTask;
 	private RemoteCommand rc;
 	private SharedPreferences prefs;
 	
@@ -118,21 +116,14 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 		buttonBar = (LinearLayout) findViewById(R.id.data_form_button_bar);
 		
 		if (reg) {
-			if (regTask != null && regTask.getStatus() == AsyncTask.Status.RUNNING) regTask.cancel(true);
-	  		regTask = new RegistrationTask();
-	  		regTask.execute(null, null, null);
+            new RegistrationTask().execute(null, null, null);
 		} else if (cap) {
-			if (capTask != null && capTask.getStatus() == AsyncTask.Status.RUNNING) capTask.cancel(true);
-	  		capTask = new CaptchaTask();
-	  		capTask.execute(null, null, null);
+            new CaptchaTask().execute(null, null, null);
 		} else if (com) {
-			if (comTask != null && comTask.getStatus() == AsyncTask.Status.RUNNING) comTask.cancel(true);
-	  		comTask = new CommandTask();
-	  		comTask.execute(null, null, null);
+            String node = getIntent().getStringExtra("node");
+            new CommandTask().execute(node, null, null);
 		} else if (muc) {
-			if (mucTask != null && mucTask.getStatus() == AsyncTask.Status.RUNNING) mucTask.cancel(true);
-	  		mucTask = new MucTask();
-	  		mucTask.execute(null, null, null);
+            new MucTask().execute(null, null, null);
 		}
 	}
 	
@@ -141,7 +132,23 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 		super.onResume();
 		service.resetTimer();
 	}
-	
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                if (rc != null && rc.getStatus() == RemoteCommand.Status.executing) {
+                    try {
+                        rc.cancel();
+                    } catch (XMPPException ignored) { }
+                }
+                finish();
+                break;
+        }
+        return true;
+    }
+
+    @Override
 	public void onClick(View view) {
 		if (view.equals(cancelButton)) {
 			finish();
@@ -201,14 +208,20 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 								reg.setType(IQ.Type.SET);
 								reg.setTo(jid);
 								reg.addExtension(f);
-								
-								PacketCollector collector = service.getConnection(account).createPacketCollector(new PacketIDFilter(id));
-								service.getConnection(account).sendPacket(reg);
+
+                                XMPPConnection connection = service.getConnection(account);
+								PacketCollector collector = connection.createPacketCollector(new PacketIDFilter(id));
+								connection.sendPacket(reg);
 								
 								IQ result = (IQ) collector.nextResult(5000);
 								if (result != null) {
 									XMPPError error = result.getError();
-									if (error != null ) Toast.makeText(DataFormActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+									if (error != null) {
+                                        int code = error.getCode();
+                                        String condition = error.getCondition();
+                                        String message = error.getMessage();
+                                        Toast.makeText(DataFormActivity.this, "["+code+"] " + condition + ": " + message, Toast.LENGTH_LONG).show();
+                                    }
 									else finish();
 								}
 							} else if (cap) {
@@ -223,10 +236,11 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 								iq.setType(IQ.Type.SET);
 								iq.setTo(jid);
 								iq.addExtension(captcha);
-									
-								PacketCollector collector = service.getConnection(account).createPacketCollector(new PacketIDFilter(id));
-								service.getConnection(account).sendPacket(iq);
-									
+
+                                XMPPConnection connection = service.getConnection(account);
+								PacketCollector collector = connection.createPacketCollector(new PacketIDFilter(id));
+								connection.sendPacket(iq);
+
 								IQ result = (IQ) collector.nextResult(5000);
 								if (result != null) {
 									XMPPError error = result.getError();
@@ -303,6 +317,7 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 	private ImageView createImageView(String cid, byte[] data) {
 		Bitmap b = BitmapFactory.decodeByteArray(data, 0, data.length);
 		ImageView image = new ImageView(this);
+        image.setLayoutParams(new ViewGroup.LayoutParams(-1, -1));
 		image.setTag("cid:" + cid);
 		if (b != null) {
 			image.getLayoutParams().height = b.getHeight();
@@ -414,14 +429,15 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 	private class RegistrationTask extends AsyncTask<String, Void, Void> {
 		@Override
 		protected Void doInBackground(String... params) {
-			id = System.currentTimeMillis()+"";
+			String id = System.currentTimeMillis()+"";
 			Registration reg = new Registration();
 			reg.setPacketID(id);
 			reg.setType(IQ.Type.GET);
 			reg.setTo(jid);
-			
-			PacketCollector collector = service.getConnection(account).createPacketCollector(new PacketIDFilter(id));
-			service.getConnection(account).sendPacket(reg);
+
+            XMPPConnection connection = service.getConnection(account);
+			PacketCollector collector = connection.createPacketCollector(new PacketIDFilter(id));
+			connection.sendPacket(reg);
 			
 			IQ result = (IQ) collector.nextResult(5000);
 			try {
@@ -456,7 +472,7 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 		protected Void doInBackground(String... params) {
 			byte[] d = getIntent().getByteArrayExtra("bob");
 			String cid = getIntent().getStringExtra("cid");
-			id = getIntent().getStringExtra("id");
+			String id = getIntent().getStringExtra("id");
 			form = service.getDataForm(id);
 			bob = new BobExtension(cid, null);
 			bob.setData(d);
@@ -484,7 +500,7 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 	private class CommandTask extends AsyncTask<String, Void, Void> {
 		@Override
 		protected Void doInBackground(String... params) {
-			String node = getIntent().getStringExtra("node");
+			String node = params[0];
 			AdHocCommandManager ahcm = AdHocCommandManager.getAddHocCommandsManager(service.getConnection(account));
 			if (ahcm != null && node != null) {
 				try {
@@ -496,10 +512,13 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 							form = rc.getForm().getDataFormToSend();
 							createForm();
 						}
-					} else if (status == AdHocCommand.Status.completed || status == AdHocCommand.Status.canceled) finish();
+					} else if (status == AdHocCommand.Status.completed || status == AdHocCommand.Status.canceled) {
+                        form = rc.getForm().getDataFormToSend();
+                        createForm();
+//                        finish();
+                    }
 				} catch (XMPPException e) { finish(); }
-			}
-			
+			} else finish();
 			return null;
 		}
 		

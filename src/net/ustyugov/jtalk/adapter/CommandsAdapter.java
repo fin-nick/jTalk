@@ -43,17 +43,18 @@ public class CommandsAdapter extends ArrayAdapter<Item> {
 	public CommandsAdapter(Context context, String account, String jid) {
 		super(context, R.id.item);
         service = JTalkService.getInstance();
-        AdHocCommandManager manager = AdHocCommandManager.getAddHocCommandsManager(service.getConnection(account));
-        if (manager != null) {
-            try {
+        try {
+            AdHocCommandManager manager = AdHocCommandManager.getAddHocCommandsManager(service.getConnection(account));
+            if (manager != null) {
+
                 DiscoverItems items = manager.discoverCommands(jid);
                 Iterator<Item> it = items.getItems();
                 while(it.hasNext()){
                     Item item = it.next();
                     add(item);
                 }
-            } catch (Exception ignored) { }
-        }
+            }
+        } catch (Exception ignored) { }
 	}
 	
 	@Override

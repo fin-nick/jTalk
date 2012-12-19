@@ -10,9 +10,12 @@
 	<item android:id="@+id/add"
 	    android:showAsAction="never"
         android:title="@string/Add"/>
-    <item android:id="@+id/muc"
+    <item android:id="@+id/bookmarks"
         android:showAsAction="never"
         android:title="@string/Bookmarks"/>
+    <item android:id="@+id/muc"
+          android:showAsAction="never"
+          android:title="@string/MUC"/>
     <item android:id="@+id/offline"
         android:showAsAction="never"
         android:title=""/>

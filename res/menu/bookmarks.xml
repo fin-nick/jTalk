@@ -4,9 +4,10 @@
           android:title="@string/OpenedChats"
           android:icon="@drawable/ic_menu_cc"
           android:showAsAction="always"/>
-    <item android:id="@+id/bookmarks"
-          android:title="@string/Bookmarks"
-          android:showAsAction="ifRoom|withText"/>
+    <item android:id="@+id/add"
+          android:title="@string/Add"
+          android:icon="@android:drawable/ic_menu_add"
+          android:showAsAction="ifRoom"/>
     <item android:id="@+id/join"
           android:title="@string/Join"
           android:showAsAction="never"/>

@@ -134,14 +134,19 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 	}
 
     @Override
+    public void onPause() {
+        super.onPause();
+        if (rc != null && rc.getStatus() == RemoteCommand.Status.executing) {
+            try {
+                rc.cancel();
+            } catch (XMPPException ignored) { }
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                if (rc != null && rc.getStatus() == RemoteCommand.Status.executing) {
-                    try {
-                        rc.cancel();
-                    } catch (XMPPException ignored) { }
-                }
                 finish();
                 break;
         }

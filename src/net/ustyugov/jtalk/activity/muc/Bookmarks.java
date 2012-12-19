@@ -71,13 +71,12 @@ public class Bookmarks extends SherlockActivity {
 	private BroadcastReceiver updateReceiver;
 	private BroadcastReceiver errorReceiver;
 	private JTalkService service;
-	private SharedPreferences prefs;
 
 	@Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         service = JTalkService.getInstance();
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
 		setTitle(R.string.Bookmarks);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -207,7 +206,7 @@ public class Bookmarks extends SherlockActivity {
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getSupportMenuInflater();
-        inflater.inflate(R.menu.muc, menu);
+        inflater.inflate(R.menu.bookmarks, menu);
         return super.onCreateOptionsMenu(menu);
     }
 	

@@ -66,7 +66,11 @@ public class Avatars {
 							image.setImageBitmap(bitmap);
 							image.setVisibility(View.VISIBLE);
 						} else {
-                            if (image != null) image.setVisibility(View.INVISIBLE);
+                            if (image != null) {
+                                image.setMaxWidth(1);
+                                image.setMinimumWidth(1);
+                                image.setVisibility(View.INVISIBLE);
+                            }
                         }
 					}
 				});

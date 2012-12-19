@@ -139,6 +139,7 @@ public class MucDialogs {
 		        		break;
 		        	case 3:
 		        		Intent cintent = new Intent(activity, CommandsActivity.class);
+                        cintent.putExtra("account", account);
 		    			cintent.putExtra("jid", group + "/" + nick);
 		    	        activity.startActivity(cintent);
 		        		break;

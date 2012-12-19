@@ -30,6 +30,7 @@ import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.Notify;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.activity.muc.Bookmarks;
+import net.ustyugov.jtalk.activity.muc.Muc;
 import net.ustyugov.jtalk.adapter.NoGroupsAdapter;
 import net.ustyugov.jtalk.adapter.RosterAdapter;
 import net.ustyugov.jtalk.adapter.SearchAdapter;
@@ -316,10 +317,14 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
                 menu.removeItem(R.id.chats);
                 item.expandActionView();
                 break;
-  	    	case R.id.muc:
-  	    		Intent mucIntent = new Intent(this, Bookmarks.class);
-  	    		startActivity(mucIntent);
+  	    	case R.id.bookmarks:
+  	    		Intent bIntent = new Intent(this, Bookmarks.class);
+  	    		startActivity(bIntent);
   	    		break;
+            case R.id.muc:
+                Intent mIntent = new Intent(this, Muc.class);
+                startActivity(mIntent);
+                break;
   	    	case R.id.chats:
   	    		ChangeChatDialog.show(this);
   	    		break;

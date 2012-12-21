@@ -140,11 +140,10 @@ public class MucRosterAdapter extends ArrayAdapter<RosterItem> {
             RosterEntry re = item.getEntry();
             String jid = re.getUser();
             String name = re.getName();
-            String state = "";
             String role = "";
             if (name == null || name.length() <= 0 ) name = jid;
 
-            Presence presence = service.getPresence(item.getAccount(), jid);
+            Presence presence = service.getPresence(account, jid);
             String status = service.getStatus(account, jid);
             if (service.getComposeList().contains(jid)) status = service.getString(R.string.Composes);
 
@@ -181,7 +180,7 @@ public class MucRosterAdapter extends ArrayAdapter<RosterItem> {
                 holder = (ItemHolder) convertView.getTag();
             }
 
-            holder.name.setText(name + state);
+            holder.name.setText(name);
             if (role.equals("moderator")) holder.name.setTextColor(0xFFFF8800);
             else if (role.equals("visitor")) holder.name.setTextColor(0xFF777777);
             else holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFEEEEEE : 0xFF343434);
@@ -210,7 +209,7 @@ public class MucRosterAdapter extends ArrayAdapter<RosterItem> {
             }
 
             if (prefs.getBoolean("LoadAvatar", false)) {
-                Avatars.loadAvatar(activity, jid, holder.avatar);
+                Avatars.loadAvatar(activity, jid.replaceAll("/", "%"), holder.avatar);
             }
 
             if (iconPicker != null) holder.statusIcon.setImageBitmap(iconPicker.getIconByPresence(presence));

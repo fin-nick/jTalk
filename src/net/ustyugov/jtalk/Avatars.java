@@ -63,6 +63,9 @@ public class Avatars {
 						}
 						
 						if (bitmap != null && image != null) {
+                            float value = 42 * activity.getResources().getDisplayMetrics().density;
+                            image.setMaxWidth((int)value);
+                            image.setMinimumWidth((int)value);
 							image.setImageBitmap(bitmap);
 							image.setVisibility(View.VISIBLE);
 						} else {

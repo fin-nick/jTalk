@@ -235,7 +235,6 @@
             android:defaultValue="false"/>
         <CheckBoxPreference 
             android:title="Auto load avatars"
-            android:summary="In MUC. Attention: traffic"
             android:key="LoadAllAvatars"
             android:defaultValue="false"/>
     </PreferenceScreen>

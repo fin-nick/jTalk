@@ -21,6 +21,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import android.preference.PreferenceManager;
+import net.ustyugov.jtalk.Avatars;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.MessageLog;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -91,7 +93,13 @@ public class RstListener implements RosterListener {
         
         Intent updateIntent = new Intent(Constants.UPDATE);
       	MessageItem item = new MessageItem(account, jid);
-		if (presence.isAvailable()) item.setBody(statusArray[getPosition(mode)] + " " + status);
+		if (presence.isAvailable()) {
+            item.setBody(statusArray[getPosition(mode)] + " " + status);
+
+            if (PreferenceManager.getDefaultSharedPreferences(service).getBoolean("LoadAllAvatars", false)) {
+                Avatars.loadAvatar(account, jid);
+            }
+        }
 		else {
 			item.setBody(statusArray[5] + " " + status);
 			updateIntent.putExtra("all", true);

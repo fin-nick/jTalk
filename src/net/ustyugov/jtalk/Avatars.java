@@ -80,46 +80,91 @@ public class Avatars {
 			}
 		}.start();
 	}
+
+    public static void loadAvatar(String account, String jid) {
+        new LoadAvatar(JTalkService.getInstance().getConnection(account), jid).execute();
+    }
+
+    private static class LoadAvatar extends AsyncTask<Void, Void, Void> {
+        private String jid;
+        private XMPPConnection connection;
+
+        public LoadAvatar(XMPPConnection connection, String jid) {
+            this.connection = connection;
+            this.jid = jid;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            File file = new File(Constants.PATH);
+            file.mkdir();
+
+            try {
+                if (file.list(new Filter(jid)).length > 0) return null;
+
+                VCard vcard = new VCard();
+                vcard.load(connection, jid);
+                byte[] buffer = vcard.getAvatar();
+
+                if (buffer != null) {
+                    FileOutputStream fos = new FileOutputStream(Constants.PATH + "/" + jid.replace("/", "%"));
+                    fos.write(buffer);
+                    fos.close();
+                }
+            } catch (Exception ignored) { }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            JTalkService.getInstance().sendBroadcast(new Intent(Constants.UPDATE));
+        }
+    }
 	
 	public static void loadAllAvatars(XMPPConnection connection, String group) {
-		new LoadAllAvatars(connection, group).execute();
+        JTalkService service = JTalkService.getInstance();
+        String account = StringUtils.parseBareAddress(connection.getUser());
+        Iterator<Presence> it = service.getRoster(account).getPresences(group);
+
+        while (it.hasNext()) {
+            Presence p = it.next();
+            String jid = p.getFrom();
+            new LoadAllAvatars(connection, group, jid).execute();
+        }
 	}
 	
 	private static class LoadAllAvatars extends AsyncTask<Void, Void, Void> {
-		private String group;
+		private String jid;
+        private String group;
 		private XMPPConnection connection;
-        private String account;
-		
-		public LoadAllAvatars(XMPPConnection connection, String group) {
+
+		public LoadAllAvatars(XMPPConnection connection, String group, String jid) {
 			this.connection = connection;
-			this.group = group;
-            this.account = StringUtils.parseBareAddress(connection.getUser());
+			this.jid = jid;
+            this.group = group;
 		}
 		
 		@Override
 		protected Void doInBackground(Void... params) {
 			File file = new File(Constants.PATH);
 			file.mkdir();
-			if (file.list(new Filter(group)).length < 1) {
-				JTalkService service = JTalkService.getInstance();
-				Iterator<Presence> it = service.getRoster(account).getPresences(group);
-				while (it.hasNext()) {
-					try {
-						Presence p = it.next();
-						String jid = p.getFrom();
-						
-						VCard vcard = new VCard();
-						vcard.load(connection, jid);
-						byte[] buffer = vcard.getAvatar();
-						
-						if (buffer != null) {
-							FileOutputStream fos = new FileOutputStream(Constants.PATH + "/" + jid.replace("/", "%"));
-							fos.write(buffer);
-							fos.close();
-						}
-					} catch (Exception ignored) { }
-				}
-			}
+            String[] files = file.list(new Filter(group));
+
+            try {
+                for(String filename : files) {
+                    if (filename.equals(jid.replaceAll("/", "%"))) return null;
+                }
+
+                VCard vcard = new VCard();
+                vcard.load(connection, jid);
+                byte[] buffer = vcard.getAvatar();
+
+                if (buffer != null) {
+                    FileOutputStream fos = new FileOutputStream(Constants.PATH + "/" + jid.replace("/", "%"));
+                    fos.write(buffer);
+                    fos.close();
+                }
+            } catch (Exception ignored) { }
 			return null;
 		}
 		
@@ -127,19 +172,18 @@ public class Avatars {
 		protected void onPostExecute(Void result) {
 			JTalkService.getInstance().sendBroadcast(new Intent(Constants.PRESENCE_CHANGED));
 		}
-		
-		private class Filter implements FilenameFilter {
-			private String group;
-			
-			public Filter(String group) {
-				this.group = group;
-			}
-
-			@Override
-			public boolean accept(File dir, String filename) {
-                return filename.contains(group);
-			}
-			
-		}
 	}
+
+    private static class Filter implements FilenameFilter {
+        private String jid;
+
+        public Filter(String jid) {
+            this.jid = jid;
+        }
+
+        @Override
+        public boolean accept(File dir, String filename) {
+            return filename.contains(jid);
+        }
+    }
 }

@@ -18,6 +18,7 @@
 package net.ustyugov.jtalk.adapter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,6 +26,7 @@ import net.ustyugov.jtalk.Holders.GroupHolder;
 import net.ustyugov.jtalk.Holders.ItemHolder;
 import net.ustyugov.jtalk.IconPicker;
 import net.ustyugov.jtalk.RosterItem;
+import net.ustyugov.jtalk.SortList;
 import net.ustyugov.jtalk.service.JTalkService;
 
 import org.jivesoftware.smack.Roster;
@@ -107,6 +109,12 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 	    				else if (m == Presence.Mode.xa) vXa.add(jid);
 	    				else if (m == Presence.Mode.dnd) vDnd.add(jid);
 	    				else if (m == Presence.Mode.available) vOnline.add(jid);
+
+                        Collections.sort(vChat, new SortList.StringComparator());
+                        Collections.sort(vAway, new SortList.StringComparator());
+                        Collections.sort(vXa, new SortList.StringComparator());
+                        Collections.sort(vDnd, new SortList.StringComparator());
+                        Collections.sort(vOnline, new SortList.StringComparator());
 	    			}
 	    			else if (role.equals("participant")) {
 	    				if (m == Presence.Mode.chat) pChat.add(jid);
@@ -114,6 +122,12 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 	    				else if (m == Presence.Mode.xa) pXa.add(jid);
 	    				else if (m == Presence.Mode.dnd) pDnd.add(jid);
 	    				else if (m == Presence.Mode.available) pOnline.add(jid);
+
+                        Collections.sort(pChat, new SortList.StringComparator());
+                        Collections.sort(pAway, new SortList.StringComparator());
+                        Collections.sort(pXa, new SortList.StringComparator());
+                        Collections.sort(pDnd, new SortList.StringComparator());
+                        Collections.sort(pOnline, new SortList.StringComparator());
 	    			}
 	    			else if (role.equals("moderator")) {
 	    				if (m == Presence.Mode.chat) mChat.add(jid);
@@ -121,6 +135,12 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 	    				else if (m == Presence.Mode.xa) mXa.add(jid);
 	    				else if (m == Presence.Mode.dnd) mDnd.add(jid);
 	    				else if (m == Presence.Mode.available) mOnline.add(jid);
+
+                        Collections.sort(mChat, new SortList.StringComparator());
+                        Collections.sort(mAway, new SortList.StringComparator());
+                        Collections.sort(mXa, new SortList.StringComparator());
+                        Collections.sort(mDnd, new SortList.StringComparator());
+                        Collections.sort(mOnline, new SortList.StringComparator());
 	    			}
 	    		}
 			}

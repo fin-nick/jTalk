@@ -467,7 +467,7 @@ public class Roster {
         			String name2 = entry2.getName();
         			if (name2 == null) name2 = entry2.getUser();
         			
-					return ((Comparable<String>) name1).compareTo(name2);
+					return name1.toLowerCase().compareTo(name2.toLowerCase());
 				}
         	});
     	}

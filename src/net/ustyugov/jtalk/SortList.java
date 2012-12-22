@@ -17,10 +17,7 @@
 
 package net.ustyugov.jtalk;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import net.ustyugov.jtalk.service.JTalkService;
 
@@ -145,7 +142,13 @@ public class SortList {
         		}
         	}
     	}
-    	
+
+        Collections.sort(chat, new StringComparator());
+        Collections.sort(online, new StringComparator());
+        Collections.sort(away, new StringComparator());
+        Collections.sort(xa, new StringComparator());
+        Collections.sort(dnd, new StringComparator());
+
     	List<String> result = new ArrayList<String>();
     	result.addAll(chat);
     	result.addAll(chat.size(),online);
@@ -153,5 +156,12 @@ public class SortList {
     	result.addAll(chat.size()+online.size()+away.size(), xa);
     	result.addAll(chat.size()+online.size()+away.size()+xa.size(), dnd);
 		return result;
+    }
+
+    public static class StringComparator implements Comparator<String> {
+        @Override
+        public int compare(String s1, String s2) {
+            return s1.toLowerCase().compareTo(s2.toLowerCase());
+        }
     }
 }

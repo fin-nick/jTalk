@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import android.view.inputmethod.EditorInfo;
+import android.widget.*;
 import com.actionbarsherlock.widget.SearchView;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
@@ -63,15 +65,9 @@ import android.view.View;
 import android.view.View.OnKeyListener;
 import android.view.View.OnLongClickListener;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
@@ -215,6 +211,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
 
         listAdapter = new ChatAdapter(this, smiles);
         listView = (MyListView) findViewById(R.id.chat_list);
+        listView.setFocusable(false);
         listView.setCacheColorHint(0x00000000);
         listView.setOnScrollListener(this);
         listView.setDividerHeight(0);
@@ -231,9 +228,9 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                     String nick = item.getName();
                     String text = messageInput.getText().toString();
                     if (text.length() > 0) {
-                        text += " " + nick + separator + " ";
+                        text += " " + nick + separator;
                     } else {
-                        text = nick + separator + " ";
+                        text = nick + separator;
                     }
                     messageInput.setText(text);
                     messageInput.setSelection(messageInput.getText().length());
@@ -256,17 +253,19 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         });
 
         messageInput = (EditText)findViewById(R.id.messageInput);
-        if (prefs.getBoolean("SendOnEnter", false)) {
-            messageInput.setOnKeyListener(new OnKeyListener() {
-                public boolean onKey(View v, int keyCode, KeyEvent event) {
-                    if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                        if (event.isShiftPressed()) messageInput.append("\n");
+        messageInput.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if (keyEvent != null && keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                    if (prefs.getBoolean("SendOnEnter", false)) {
+                        if (keyEvent.isShiftPressed() || keyEvent.isAltPressed()) messageInput.append("\n");
                         else onClick(sendButton);
                         return true;
-                    } else return false;
+                    }
                 }
-            });
-        }
+                return false;
+            }
+        });
 
         sendButton  = (Button)findViewById(R.id.SendButton);
         sendButton.setEnabled(false);

@@ -65,26 +65,6 @@
            android:title="@string/FontSize"
            android:defaultValue="@string/DefaultFontSize" 
            android:numeric="integer"/>
-         <PreferenceScreen android:title="@string/Smiles">
-			<CheckBoxPreference
-           		android:key="ShowSmiles"
-           		android:title="@string/ShowSmiles"
-           		android:defaultValue="true" />
-         	<ListPreference 
-         		android:key="SmilesPack"
-         		android:title="@string/Smiles"/>
-         	<EditTextPreference
-           		android:key="SmilesSize"
-           		android:title="@string/Size"
-           		android:defaultValue="18"
-           		android:numeric="integer"/>
-         	<EditTextPreference
-                android:key="SmilesColumns"
-                android:title="Columns"
-                android:summary="The number of columns in the dialog"
-                android:defaultValue="3" 
-                android:numeric="integer"/>
-		</PreferenceScreen>
     </PreferenceScreen>
     
 	<PreferenceScreen android:title="@string/MUC">
@@ -181,6 +161,26 @@
             android:title="@string/DarkColors"
             android:key="DarkColors"
             android:defaultValue="false"/>
+        <PreferenceScreen android:title="@string/Smiles">
+            <CheckBoxPreference
+                    android:key="ShowSmiles"
+                    android:title="@string/ShowSmiles"
+                    android:defaultValue="true" />
+            <ListPreference
+                    android:key="SmilesPack"
+                    android:title="@string/Smiles"/>
+            <EditTextPreference
+                    android:key="SmilesSize"
+                    android:title="@string/Size"
+                    android:defaultValue="18"
+                    android:numeric="integer"/>
+            <EditTextPreference
+                    android:key="SmilesColumns"
+                    android:title="Columns"
+                    android:summary="The number of columns in the dialog"
+                    android:defaultValue="3"
+                    android:numeric="integer"/>
+        </PreferenceScreen>
         <ListPreference 
             android:key="IconPack"
             android:title="Icons"/>

@@ -780,7 +780,7 @@ public class JTalkService extends Service {
 
                     ConnectionTask task = new ConnectionTask();
                     if (connectionTasks.containsKey(username)) task = connectionTasks.get(username);
-                    if (task.getStatus() != AsyncTask.Status.RUNNING) {
+                    if (task.getStatus() != AsyncTask.Status.RUNNING && task.getStatus() != AsyncTask.Status.FINISHED) {
                         task.execute(username, password, resource, service, tls, port);
                         connectionTasks.put(username, task);
                     }

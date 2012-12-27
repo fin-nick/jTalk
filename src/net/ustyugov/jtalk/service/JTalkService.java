@@ -813,56 +813,57 @@ public class JTalkService extends Service {
 		}
     }
 
-	public void joinRoom(final String account, final String group, final String nick, final String password) {	
-		if (connections.containsKey(account)) {
-  			final XMPPConnection connection = connections.get(account);
-  			
-  			new Thread() {
-  				@Override
-  				public void run() {
-  					if (getConferencesHash(account).containsKey(group)) getConferencesHash(account).remove(group);
-  					
-  					MultiUserChat muc = new MultiUserChat(connection, group);
-  					getConferencesHash(account).put(group, muc);
-  					
-  					Presence presence = new Presence(Presence.Type.available);
-  					presence.setStatus(prefs.getString("currentStatus", ""));
-  					presence.setMode(Presence.Mode.valueOf(prefs.getString("currentMode", "available")));
-  					
-  					try { 
-  						DiscussionHistory h = new DiscussionHistory();
-  						h.setMaxStanzas(10);
-  						muc.addParticipantStatusListener(new MucParticipantStatusListener(account, group));
-  						muc.addParticipantListener(new PacketListener() {
-  							@Override
-  							public void processPacket(Packet packet) {
-  								Presence p = (Presence) packet;
-  						        if (p.isAvailable()) sendBroadcast(new Intent(Constants.PRESENCE_CHANGED));
-  							}
-  						});
-  						muc.join(nick, password, h, 5000, presence);
-  					} catch (Exception e) {
-  				  		Intent eIntent = new Intent(Constants.ERROR);
-  				  		eIntent.putExtra("error", "Error: " + e.getLocalizedMessage());
-  				  		sendBroadcast(eIntent);
-  				  		return;
-  				  	}
-  				  		
-  					if (muc.isJoined()) {
-  						Conference conf = new Conference(group, nick, password);
-  						if (!joinedConferences.contains(conf)) joinedConferences.put(group, conf);
-  						Intent updateIntent = new Intent(Constants.PRESENCE_CHANGED);
-  						updateIntent.putExtra("join", true);
-  						updateIntent.putExtra("group", group);
-  						sendBroadcast(updateIntent);
-  						
-  						if (prefs.getBoolean("LoadAllAvatars", false)) {
-  							Avatars.loadAllAvatars(connection, group);
-  						}
-  					}
-  				}
-  			}.start();
-		}
+    public void joinRoom(final String account, final String group, final String nick, final String password) {
+        if (joinedConferences.containsKey(group)) return;
+        if (connections.containsKey(account)) {
+            final XMPPConnection connection = connections.get(account);
+
+            new Thread() {
+                @Override
+                public void run() {
+                    if (getConferencesHash(account).containsKey(group)) getConferencesHash(account).remove(group);
+
+                    MultiUserChat muc = new MultiUserChat(connection, group);
+                    getConferencesHash(account).put(group, muc);
+
+                    Presence presence = new Presence(Presence.Type.available);
+                    presence.setStatus(prefs.getString("currentStatus", ""));
+                    presence.setMode(Presence.Mode.valueOf(prefs.getString("currentMode", "available")));
+
+                    try {
+                        DiscussionHistory h = new DiscussionHistory();
+                        h.setMaxStanzas(10);
+                        muc.addParticipantStatusListener(new MucParticipantStatusListener(account, group));
+                        muc.addParticipantListener(new PacketListener() {
+                            @Override
+                            public void processPacket(Packet packet) {
+                                Presence p = (Presence) packet;
+                                if (p.isAvailable()) sendBroadcast(new Intent(Constants.PRESENCE_CHANGED));
+                            }
+                        });
+                        muc.join(nick, password, h, 5000, presence);
+                    } catch (Exception e) {
+                        Intent eIntent = new Intent(Constants.ERROR);
+                        eIntent.putExtra("error", "Error: " + e.getLocalizedMessage());
+                        sendBroadcast(eIntent);
+                        return;
+                    }
+
+                    if (muc.isJoined()) {
+                        Conference conf = new Conference(group, nick, password);
+                        joinedConferences.put(group, conf);
+                        Intent updateIntent = new Intent(Constants.PRESENCE_CHANGED);
+                        updateIntent.putExtra("join", true);
+                        updateIntent.putExtra("group", group);
+                        sendBroadcast(updateIntent);
+
+                        if (prefs.getBoolean("LoadAllAvatars", false)) {
+                            Avatars.loadAllAvatars(connection, group);
+                        }
+                    }
+                }
+            }.start();
+        }
     }
 	
 	public void leaveRoom(String account, String group) {

@@ -256,7 +256,7 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 		int fontSize = Integer.parseInt(service.getResources().getString(R.string.DefaultFontSize));
 		try {
 			fontSize = Integer.parseInt(prefs.getString("RosterSize", service.getResources().getString(R.string.DefaultFontSize)));
-		} catch (NumberFormatException e) { }
+		} catch (NumberFormatException ignored) { }
 		
 		RosterItem item = getItem(position);
 		if (item.isGroup()) {
@@ -304,7 +304,7 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 			if(convertView == null || convertView.findViewById(R.id.status) == null) {		
 				LayoutInflater inflater = activity.getLayoutInflater();
 				convertView = inflater.inflate(R.layout.entry, null, false);
-				
+
 				ItemHolder holder = new ItemHolder();
 				holder.name = (TextView) convertView.findViewById(R.id.name);
 				holder.name.setTextSize(fontSize);

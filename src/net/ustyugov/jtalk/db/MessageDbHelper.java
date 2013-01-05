@@ -21,9 +21,9 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
+import net.ustyugov.jtalk.Constants;
 
 public class MessageDbHelper extends SQLiteOpenHelper implements BaseColumns {
-	public static final String DB_NAME = "msg.db";
 	public static final String TABLE_NAME = "msg";
 	public static final String ID = "id";
 	public static final String JID = "jid";
@@ -35,25 +35,25 @@ public class MessageDbHelper extends SQLiteOpenHelper implements BaseColumns {
 	public static final String BOB = "bob";
 	public static final String RECEIVED = "received";
 	public static final String COLLAPSED = "collapsed";
-	
-	public MessageDbHelper(Context context) {
-		super(context, DB_NAME, null, 1);
+
+	public MessageDbHelper(Context context, String path) {
+        super(context, path, null, 1);
 	}
 	
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL("CREATE TABLE " + TABLE_NAME
-				+ " ( _id integer primary key autoincrement, "
-				+ ID + " TEXT, "
-				+ JID + " TEXT, "
-				+ STAMP + " TEXT, "
-				+ NICK + " TEXT, "
-				+ TYPE + " TEXT, "
-				+ FORM + " LONGTEXT, "
-				+ BOB + " LONGTEXT, "
-				+ RECEIVED + " TEXT, "
-				+ COLLAPSED + " TEXT, "
-				+ BODY + " LONGTEXT)");
+        db.execSQL("CREATE TABLE " + TABLE_NAME
+                + " ( _id integer primary key autoincrement, "
+                + ID + " TEXT, "
+                + JID + " TEXT, "
+                + STAMP + " TEXT, "
+                + NICK + " TEXT, "
+                + TYPE + " TEXT, "
+                + FORM + " LONGTEXT, "
+                + BOB + " LONGTEXT, "
+                + RECEIVED + " TEXT, "
+                + COLLAPSED + " TEXT, "
+                + BODY + " LONGTEXT)");
 	}
 	
 	@Override

@@ -27,7 +27,7 @@ public final class Constants implements BaseColumns {
 	
 	public static final String PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/com.jtalk2/cache/";
 	public static final String PATH_SMILES = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/com.jtalk2/smiles/";
-//	public static final String PATH_LOG = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/com.jtalk2/log/";
+	public static final String PATH_LOG = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/com.jtalk2/log/";
 	
 //	public static final int MAX_MUC_MESSAGES = 100;
 	public static final long PING_DELAY = 45000;

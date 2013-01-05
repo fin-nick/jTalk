@@ -24,6 +24,10 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.Environment;
+import net.ustyugov.jtalk.Constants;
+
+import java.io.*;
 
 public class JTalkProvider  extends ContentProvider {
 	public static final Uri ACCOUNT_URI = Uri.parse("content://com.jtalk2/account");
@@ -38,7 +42,29 @@ public class JTalkProvider  extends ContentProvider {
 	
 	@Override
 	public boolean onCreate() {
-		msg_db = new MessageDbHelper(getContext()).getWritableDatabase();
+        String path = "msg.db";
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            path = Constants.PATH_LOG + "/msg.db";
+            try {
+                File file = new File(Constants.PATH_LOG);
+                file.mkdirs();
+                file = new File(path);
+                if (!file.exists()) {
+                    InputStream input = new FileInputStream("/data/data/com.jtalk2/databases/msg.db");
+                    OutputStream output = new FileOutputStream(path);
+
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = input.read(buffer)) > 0) { output.write(buffer, 0, length); }
+                    output.flush();
+                    output.close();
+                    input.close();
+                }
+            } catch (Exception ignored) { }
+        }
+
+		msg_db = new MessageDbHelper(getContext(), path).getWritableDatabase();
 		wdg_db = new WidgetDbHelper(getContext()).getWritableDatabase();
 		acc_db = new AccountDbHelper(getContext()).getWritableDatabase();
 		tmp_db = new TemplatesDbHelper(getContext()).getWritableDatabase();

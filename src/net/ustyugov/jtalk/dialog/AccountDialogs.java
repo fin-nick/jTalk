@@ -17,7 +17,10 @@
 
 package net.ustyugov.jtalk.dialog;
 
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import net.ustyugov.jtalk.Constants;
+import net.ustyugov.jtalk.Notify;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import android.app.Activity;
@@ -48,6 +51,14 @@ public class AccountDialogs {
 	    final CheckBox active = (CheckBox) layout.findViewById(R.id.account_active);
 	    final CheckBox tls = (CheckBox) layout.findViewById(R.id.account_tls);
 	    final CheckBox sasl = (CheckBox) layout.findViewById(R.id.account_sasl);
+        final LinearLayout optionsLinear = (LinearLayout) layout.findViewById(R.id.options_linear);
+        CheckBox options = (CheckBox) layout.findViewById(R.id.options);
+        options.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                optionsLinear.setVisibility(b ? View.VISIBLE : View.GONE);
+            }
+        });
 	    
 		AlertDialog.Builder builder = new AlertDialog.Builder(a);
 		builder.setView(layout);
@@ -86,6 +97,8 @@ public class AccountDialogs {
 	 	           
 	 	            Intent i = new Intent(Constants.UPDATE);
 	             	a.sendBroadcast(i);
+
+                    ConnectDialog(a, jid);
 				}
 			}
 		});
@@ -151,6 +164,15 @@ public class AccountDialogs {
 	    
 	    final CheckBox sasl = (CheckBox) layout.findViewById(R.id.account_sasl);
 	    sasl.setChecked(s.equals("1"));
+
+        final LinearLayout optionsLinear = (LinearLayout) layout.findViewById(R.id.options_linear);
+        CheckBox options = (CheckBox) layout.findViewById(R.id.options);
+        options.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                optionsLinear.setVisibility(b ? View.VISIBLE : View.GONE);
+            }
+        });
 	    
 		AlertDialog.Builder builder = new AlertDialog.Builder(a);
 		builder.setView(layout);
@@ -190,8 +212,13 @@ public class AccountDialogs {
                     JTalkService service = JTalkService.getInstance();
                     if (service.isAuthenticated(jid)) service.disconnect(jid);
 
+                    if (service.isAuthenticated()) Notify.updateNotify();
+                    else Notify.offlineNotify(service.getGlobalState());
+
 	 	            Intent i = new Intent(Constants.UPDATE);
 	             	a.sendBroadcast(i);
+
+                    ConnectDialog(a, jid);
 				}
 			}
 		});
@@ -202,4 +229,20 @@ public class AccountDialogs {
 		});
 		builder.create().show();
 	}
+
+    public static void ConnectDialog(Activity a, final String account) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(a);
+        builder.setMessage("Connect?");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+              JTalkService.getInstance().connect(account);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
+    }
 }

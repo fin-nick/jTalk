@@ -1,84 +1,91 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/add_account_linear"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical"
-    android:padding="10dp" >
-	
-	<ScrollView 
-        android:layout_height="fill_parent"
-        android:layout_width="fill_parent">
-        
-        <LinearLayout android:orientation="vertical" 
-    		android:layout_height="fill_parent" 
-    		android:layout_width="fill_parent">
-    		
-            <CheckBox android:id="@+id/account_active" 
-                android:layout_width="wrap_content" 
-                android:layout_height="wrap_content" 
-                android:checked="true"
-                android:text="Enabled" />
-     		<TextView 
-    			android:layout_width="fill_parent"
-    			android:layout_height="wrap_content"
-    			android:text="@string/DialogJid" />
-     		 <EditText 
-				android:id="@+id/account_jid" 
-				android:singleLine="true"
- 				android:layout_width="fill_parent" 
- 				android:layout_height="wrap_content"
- 				android:hint="user@server.com"
-                 android:inputType="textEmailAddress"/>
-      		<TextView 
-    			android:layout_width="fill_parent"
-    			android:layout_height="wrap_content" android:text="@string/Password"/>
-     		 <EditText 
-				android:id="@+id/account_password" 
-				android:singleLine="true"
-				android:password="true"
- 				android:layout_width="fill_parent" 
- 				android:layout_height="wrap_content"
- 				android:hint="password"/> 
-			  <TextView
-    			android:layout_width="fill_parent"
-   			 	android:layout_height="wrap_content"
-    			android:text="@string/Resource" />
-     		 <EditText  
-      			android:id="@+id/account_resource"
-      			android:singleLine="true"
-    			android:layout_width="fill_parent"
-    			android:layout_height="wrap_content"
-    			android:hint="Android"/>
-    		<TextView
-    			android:layout_width="fill_parent"
-   			 	android:layout_height="wrap_content"
-    			android:text="@string/Server" />
-     		 <EditText  
-      			android:id="@+id/account_server"
-      			android:singleLine="true"
-    			android:layout_width="fill_parent"
-    			android:layout_height="wrap_content"/>
-    		<TextView
-    			android:layout_width="fill_parent"
-   			 	android:layout_height="wrap_content"
-    			android:text="@string/Port" />
-     		 <EditText  
-      			android:id="@+id/account_port"
-      			android:singleLine="true"
-      			android:hint="5222"
-    			android:layout_width="fill_parent"
-    			android:layout_height="wrap_content"/>
-    		<CheckBox android:id="@+id/account_tls" 
-    			android:layout_width="wrap_content" 
-    			android:layout_height="wrap_content" 
-    			android:text="TLS" />
-    		<CheckBox android:id="@+id/account_sasl"
-    		    android:visibility="gone" 
-    		    android:checked="true"
-                android:layout_width="wrap_content" 
-                android:layout_height="wrap_content" 
-                android:text="SASL" />
-    	</LinearLayout>
+              android:id="@+id/add_account_linear"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:orientation="vertical"
+              android:padding="10dp" >
+
+    <ScrollView
+            android:layout_height="fill_parent"
+            android:layout_width="fill_parent">
+
+        <LinearLayout android:orientation="vertical"
+                      android:layout_height="fill_parent"
+                      android:layout_width="fill_parent">
+
+            <CheckBox android:id="@+id/account_active"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:checked="true"
+                      android:text="Enabled" />
+            <EditText
+                    android:id="@+id/account_jid"
+                    android:singleLine="true"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="user@server.com"
+                    android:inputType="textEmailAddress"/>
+            <EditText
+                    android:id="@+id/account_password"
+                    android:singleLine="true"
+                    android:password="true"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="password"/>
+
+            <CheckBox android:id="@+id/options"
+                      android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:checked="false"
+                      android:text="Options" />
+
+            <LinearLayout android:layout_margin="7dip"
+                          android:visibility="gone"
+                          android:id="@+id/options_linear"
+                          android:orientation="vertical"
+                          android:layout_height="wrap_content"
+                          android:layout_width="fill_parent">
+                <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/Resource" />
+                <EditText
+                        android:id="@+id/account_resource"
+                        android:singleLine="true"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Android"/>
+                <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/Server" />
+                <EditText
+                        android:id="@+id/account_server"
+                        android:singleLine="true"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"/>
+                <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/Port" />
+                <EditText
+                        android:id="@+id/account_port"
+                        android:singleLine="true"
+                        android:hint="5222"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"/>
+                <CheckBox android:id="@+id/account_tls"
+                          android:checked="true"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="TLS" />
+                <CheckBox android:id="@+id/account_sasl"
+                          android:checked="true"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="SASL" />
+            </LinearLayout>
+        </LinearLayout>
     </ScrollView>
 </LinearLayout>

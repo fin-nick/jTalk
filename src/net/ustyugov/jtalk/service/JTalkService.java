@@ -100,7 +100,6 @@ import org.xbill.DNS.Credibility;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.SRVRecord;
-import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
 import android.app.PendingIntent;
@@ -776,12 +775,13 @@ public class JTalkService extends Service {
 					String resource = cursor.getString(cursor.getColumnIndex(AccountDbHelper.RESOURCE)).trim();
 					String service = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SERVER));
 					String tls = cursor.getString(cursor.getColumnIndex(AccountDbHelper.TLS));
+                    String sasl = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SASL));
 					String port = cursor.getString(cursor.getColumnIndex(AccountDbHelper.PORT));
 
                     ConnectionTask task = new ConnectionTask();
                     if (connectionTasks.containsKey(username)) task = connectionTasks.get(username);
                     if (task.getStatus() != AsyncTask.Status.RUNNING && task.getStatus() != AsyncTask.Status.FINISHED) {
-                        task.execute(username, password, resource, service, tls, port);
+                        task.execute(username, password, resource, service, tls, sasl, port);
                         connectionTasks.put(username, task);
                     }
 				} while(cursor.moveToNext());
@@ -804,10 +804,11 @@ public class JTalkService extends Service {
 			String resource = cursor.getString(cursor.getColumnIndex(AccountDbHelper.RESOURCE)).trim();
 			String service = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SERVER));
 			String tls = cursor.getString(cursor.getColumnIndex(AccountDbHelper.TLS));
+            String sasl = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SASL));
 			String port = cursor.getString(cursor.getColumnIndex(AccountDbHelper.PORT));
 
             ConnectionTask task = new ConnectionTask();
-            task.execute(username, password, resource, service, tls, port);
+            task.execute(username, password, resource, service, tls, sasl, port);
             connectionTasks.put(username, task);
 			cursor.close();
 		}
@@ -1363,9 +1364,10 @@ public class JTalkService extends Service {
             String resource = args[2];
             String service = args[3];
             String tls = args[4];
+            String sasl = args[5];
             int port = 5222;
             try {
-                port = Integer.parseInt(args[5]);
+                port = Integer.parseInt(args[6]);
             } catch (NumberFormatException ignored) { }
 
             if (username == null || username.indexOf("@") < 1) {
@@ -1406,7 +1408,7 @@ public class JTalkService extends Service {
                 cc.setReconnectionAllowed(false);
                 cc.setRosterLoadedAtLogin(true);
                 cc.setSendPresence(false);
-                cc.setSASLAuthenticationEnabled(true);
+                cc.setSASLAuthenticationEnabled(sasl.equals("1"));
                 cc.setSecurityMode(tls.equals("0") ? SecurityMode.disabled : SecurityMode.enabled);
 
                 if (service.equals("talk.google.com") || host.equals("gmail.com")) cc.setSASLAuthenticationEnabled(false);

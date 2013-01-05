@@ -18,8 +18,6 @@
 package net.ustyugov.jtalk.adapter;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -30,6 +28,7 @@ import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.Smiles;
 import net.ustyugov.jtalk.listener.TextLinkClickListener;
+import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.view.MyTextView;
 
 import com.jtalk2.R;
@@ -56,13 +55,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkClickListener {
-    private int searchCurrentPosition = 0;
     private String searchString = "";
-    private Hashtable<Integer, List<Integer>> searchHash = new Hashtable<Integer, List<Integer>>();
 
     private Context context;
     private Smiles smiles;
     private String nick;
+    private String group;
     private boolean firstClick = false;
     private boolean showtime = false;
     private Timer doubleClickTimer = new Timer();
@@ -73,110 +71,56 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
     private int inColor;
     private int outColor;
 
-    public MucChatAdapter(Context context, String group, String nick, Smiles smiles) {
+    public MucChatAdapter(Context context, Smiles smiles) {
         super(context, R.id.chat1);
         this.context = context;
         this.smiles = smiles;
-        this.nick	 = nick;
         this.prefs = PreferenceManager.getDefaultSharedPreferences(context);
         this.showtime = prefs.getBoolean("ShowTime", false);
         applyColors();
     }
 
-    public void update(List<MessageItem> list) {
+    public String getGroup() { return this.group; }
+
+    public void update(String account, String group, String nick, String searchString) {
+        JTalkService service = JTalkService.getInstance();
+        this.group = group;
+        this.nick = nick;
+        this.searchString = searchString;
         clear();
+
+        List<MessageItem> list = new ArrayList<MessageItem>();
+        if (service.getMucMessagesHash(account).containsKey(group)) {
+            list = service.getMucMessagesHash(account).get(group);
+        }
+
+        List<MessageItem> messages = new ArrayList<MessageItem>();
         if (!prefs.getBoolean("ShowStatus", false)) {
-            for (int i = 0; i < list.size(); i++) {
-                MessageItem item = list.get(i);
-                if (item.getType() != MessageItem.Type.message) {
-                    list.remove(item);
-                } else add(item);
+            for (MessageItem item : list) {
+                if (item.getType() == MessageItem.Type.message) {
+                    messages.add(item);
+                }
             }
-        } else {
-            for (int i = 0; i < list.size(); i++) {
-                MessageItem item = list.get(i);
-                add(item);
-            }
-        }
-    }
+        } else messages = list;
 
-    public int nextSearch() {
-        List<Integer> list = new ArrayList<Integer>();
-        Enumeration<Integer> keys = searchHash.keys();
-        while(keys.hasMoreElements()) {
-            list.add(keys.nextElement());
-        }
-
-        int idx = list.indexOf(searchCurrentPosition);
-        if (idx < list.size() - 1) {
-            idx++;
-            searchCurrentPosition = list.get(idx);
-        }
-        notifyDataSetChanged();
-        return searchCurrentPosition;
-    }
-
-    public int prevSearch() {
-        List<Integer> list = new ArrayList<Integer>();
-        Enumeration<Integer> keys = searchHash.keys();
-        while(keys.hasMoreElements()) {
-            list.add(keys.nextElement());
-        }
-
-        int idx = list.indexOf(searchCurrentPosition);
-        if (idx > 0) {
-            idx--;
-            searchCurrentPosition = list.get(idx);
-        }
-        notifyDataSetChanged();
-        return searchCurrentPosition;
-    }
-
-    public void search(String search) {
-        this.searchString = search;
-        searchHash.clear();
-        if (search.length() > 0) {
-            int count = getCount();
-            for (int i = 0; i < count; i++) {
-                MessageItem item = getItem(i);
+        for (MessageItem item : messages) {
+            if (searchString.length() > 0) {
                 String name = item.getName();
-                String n    = item.getName();
                 String body = item.getBody();
                 MessageItem.Type type = item.getType();
-                String time = item.getTime();
-                String t = null;
-                if (time != null) {
-                    t = "(" + time + ")";
-                    if (showtime && t.length() > 2) name = t + " " + name;
+                String time = "(" + item.getTime() + ")";
+                if (type == MessageItem.Type.status) {
+                    if (showtime) body = time + "  " + body;
+                } else {
+                    if (showtime) body = time + " " + name + ": " + body;
+                    else body = name + ": " + body;
                 }
 
-                String message;
-                if (type == MessageItem.Type.status) message = name + " " + body;
-                else {
-                    if (body.length() > 4 && body.substring(0, 3).equals("/me")) {
-                        if (showtime && t.length() > 2) message = t + " * " + n + " " + body.substring(3);
-                        else message = " * " + n + " " + body.substring(3);
-                    } else {
-                        message = name + ": " + body;
-                    }
+                if (body.toLowerCase().contains(searchString.toLowerCase())) {
+                    add(item);
                 }
-
-                List<Integer> list = new ArrayList<Integer>();
-                int from = 0;
-                int start;
-                while ((start = message.toLowerCase().indexOf(search.toLowerCase(), from)) != -1) {
-                    from = start + search.length();
-                    list.add(start);
-                }
-                if (list.size() > 0) {
-                    searchHash.put(i, list);
-                    searchCurrentPosition = i;
-                }
-            }
-        } else {
-            searchCurrentPosition = -1;
+            } else add(item);
         }
-        notifyDataSetChanged();
     }
 
     @Override
@@ -185,7 +129,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
         int fontSize = Integer.parseInt(context.getResources().getString(R.string.DefaultFontSize));
         try {
             fontSize = Integer.parseInt(prefs.getString("FontSize", context.getResources().getString(R.string.DefaultFontSize)));
-        } catch (NumberFormatException e) {	}
+        } catch (NumberFormatException ignored) {	}
 
         View v = convertView;
         if (v == null) {
@@ -240,21 +184,22 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
                 Pattern nickPattern = Pattern.compile(nick, Pattern.CASE_INSENSITIVE);
                 Matcher nickMatcher = nickPattern.matcher(message);
                 while (nickMatcher.find(pos)) {
-                    ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0 + nickMatcher.start(), 0 + nickMatcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    ssb.setSpan(new ForegroundColorSpan(outColor), 0 + nickMatcher.start(), 0 + nickMatcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), nickMatcher.start(), nickMatcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    ssb.setSpan(new ForegroundColorSpan(outColor), nickMatcher.start(), nickMatcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     pos = nickMatcher.end();
                 }
             }
         }
 
-        // Search
-        if (searchHash.containsKey(position)) {
-            List<Integer> list = searchHash.get(position);
-            for (int start : list) {
-                int backcolor = Constants.SEARCH_BACKGROUND;
-                if (searchCurrentPosition == position ) backcolor = Constants.SEARCH_ACTIVE_BACKGROUND;
-                ssb.setSpan(new BackgroundColorSpan(backcolor), start, start + searchString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                ssb.setSpan(new ForegroundColorSpan(Constants.SEARCH_FOREGROUND), start, start + searchString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        // Search highlight
+        if (searchString.length() > 0) {
+            if (ssb.toString().toLowerCase().contains(searchString.toLowerCase())) {
+                int from = 0;
+                int start = -1;
+                while ((start = ssb.toString().toLowerCase().indexOf(searchString.toLowerCase(), from)) != -1) {
+                    from = start + searchString.length();
+                    ssb.setSpan(new BackgroundColorSpan(Constants.SEARCH_BACKGROUND), start, start + searchString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
             }
         }
 
@@ -329,7 +274,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
             }
         }
 
-        if (item.isSelected()) v.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0x77525252 : 0xFFDDDDDD);
+        if (item.isSelected()) v.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF444444 : 0xFFCCCCCC);
         else v.setBackgroundColor(0X00000000);
         return v;
     }

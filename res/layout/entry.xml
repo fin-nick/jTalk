@@ -52,25 +52,17 @@
 
     <ImageView android:id="@+id/caps"
                android:visibility="gone"
-               android:minWidth="21dip"
-               android:minHeight="21dip"
-               android:maxWidth="21dip"
-               android:maxHeight="21dip"
                android:layout_gravity="center"
                android:adjustViewBounds="true"
                android:layout_marginRight="5dip"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"/>
+               android:layout_width="21dip"
+               android:layout_height="21dip"/>
 
     <ImageView android:id="@+id/contactlist_pic"
                android:layout_width="42dip"
-               android:layout_height="wrap_content"
+               android:layout_height="42dip"
                android:adjustViewBounds="true"
-               android:minWidth="42dip"
-               android:minHeight="42dip"
-               android:maxWidth="42dip"
-               android:maxHeight="42dip"
-               android:layout_margin="3dip"
+               android:layout_margin="1dip"
                android:gravity="center"
                android:layout_gravity="center"
                android:visibility="gone"/>

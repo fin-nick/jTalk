@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">jTalk</string>
     <string name="version">0.47</string>
-    <string name="build">367</string>
+    <string name="build">369</string>
     
     <string name="Connect">Connect</string>
     <string name="Disconnect">Disconnect</string>
@@ -161,6 +161,7 @@
     <string name="ShowOfflineContacts">Show offline contacts</string>
     <string name="SelectMessage">Select message</string>
     <string name="DeselectMessage">Deselect message</string>
+    <string name="DeselectAllMessages">Deselect all messages</string>
     
     <!-- Dialogs -->
     <string name="Room">Room</string>

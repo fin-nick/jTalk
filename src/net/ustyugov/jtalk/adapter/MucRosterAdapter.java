@@ -17,10 +17,7 @@
 
 package net.ustyugov.jtalk.adapter;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.Holders.GroupHolder;
@@ -97,7 +94,9 @@ public class MucRosterAdapter extends ArrayAdapter<RosterItem> {
                         users.add(StringUtils.parseResource(p.getFrom()));
                     }
 
-                    users = SortList.sortParticipantsInChat(account, group, users);
+                    if (prefs.getBoolean("SortByStatuses", true)) users = SortList.sortParticipantsInChat(account, group, users);
+                    else Collections.sort(users, new SortList.StringComparator());
+
                     for (String user: users) {
                         RosterEntry entry = new RosterEntry(group + "/" + user, user, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
                         RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);

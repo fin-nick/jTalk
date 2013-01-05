@@ -134,7 +134,8 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
                             list.add(jid);
                         }
                     }
-                    list = SortList.sortSimpleContacts(account, list);
+
+                    if (prefs.getBoolean("SortByStatuses", true)) list = SortList.sortSimpleContacts(account, list);
 
                     for (String jid: list) {
                         RosterEntry re = roster.getEntry(jid);

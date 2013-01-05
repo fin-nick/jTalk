@@ -104,6 +104,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     private String jid;
     private String account;
     private String resource;
+    private String searchString = "";
     private boolean compose = false;
 
     private BroadcastReceiver textReceiver;
@@ -210,8 +211,9 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         });
 
         listAdapter = new ChatAdapter(this, smiles);
+        listMucAdapter = new MucChatAdapter(this, smiles);
         listView = (MyListView) findViewById(R.id.chat_list);
-        listView.setFocusable(false);
+        listView.setFocusable(true);
         listView.setCacheColorHint(0x00000000);
         listView.setOnScrollListener(this);
         listView.setDividerHeight(0);
@@ -299,10 +301,15 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 msgList = service.getMucMessagesHash(account).get(jid);
             } else msgList = new ArrayList<MessageItem>();
 
-            listMucAdapter = new MucChatAdapter(this, jid, muc.getNickname(), smiles);
-            listMucAdapter.update(msgList);
-            listView.setAdapter(listMucAdapter);
-            listView.setScroll(true);
+            String group = listMucAdapter.getGroup();
+            listMucAdapter.update(account, jid, muc.getNickname(), searchString);
+            if (listView.getAdapter() instanceof ChatAdapter) {
+                listView.setAdapter(listMucAdapter);
+                listView.setScroll(true);
+            }
+            else {
+                if (group != null && group.equals(jid)) listView.setScroll(false); else listView.setScroll(true);
+            }
         } else {
             isMuc = false;
             muc = null;
@@ -325,9 +332,9 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 msgList = new ArrayList<MessageItem>();
                 loadStory(false);
             }
+
             String j = listAdapter.getJid();
-            listAdapter.search("");
-            listAdapter.update(jid, msgList);
+            listAdapter.update(account, jid, searchString);
             if (listView.getAdapter() instanceof MucChatAdapter) {
                 listView.setAdapter(listAdapter);
                 listView.setScroll(true);
@@ -407,6 +414,13 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         int position = chatsSpinnerAdapter.getPosition(account, jid);
         getSupportActionBar().setSelectedNavigationItem(position);
         rosterItem = chatsSpinnerAdapter.getItem(position);
+
+        if (searchString.length() > 0) {
+            if (menu != null) {
+                MenuItem item = menu.findItem(R.id.search);
+                item.expandActionView();
+            }
+        }
     }
 
     @Override
@@ -433,7 +447,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
 
     @Override
     public boolean onKeyUp(int key, KeyEvent event) {
-        if (key == KeyEvent.KEYCODE_SEARCH) {
+        if (key == KeyEvent.KEYCODE_SEARCH && Build.VERSION.SDK_INT >= 8) {
             MenuItem item = menu.findItem(R.id.search);
             item.expandActionView();
         }
@@ -463,8 +477,8 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 OnActionExpandListener listener = new OnActionExpandListener() {
                     @Override
                     public boolean onMenuItemActionCollapse(MenuItem item) {
-                        if (!isMuc) listAdapter.search("");
-                        else listMucAdapter.search("");
+                        searchString = "";
+                        updateList();
                         createOptionMenu();
                         return true;
                     }
@@ -481,12 +495,12 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                     @Override
                     public boolean onQueryTextChange(String newText) {
-                        if (!isMuc) listAdapter.search(newText);
-                        else listMucAdapter.search(newText);
                         return true;
                     }
                     @Override
                     public boolean onQueryTextSubmit(String query) {
+                        searchString = query;
+                        updateList();
                         return true;
                     }
                 });
@@ -621,29 +635,10 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 break;
             case R.id.search:
                 if (!item.isActionViewExpanded()) {
-                    getSupportMenuInflater().inflate(R.menu.find_menu, menu);
                     menu.removeItem(R.id.sidebar);
                     menu.removeItem(R.id.smile);
                     item.expandActionView();
                 }
-                break;
-            case R.id.prev:
-                int prevPosition = -1;
-                if (!isMuc) {
-                    prevPosition = listAdapter.prevSearch();
-                } else {
-                    prevPosition = listMucAdapter.prevSearch();
-                }
-                if (prevPosition >= 0) listView.setSelection(prevPosition);
-                break;
-            case R.id.next:
-                int nextPosition = -1;
-                if (!isMuc) {
-                    nextPosition = listAdapter.nextSearch();
-                } else {
-                    nextPosition = listMucAdapter.nextSearch();
-                }
-                if (nextPosition >= 0) listView.setSelection(nextPosition);
                 break;
             default:
                 return false;
@@ -696,13 +691,13 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 msgList = service.getMucMessagesHash(account).get(jid);
             } else msgList = new ArrayList<MessageItem>();
 
-            listMucAdapter.update(msgList);
+            listMucAdapter.update(account, jid, muc.getNickname(), searchString);
             listMucAdapter.notifyDataSetChanged();
         } else {
             if (service.getMessagesHash(account).containsKey(jid)) {
                 msgList = service.getMessagesHash(account).get(jid);
             }
-            listAdapter.update(jid, msgList);
+            listAdapter.update(account, jid, searchString);
             listAdapter.notifyDataSetChanged();
         }
 

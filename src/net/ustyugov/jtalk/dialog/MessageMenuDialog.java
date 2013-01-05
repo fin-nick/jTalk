@@ -34,6 +34,9 @@ import android.widget.AdapterView.OnItemLongClickListener;
 
 import com.jtalk2.R;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MessageMenuDialog implements OnItemLongClickListener, OnClickListener {
     private Activity activity;
     private String account;
@@ -53,24 +56,25 @@ public class MessageMenuDialog implements OnItemLongClickListener, OnClickListen
     	message = (MessageItem) parent.getAdapter().getItem(position);
 
     	if (message.getName().equals(activity.getResources().getString(R.string.Me))) {
-    		items = new CharSequence[5];
+    		items = new CharSequence[6];
     		items[4] = activity.getString(R.string.Edit);
     	}
     	else if (message.containsCaptcha()) { 
-    		items = new CharSequence[5];
+    		items = new CharSequence[6];
     		items[4] = "Captcha";
     	}
     	else if (service.getConferencesHash(account).containsKey(jid)) { 
-    		items = new CharSequence[5];
+    		items = new CharSequence[6];
     		items[4] = activity.getString(R.string.Reply);
     	}
-    	else items = new CharSequence[4];
+    	else items = new CharSequence[5];
 
         if (message.isSelected()) items[0] = activity.getString(R.string.DeselectMessage);
         else items[0] = activity.getString(R.string.SelectMessage);
     	items[1] = activity.getString(R.string.Quote);
         items[2] = activity.getString(R.string.Copy);
         items[3] = activity.getString(R.string.SelectText);
+        items[items.length-1] = activity.getString(R.string.DeselectAllMessages);
         
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(R.string.Actions);
@@ -106,8 +110,10 @@ public class MessageMenuDialog implements OnItemLongClickListener, OnClickListen
     		        in.putExtra("bob", message.getBob().getData());
     		        in.putExtra("cid", message.getBob().getCid());
     				activity.startActivity(in);
+                    break;
         		} else if (message.getName().equals(activity.getString(R.string.Me))) {
         			MessageDialogs.EditMessageDialog(activity, account, message, jid);
+                    break;
         		} else if (service.getConferencesHash(account).containsKey(jid)) {
         			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
         			String separator = prefs.getString("nickSeparator", ", ");
@@ -115,8 +121,28 @@ public class MessageMenuDialog implements OnItemLongClickListener, OnClickListen
         			Intent intent = new Intent(Constants.PASTE_TEXT);
                     intent.putExtra("text", message.getName() + separator);
                     activity.sendBroadcast(intent);
-        		}
-        		break;
+                    break;
+        		} else {
+
+                }
+            case 5:
+                List<MessageItem> messages = new ArrayList<MessageItem>();
+                if (service.getConferencesHash(account).containsKey(jid)) {
+                    if (service.getMucMessagesHash(account).containsKey(jid)) {
+                        messages = service.getMucMessagesHash(account).get(jid);
+                    }
+                } else {
+                    if (service.getMessagesHash(account).containsKey(jid)) {
+                        messages = service.getMessagesHash(account).get(jid);
+                    }
+                }
+                for (MessageItem item : messages) {
+                    if (item.isSelected()) {
+                        item.select(false);
+                    }
+                }
+                activity.sendBroadcast(new Intent(Constants.RECEIVED));
+                break;
         }
     }
 }

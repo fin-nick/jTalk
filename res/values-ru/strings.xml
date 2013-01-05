@@ -154,6 +154,7 @@
     <string name="ShowOfflineContacts">Показать отключенных</string>
     <string name="SelectMessage">Выбрать сообщение</string>
     <string name="DeselectMessage">Снять выделение</string>
+    <string name="DeselectAllMessages">Снять все выделения</string>
     
     <!-- Dialogs -->
     <string name="Room">Комната</string>

@@ -311,9 +311,6 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
   	    		RosterDialogs.addDialog(this, null);
   	    		break;
             case R.id.search:
-                getSupportMenuInflater().inflate(R.menu.find_menu, menu);
-                menu.removeItem(R.id.prev);
-                menu.removeItem(R.id.next);
                 menu.removeItem(R.id.chats);
                 item.expandActionView();
                 break;

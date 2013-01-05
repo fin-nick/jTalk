@@ -18,8 +18,6 @@
 package net.ustyugov.jtalk.adapter;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -29,6 +27,7 @@ import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.Smiles;
 import net.ustyugov.jtalk.dialog.JuickMessageMenuDialog;
 import net.ustyugov.jtalk.listener.TextLinkClickListener;
+import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.view.MyTextView;
 
 import com.jtalk2.R;
@@ -55,10 +54,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkClickListener {
-	private int searchCurrentPosition = 0;
 	private String searchString = "";
-	private Hashtable<Integer, List<Integer>> searchHash = new Hashtable<Integer, List<Integer>>();
-	
+
 	private SharedPreferences prefs;
 	private Context context;
 	private Smiles smiles;
@@ -81,101 +78,55 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         applyColors();
     }
 	
-	public void update(String jid, List<MessageItem> list) {
+	public void update(String account, String jid, String searchString) {
+        JTalkService service = JTalkService.getInstance();
 		this.jid = jid;
+        this.searchString = searchString;
 		clear();
-		if (!prefs.getBoolean("ShowStatus", false)) {
-        	for (int i = 0; i < list.size(); i++) {
-        		MessageItem item = list.get(i);
-            	if (item.getType() != MessageItem.Type.message) {
-            		list.remove(item);
-            	} else add(item);
+
+        List<MessageItem> list = new ArrayList<MessageItem>();
+        if (service.getMessagesHash(account).containsKey(jid)) {
+            list = service.getMessagesHash(account).get(jid);
+        }
+
+        List<MessageItem> messages = new ArrayList<MessageItem>();
+        if (!prefs.getBoolean("ShowStatus", false)) {
+            for (MessageItem item : list) {
+                if (item.getType() == MessageItem.Type.message) {
+                    messages.add(item);
+                }
             }
-        } else {
-        	for (int i = 0; i < list.size(); i++) {
-        		MessageItem item = list.get(i);
-            	add(item);
-            }
+        } else messages = list;
+
+        for (MessageItem item : messages) {
+            if (searchString.length() > 0) {
+                String name = item.getName();
+                String body = item.getBody();
+                MessageItem.Type type = item.getType();
+                String time = "(" + item.getTime() + ")";
+                if (type == MessageItem.Type.status) {
+                    if (showtime) body = time + "  " + body;
+                } else {
+                    if (showtime) body = time + " " + name + ": " + body;
+                    else body = name + ": " + body;
+                }
+
+                if (body.toLowerCase().contains(searchString.toLowerCase())) {
+                    add(item);
+                }
+            } else add(item);
         }
 	}
 	
 	public String getJid() { return this.jid; }
-	
-	public int nextSearch() {
-		List<Integer> list = new ArrayList<Integer>();
-		Enumeration<Integer> keys = searchHash.keys();
-		while(keys.hasMoreElements()) {
-			list.add(keys.nextElement());
-		}
-		
-		int idx = list.indexOf(searchCurrentPosition);
-		if (idx < list.size() - 1) {
-			idx++;
-			searchCurrentPosition = list.get(idx);
-		}
-		notifyDataSetChanged();
-		return searchCurrentPosition;
-	}
-	
-	public int prevSearch() {
-		List<Integer> list = new ArrayList<Integer>();
-		Enumeration<Integer> keys = searchHash.keys();
-		while(keys.hasMoreElements()) {
-			list.add(keys.nextElement());
-		}
-		
-		int idx = list.indexOf(searchCurrentPosition);
-		if (idx > 0) {
-			idx--;
-			searchCurrentPosition = list.get(idx);
-		}
-		notifyDataSetChanged();
-		return searchCurrentPosition;
-	}
-	
-	public void search(String search) {
-		this.searchString = search;
-		searchHash.clear();
-		if (search.length() > 0) {
-			int count = getCount();
-			for (int i = 0; i < count; i++) {
-				MessageItem item = getItem(i);
-				String name = item.getName();
-				String body = item.getBody();
-				MessageItem.Type type = item.getType();
-				String time = "(" + item.getTime() + ")";
-				if (type == MessageItem.Type.status) {
-					if (showtime) body = time + "  " + body;
-				} else {
-					if (showtime) body = time + " " + name + ": " + body;
-		        	else body = name + ": " + body;
-				}
-				
-				List<Integer> list = new ArrayList<Integer>();
-	        	int from = 0;
-	   	        int start;
-	   	        while ((start = body.toLowerCase().indexOf(search.toLowerCase(), from)) != -1) {
-	   	            from = start + search.length();
-	   	            list.add(start);
-	   	        }
-	   	        if (list.size() > 0) {
-	   	        	searchHash.put(i, list);
-	   	        	searchCurrentPosition = i;
-	   	        }
-			}
-		} else {
-			searchCurrentPosition = -1;
-		}
-		notifyDataSetChanged();
-	}
-	
+
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		boolean enableCollapse = prefs.getBoolean("EnableCollapseMessages", true);
 		int fontSize = Integer.parseInt(context.getResources().getString(R.string.DefaultFontSize));
 		try {
 			fontSize = Integer.parseInt(prefs.getString("FontSize", context.getResources().getString(R.string.DefaultFontSize)));
-		} catch (NumberFormatException e) {	}
+		} catch (NumberFormatException ignored) {	}
 		
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -230,16 +181,17 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
             
             if (item.isEdited()) ssb.setSpan(new ForegroundColorSpan(inColor), colorLength + 1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-        
-     // Search...
-        if (searchHash.containsKey(position)) {
-        	List<Integer> list = searchHash.get(position);
-        	for (int start : list) {
-        		int backcolor = Constants.SEARCH_BACKGROUND;
-        		if (searchCurrentPosition == position ) backcolor = Constants.SEARCH_ACTIVE_BACKGROUND;
-        		ssb.setSpan(new BackgroundColorSpan(backcolor), start, start + searchString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-   	            ssb.setSpan(new ForegroundColorSpan(Constants.SEARCH_FOREGROUND), start, start + searchString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        	}
+
+        // Search highlight
+        if (searchString.length() > 0) {
+            if (ssb.toString().toLowerCase().contains(searchString.toLowerCase())) {
+                int from = 0;
+                int start = -1;
+                while ((start = ssb.toString().toLowerCase().indexOf(searchString.toLowerCase(), from)) != -1) {
+                    from = start + searchString.length();
+                    ssb.setSpan(new BackgroundColorSpan(Constants.SEARCH_BACKGROUND), start, start + searchString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+            }
         }
 
         LinearLayout linear = (LinearLayout) convertView.findViewById(R.id.chat_item);
@@ -316,7 +268,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         
         textView.setTextSize(fontSize);
 
-        if (item.isSelected()) convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0x77525252 : 0xFFDDDDDD);
+        if (item.isSelected()) convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF444444 : 0xFFCCCCCC);
         else convertView.setBackgroundColor(0X00000000);
         return convertView;
     }

@@ -165,7 +165,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                             add(item);
                             if (service.getCollapsedGroups().contains(name)) item.setCollapsed(true);
                             else {
-                                list = SortList.sortSimpleContacts(account, list);
+                                if (prefs.getBoolean("SortByStatuses", true)) list = SortList.sortSimpleContacts(account, list);
                                 for (String jid: list) {
                                     RosterEntry re = roster.getEntry(jid);
                                     RosterItem i = new RosterItem(account, RosterItem.Type.entry, re);
@@ -194,7 +194,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                         add(item);
                         if (service.getCollapsedGroups().contains(name)) item.setCollapsed(true);
                         else {
-                            list = SortList.sortSimpleContacts(account, list);
+                            if (prefs.getBoolean("SortByStatuses", true)) list = SortList.sortSimpleContacts(account, list);
                             for (String jid: list) {
                                 RosterEntry re = roster.getEntry(jid);
                                 RosterItem i = new RosterItem(account, RosterItem.Type.entry, re);

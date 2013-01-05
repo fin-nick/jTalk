@@ -936,7 +936,6 @@ public class JTalkService extends Service {
   		String resource = StringUtils.parseResource(user);
   		if (resource.length() > 0) sendMessage(account, StringUtils.parseBareAddress(user), message, resource);
   		else sendMessage(account, user, message, null);
-  		
   	}
   	
   	private void sendMessage(String account, String user, String message, String resource) {

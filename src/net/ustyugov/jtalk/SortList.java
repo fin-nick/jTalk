@@ -68,57 +68,57 @@ public class SortList {
     	result.addAll(chat.size() + online.size() + away.size() + xa.size() + dnd.size(), offline);
 		return result;
     }
-    
+
     public static List<String> sortSimpleContacts(String account, List<String> list) {
-    	JTalkService service = JTalkService.getInstance();
-    	
-    	List<String> online  = new ArrayList<String>();
-    	List<String> chat    = new ArrayList<String>();
-    	List<String> away    = new ArrayList<String>();
-    	List<String> xa      = new ArrayList<String>();
-    	List<String> dnd     = new ArrayList<String>();
-    	List<String> offline = new ArrayList<String>();
-    	
-    	for (String jid : list) {
-    		Presence.Mode presenceMode = service.getMode(account, jid);
-    		Presence.Type presenceType = service.getType(account, jid);
-  			
-    		if (presenceType == Presence.Type.available) {
-    			if (presenceMode == Presence.Mode.chat) {
-        			chat.add(jid);
-        		} else if (presenceMode == Presence.Mode.away) {
-        			away.add(jid);
-        		} else if (presenceMode == Presence.Mode.xa) {
-        			xa.add(jid);
-        		} else if (presenceMode == Presence.Mode.dnd) {
-        			dnd.add(jid);
-        		} else {
-        			online.add(jid);
-        		}
-    		} else {
-    			offline.add(jid);
-    		}
-    	}
-    	
-    	List<String> result = new ArrayList<String>();
-    	result.addAll(chat);
-    	result.addAll(chat.size(),online);
-    	result.addAll(chat.size()+online.size(), away);
-    	result.addAll(chat.size()+online.size()+away.size(), xa);
-    	result.addAll(chat.size()+online.size()+away.size()+xa.size(), dnd);
-    	result.addAll(chat.size()+online.size()+away.size()+xa.size()+dnd.size(), offline);
-		return result;
+        JTalkService service = JTalkService.getInstance();
+
+        List<String> online  = new ArrayList<String>();
+        List<String> chat    = new ArrayList<String>();
+        List<String> away    = new ArrayList<String>();
+        List<String> xa      = new ArrayList<String>();
+        List<String> dnd     = new ArrayList<String>();
+        List<String> offline = new ArrayList<String>();
+
+        for (String jid : list) {
+            Presence.Mode presenceMode = service.getMode(account, jid);
+            Presence.Type presenceType = service.getType(account, jid);
+
+            if (presenceType == Presence.Type.available) {
+                if (presenceMode == Presence.Mode.chat) {
+                    chat.add(jid);
+                } else if (presenceMode == Presence.Mode.away) {
+                    away.add(jid);
+                } else if (presenceMode == Presence.Mode.xa) {
+                    xa.add(jid);
+                } else if (presenceMode == Presence.Mode.dnd) {
+                    dnd.add(jid);
+                } else {
+                    online.add(jid);
+                }
+            } else {
+                offline.add(jid);
+            }
+        }
+
+        List<String> result = new ArrayList<String>();
+        result.addAll(chat);
+        result.addAll(chat.size(),online);
+        result.addAll(chat.size()+online.size(), away);
+        result.addAll(chat.size()+online.size()+away.size(), xa);
+        result.addAll(chat.size()+online.size()+away.size()+xa.size(), dnd);
+        result.addAll(chat.size()+online.size()+away.size()+xa.size()+dnd.size(), offline);
+        return result;
     }
-    
+
     public static List<String> sortParticipantsInChat(String account, String group, List<String> list) {
     	JTalkService service = JTalkService.getInstance();
-    	
+
     	List<String> online  = new ArrayList<String>();
     	List<String> chat    = new ArrayList<String>();
     	List<String> away    = new ArrayList<String>();
     	List<String> xa      = new ArrayList<String>();
     	List<String> dnd     = new ArrayList<String>();
-    	
+
     	if (service.getConferencesHash(account).containsKey(group)) {
     		for (String nick : list) {
         		Presence p = service.getConferencesHash(account).get(group).getOccupantPresence(group + "/" + nick);

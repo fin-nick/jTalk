@@ -18,14 +18,13 @@
 package net.ustyugov.jtalk.adapter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import net.ustyugov.jtalk.IconPicker;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.SortList;
-import net.ustyugov.jtalk.db.AccountDbHelper;
-import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
 
 import org.jivesoftware.smack.packet.Presence;
@@ -33,7 +32,6 @@ import org.jivesoftware.smack.util.StringUtils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -59,6 +57,7 @@ public class UsersAdapter extends ArrayAdapter<RosterItem> {
 	}
 	
 	public void update() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
 		clear();
         List<String> users = new ArrayList<String>();
         Iterator<Presence> it = service.getRoster(account).getPresences(group);
@@ -67,7 +66,9 @@ public class UsersAdapter extends ArrayAdapter<RosterItem> {
             users.add(StringUtils.parseResource(p.getFrom()));
         }
 
-        users = SortList.sortParticipantsInChat(account, group, users);
+        if (prefs.getBoolean("SortByStatuses", true)) users = SortList.sortParticipantsInChat(account, group, users);
+        else Collections.sort(users, new SortList.StringComparator());
+
         for (String user: users) {
             RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
             item.setName(user);

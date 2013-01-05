@@ -23,6 +23,7 @@ import java.io.FilenameFilter;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import android.view.ViewGroup;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.util.StringUtils;
@@ -63,15 +64,17 @@ public class Avatars {
 						}
 						
 						if (bitmap != null && image != null) {
-                            float value = 42 * activity.getResources().getDisplayMetrics().density;
-                            image.setMaxWidth((int)value);
-                            image.setMinimumWidth((int)value);
+                            int value = (int) (42 * activity.getResources().getDisplayMetrics().density);
+                            ViewGroup.LayoutParams lp = image.getLayoutParams();
+                            lp.width = value;
+                            image.setLayoutParams(lp);
 							image.setImageBitmap(bitmap);
 							image.setVisibility(View.VISIBLE);
 						} else {
                             if (image != null) {
-                                image.setMaxWidth(1);
-                                image.setMinimumWidth(1);
+                                ViewGroup.LayoutParams lp = image.getLayoutParams();
+                                lp.width = 1;
+                                image.setLayoutParams(lp);
                                 image.setVisibility(View.INVISIBLE);
                             }
                         }

@@ -122,7 +122,7 @@ public class SearchAdapter extends ArrayAdapter<RosterItem> {
                             if (jid.contains(search) || name.toLowerCase().contains(search)) list.add(jid);
                         }
                     }
-                    list = SortList.sortSimpleContacts(account, list);
+                    if (prefs.getBoolean("SortByStatuses", true)) list = SortList.sortSimpleContacts(account, list);
 
                     for (String jid: list) {
                         RosterEntry re = roster.getEntry(jid);

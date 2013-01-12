@@ -356,21 +356,37 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         messageInput.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
                 int length = s.length();
-                if (length > 0) sendButton.setEnabled(true); else sendButton.setEnabled(false);
-
-                if (!isMuc) {
-                    if (length > 0) {
+                if (length > 0) {
+                    if (!isMuc) {
                         if (!compose) {
                             compose = true;
                             service.setChatState(account, jid, ChatState.composing);
                         }
-                    } else if (length == 0) {
+                    }
+                    sendButton.setEnabled(true);
+                } else {
+                    if (!isMuc) {
                         if (compose) {
                             compose = false;
                             service.setChatState(account, jid, ChatState.active);
                         }
                     }
+                    sendButton.setEnabled(false);
                 }
+//
+//                if (!isMuc) {
+//                    if (length > 0) {
+//                        if (!compose) {
+//                            compose = true;
+//                            service.setChatState(account, jid, ChatState.composing);
+//                        }
+//                    } else if (length == 0) {
+//                        if (compose) {
+//                            compose = false;
+//                            service.setChatState(account, jid, ChatState.active);
+//                        }
+//                    }
+//                }
             }
 
             public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
@@ -440,7 +456,10 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (msgList.isEmpty()) closeChat();
+        if (msgList.isEmpty()) {
+            clearChat();
+            if (!isMuc) service.setChatState(account, jid, ChatState.gone);
+        }
         jid = null;
         account = null;
     }
@@ -931,7 +950,6 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     }
 
     private void closeChat() {
-        if (!isMuc) service.setChatState(account, jid, ChatState.gone);
         clearChat();
         finish();
     }

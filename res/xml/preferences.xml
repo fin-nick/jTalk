@@ -241,6 +241,18 @@
                 android:title="Auto load avatars"
                 android:key="LoadAllAvatars"
                 android:defaultValue="false"/>
+        <CheckBoxPreference
+                android:title="Ping to server"
+                android:summary="Needed reconnect"
+                android:key="Ping"
+                android:defaultValue="false"/>
+        <EditTextPreference
+                android:dependency="Ping"
+                android:key="PingTimeout"
+                android:title="Ping timeout"
+                android:summary="in seconds"
+                android:defaultValue="60"
+                android:numeric="integer"/>
     </PreferenceScreen>
     <PreferenceScreen android:title="@string/Info">
         <Preference

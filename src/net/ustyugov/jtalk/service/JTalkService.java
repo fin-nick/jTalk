@@ -19,14 +19,7 @@ package net.ustyugov.jtalk.service;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Timer;
+import java.util.*;
 
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.RosterActivity;
@@ -1497,7 +1490,7 @@ public class JTalkService extends Service {
         }
 
         @Override
-        public void onPostExecute(String username) {
+        public void onPostExecute(final String username) {
             if (username != null) {
                 XMPPConnection connection = connections.get(username);
 
@@ -1565,6 +1558,20 @@ public class JTalkService extends Service {
                 sendBroadcast(new Intent(Constants.CONNECTION_STATE));
                 Intent updateIn = new Intent(Constants.UPDATE);
                 sendBroadcast(updateIn);
+
+                if (prefs.getBoolean("Ping", false)) {
+                    int timeout = 60000;
+                    try {
+                        timeout = Integer.parseInt(prefs.getString("PingTimeout", 60+"")) * 1000;
+                    } catch (NumberFormatException ignored) { }
+                    Timer pingTimer = new Timer();
+                    pingTimer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            new PingTask(username).execute();
+                        }
+                    }, timeout, timeout * 2);
+                }
             }
         }
     }

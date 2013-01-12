@@ -106,7 +106,11 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
         gridView.setOnItemClickListener(this);
         gridView.setOnItemLongClickListener(this);
         gridView.setAdapter(rosterAdapter);
-        
+
+        if (getIntent().getBooleanExtra("status", false)) {
+            RosterDialogs.changeStatusDialog(this, null, null);
+        }
+
        	if (getIntent().getBooleanExtra("file", false)) {
            	if (service.getIncomingRequests().size() > 0) {
            		FileTransferRequest request = service.getIncomingRequests().remove(0);

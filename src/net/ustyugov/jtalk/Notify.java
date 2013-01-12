@@ -76,16 +76,23 @@ public class Notify {
             }
 
             Intent i = new Intent(service, RosterActivity.class);
-            i.setAction(Intent.ACTION_MAIN);
-            i.addCategory(Intent.CATEGORY_LAUNCHER);
+            i.setAction(Constants.UPDATE);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
+            i.putExtra("status", false);
+            PendingIntent piRoster = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Intent i2 = new Intent(service, RosterActivity.class);
+            i2.setAction(Constants.PRESENCE_CHANGED);
+            i2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            i2.putExtra("status", true);
+            PendingIntent piStatus = PendingIntent.getActivity(service, 0, i2, PendingIntent.FLAG_UPDATE_CURRENT);
 
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
             mBuilder.setSmallIcon(icon);
             mBuilder.setContentTitle(statusArray[pos]);
             mBuilder.setContentText(text);
-            mBuilder.setContentIntent(contentIntent);
+            mBuilder.setContentIntent(piRoster);
+            mBuilder.addAction(R.drawable.ic_action_refresh, service.getString(R.string.Status), piStatus);
 
             NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
             mng.notify(NOTIFICATION, mBuilder.build());
@@ -122,7 +129,9 @@ public class Notify {
                         if (re != null && re.getName() != null) n = re.getName();
                     }
                 }
-                if (n != null && n.length() > 0) inboxStyle.addLine(n + ": " + service.getMessagesCount(account, jid));
+                if (n != null && n.length() > 0) {
+                    inboxStyle.addLine(n + ": (" + service.getMessagesCount(account, jid) + ") " + item.getBody());
+                }
             }
 
             mBuilder.setStyle(inboxStyle);
@@ -244,7 +253,7 @@ public class Notify {
                         if (re != null && re.getName() != null) n = re.getName();
                     }
                 }
-                if (n != null && n.length() > 0) inboxStyle.addLine(n + ": " + service.getMessagesCount(acc, jid));
+                if (n != null && n.length() > 0) inboxStyle.addLine(n + ": (" + service.getMessagesCount(acc, jid) + ") " + item.getBody());
             }
 
             mBuilder.setStyle(inboxStyle);

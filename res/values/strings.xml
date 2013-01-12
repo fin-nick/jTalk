@@ -224,6 +224,8 @@
     <string name="Administration">Administration</string>
     <string name="Users">Users</string>
     <string name="Privates">Private chats</string>
+    <string name="YouJoin">You joined to group</string>
+    <string name="YouLeave">You leave from group</string>
     
     <!--  Files statuses -->
     <string name="Downloading">Downloading</string>

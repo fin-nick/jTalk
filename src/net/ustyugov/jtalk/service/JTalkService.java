@@ -32,6 +32,7 @@ import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.RosterActivity;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
+import net.ustyugov.jtalk.dialog.RosterDialogs;
 import net.ustyugov.jtalk.listener.ConListener;
 import net.ustyugov.jtalk.listener.IncomingFileListener;
 import net.ustyugov.jtalk.listener.InviteListener;
@@ -833,7 +834,7 @@ public class JTalkService extends Service {
                     presence.setMode(Presence.Mode.valueOf(prefs.getString("currentMode", "available")));
 
                     try {
-                        writeMucMessage(account, group, nick, "You joined to group");
+                        writeMucMessage(account, group, nick, getString(R.string.YouJoin));
 
                         DiscussionHistory h = new DiscussionHistory();
                         h.setMaxStanzas(10);
@@ -879,7 +880,7 @@ public class JTalkService extends Service {
 			try {
 				MultiUserChat muc = getConferencesHash(account).get(group);
 				if (muc.isJoined()) {
-                    writeMucMessage(account, group, muc.getNickname(), "You leave from group");
+                    writeMucMessage(account, group, muc.getNickname(), getString(R.string.YouLeave));
                     muc.leave();
                 }
 			} catch (IllegalStateException ignored) { }
@@ -898,7 +899,7 @@ public class JTalkService extends Service {
             while(groups.hasMoreElements()) {
                 String group = groups.nextElement();
                 MultiUserChat muc = hash.get(group);
-                writeMucMessage(account, group, muc.getNickname(), "You leave from group");
+                writeMucMessage(account, group, muc.getNickname(), getString(R.string.YouLeave));
                 try {
                     if (muc.isJoined()) { muc.leave(); }
                 } catch (IllegalStateException ignored) { }

@@ -152,7 +152,7 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 			
 			if (mCount > 0) {
 				RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
-				item.setName(service.getString(R.string.moderator) + "(" + mCount + ")");
+				item.setName(mCount+"");
 				item.setObject("moderator");
 				add(item);
                 if (!prefs.getBoolean("SortByStatuses", true)) {
@@ -200,7 +200,7 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 			
 			if (pCount > 0) {
 				RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
-				item.setName(service.getString(R.string.participant) + "(" + pCount + ")");
+				item.setName(pCount+"");
 				item.setObject("participant");
 				add(item);
                 if (!prefs.getBoolean("SortByStatuses", true)) {
@@ -248,7 +248,7 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 			
 			if (vCount > 0) {
 				RosterItem item = new RosterItem(account, RosterItem.Type.group, null);
-				item.setName(service.getString(R.string.visitor) + "(" + vCount + ")");
+				item.setName(vCount+"");
 				item.setObject("visitor");
 				add(item);
                 if (!prefs.getBoolean("SortByStatuses", true)) {
@@ -327,16 +327,19 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 				holder = (GroupHolder) convertView.getTag();
 			}
 	        holder.text.setText(item.getName());
-			
-			if (minimal && service.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-				holder.messageIcon.setVisibility(View.GONE);
-			} else {
-				String role = (String) item.getObject();
-				if (role.equals("moderator")) holder.messageIcon.setImageBitmap(ip.getModeratorBitmap());
-				else if (role.equals("participant")) holder.messageIcon.setImageBitmap(ip.getParticipantBitmap());
-				else holder.messageIcon.setImageBitmap(ip.getVisitorBitmap());
-				holder.messageIcon.setVisibility(View.VISIBLE);
-			}
+
+            String role = (String) item.getObject();
+            if (role.equals("moderator")) holder.messageIcon.setImageBitmap(ip.getModeratorBitmap());
+            else if (role.equals("participant")) holder.messageIcon.setImageBitmap(ip.getParticipantBitmap());
+            else holder.messageIcon.setImageBitmap(ip.getVisitorBitmap());
+            holder.messageIcon.setVisibility(View.VISIBLE);
+            if (minimal && service.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                ViewGroup.LayoutParams params = holder.messageIcon.getLayoutParams();
+                params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+                holder.messageIcon.setLayoutParams(params);
+            }
+
 			return convertView;
 		} else if (item.isEntry()) {
 			boolean color = prefs.getBoolean("ColoredBar", true);

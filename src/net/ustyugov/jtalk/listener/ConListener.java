@@ -39,10 +39,12 @@ public class ConListener implements ConnectionListener {
 	public void connectionClosed() {
         context.sendBroadcast(new Intent(Constants.UPDATE));
         context.sendBroadcast(new Intent(Constants.CONNECTION_STATE));
+        service.leaveAllRooms(account);
 	}
 
 	public void connectionClosedOnError(Exception e) {
         if (!service.isAuthenticated()) Notify.offlineNotify("Connection closed");
+        service.leaveAllRooms(account);
         
         context.sendBroadcast(new Intent(Constants.UPDATE));
         context.sendBroadcast(new Intent(Constants.CONNECTION_STATE));

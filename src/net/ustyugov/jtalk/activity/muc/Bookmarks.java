@@ -112,7 +112,7 @@ public class Bookmarks extends SherlockActivity {
 						String nick = bc.getNickname();
 						String pass = bc.getPassword();
 						if (nick == null || nick.length() < 1) nick = StringUtils.parseName(service.getConnection(account).getUser());
-						service.joinRoom(account, jid, nick, pass);
+						if (!service.getJoinedConferences().containsKey(jid)) service.joinRoom(account, jid, nick, pass);
 					}
 				});
 		        

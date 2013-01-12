@@ -135,14 +135,17 @@ public class MsgListener implements PacketListener {
 		
 		if (body != null && body.length() > 0) {
 	        if (type.equals("groupchat")) { // Group Chat Message
+                String nick  = StringUtils.parseResource(from);
+                String group = StringUtils.parseBareAddress(from);
+
 	        	Date date = new java.util.Date();
 				String time = DateFormat.getTimeFormat(context).format(date);
 				DelayInformation delayExt = (DelayInformation) msg.getExtension("jabber:x:delay");
-				if (delayExt != null) time = delayExt.getStamp().toLocaleString();
+				if (delayExt != null) {
+                    if (service.getJoinedConferences().containsKey(group)) return;
+                    time = delayExt.getStamp().toLocaleString();
+                }
 		       
-	        	String nick  = StringUtils.parseResource(from);
-	        	String group = StringUtils.parseBareAddress(from);
-	        	
 	        	String mynick = context.getResources().getString(R.string.Me);
 	        	if (service.getConferencesHash(account).containsKey(group)) mynick = service.getConferencesHash(account).get(group).getNickname();
 

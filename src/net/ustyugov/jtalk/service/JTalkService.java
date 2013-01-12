@@ -689,26 +689,23 @@ public class JTalkService extends Service {
     }
 
     public void disconnect(final boolean exit) {
-    	if (wifiLock != null && wifiLock.isHeld()) wifiLock.release();
     	if (locationManager != null && locationListener != null) locationManager.removeUpdates(locationListener);
-    	leaveAllRooms();
-    	
     	Collection<XMPPConnection> con = getAllConnections();
 		for (XMPPConnection connection: con) {
 			String account = StringUtils.parseBareAddress(connection.getUser());
 	    	if (isAuthenticated(account)) {
-                if (connectionTasks.containsKey(account)) {
-                    connectionTasks.remove(account).cancel(true);
-                }
-
+                if (connectionTasks.containsKey(account)) { connectionTasks.remove(account).cancel(true); }
 	    		removeConnectionListener(account);
 				Presence presence = new Presence(Presence.Type.unavailable, "", 0, null);
 				connection.disconnect(presence);
 	    	} else if (connection.isConnected()) connection.disconnect();
             setState(account, getString(R.string.Disconnect));
             connections.remove(connection);
-	    	if (exit) stopSelf();
 		}
+        if (exit) {
+            if (wifiLock != null && wifiLock.isHeld()) wifiLock.release();
+            stopSelf();
+        }
     }
     
     public void disconnect(String account) {
@@ -718,8 +715,13 @@ public class JTalkService extends Service {
             }
 
     		XMPPConnection connection = connections.remove(account);
-    		removeConnectionListener(account);
-    		connection.disconnect();
+            if (isAuthenticated(account)) {
+                if (connectionTasks.containsKey(account)) { connectionTasks.remove(account).cancel(true); }
+                removeConnectionListener(account);
+                Presence presence = new Presence(Presence.Type.unavailable, "", 0, null);
+                connection.disconnect(presence);
+            } else if (connection.isConnected()) connection.disconnect();
+            setState(account, getString(R.string.Disconnect));
     	}
     	sendBroadcast(new Intent(Constants.UPDATE));
     }
@@ -815,7 +817,6 @@ public class JTalkService extends Service {
     }
 
     public void joinRoom(final String account, final String group, final String nick, final String password) {
-        if (joinedConferences.containsKey(group)) return;
         if (connections.containsKey(account)) {
             final XMPPConnection connection = connections.get(account);
 
@@ -832,9 +833,10 @@ public class JTalkService extends Service {
                     presence.setMode(Presence.Mode.valueOf(prefs.getString("currentMode", "available")));
 
                     try {
+                        writeMucMessage(account, group, nick, "You joined to group");
+
                         DiscussionHistory h = new DiscussionHistory();
                         h.setMaxStanzas(10);
-                        muc.addParticipantStatusListener(new MucParticipantStatusListener(account, group));
                         muc.addParticipantListener(new PacketListener() {
                             @Override
                             public void processPacket(Packet packet) {
@@ -851,12 +853,17 @@ public class JTalkService extends Service {
                     }
 
                     if (muc.isJoined()) {
-                        Conference conf = new Conference(group, nick, password);
-                        joinedConferences.put(group, conf);
                         Intent updateIntent = new Intent(Constants.PRESENCE_CHANGED);
                         updateIntent.putExtra("join", true);
                         updateIntent.putExtra("group", group);
                         sendBroadcast(updateIntent);
+
+                        try {
+                            Thread.sleep(10000);
+                        } catch (Exception ignored) { }
+                        Conference conf = new Conference(group, nick, password);
+                        joinedConferences.put(group, conf);
+                        muc.addParticipantStatusListener(new MucParticipantStatusListener(account, group));
 
                         if (prefs.getBoolean("LoadAllAvatars", false)) {
                             Avatars.loadAllAvatars(connection, group);
@@ -871,7 +878,10 @@ public class JTalkService extends Service {
 		if (getConferencesHash(account).containsKey(group)) {
 			try {
 				MultiUserChat muc = getConferencesHash(account).get(group);
-				if (muc.isJoined()) muc.leave();
+				if (muc.isJoined()) {
+                    writeMucMessage(account, group, muc.getNickname(), "You leave from group");
+                    muc.leave();
+                }
 			} catch (IllegalStateException ignored) { }
 			getConferencesHash(account).remove(group);
 	    }
@@ -881,22 +891,23 @@ public class JTalkService extends Service {
 		sendBroadcast(updateIntent);
 	}
 	
-	public void leaveAllRooms() {
-		for (Hashtable<String, MultiUserChat> hash : conferences.values()) {
-			if (!hash.isEmpty()) {
-				Collection<MultiUserChat> coll = hash.values();
-				for(MultiUserChat muc : coll) {
-					try {
-						if (muc.isJoined()) muc.leave();
-					} catch (IllegalStateException ignored) { }
-				}
-				mucMessages.clear();
-//				joinedConferences.clear();
-//				conferencesHash.clear();
-			}
-		}
-	}
-	
+    public void leaveAllRooms(String account) {
+        Hashtable<String, MultiUserChat> hash = conferences.get(account);
+        if (!hash.isEmpty()) {
+            Enumeration<String> groups = hash.keys();
+            while(groups.hasMoreElements()) {
+                String group = groups.nextElement();
+                MultiUserChat muc = hash.get(group);
+                writeMucMessage(account, group, muc.getNickname(), "You leave from group");
+                try {
+                    if (muc.isJoined()) { muc.leave(); }
+                } catch (IllegalStateException ignored) { }
+            }
+        }
+        Intent updateIntent = new Intent(Constants.PRESENCE_CHANGED);
+        sendBroadcast(updateIntent);
+    }
+
     public void addContact(String account, String jid, String name, String group) {
 	    try {
 		    final String[] groups = { group };
@@ -1241,6 +1252,29 @@ public class JTalkService extends Service {
   		else if(value instanceof Boolean) editor.putBoolean(name, (Boolean)value);
   		editor.commit();
   	}
+
+    private void writeMucMessage(String account, String group, String nick, String message) {
+        Date date = new java.util.Date();
+        date.setTime(Long.parseLong(System.currentTimeMillis()+""));
+        String time = DateFormat.getTimeFormat(getInstance()).format(date);
+
+        MessageItem item = new MessageItem(account, group + "/" + nick);
+        item.setBody(message);
+        item.setType(MessageItem.Type.status);
+        item.setName(StringUtils.parseName(group));
+        item.setTime(time);
+
+        MessageLog.writeMucMessage(group, nick, item);
+
+        List<MessageItem> list = new ArrayList<MessageItem>();
+        if (getMucMessagesHash(account).containsKey(group)) {
+            list = getMucMessagesHash(account).get(group);
+            list.add(item);
+        } else {
+            list.add(item);
+            getMucMessagesHash(account).put(group, list);
+        }
+    }
   	
   	private void clearAll() {
   		autoStatusTimer.cancel();

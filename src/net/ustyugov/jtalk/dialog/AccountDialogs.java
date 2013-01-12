@@ -98,7 +98,7 @@ public class AccountDialogs {
 	 	            Intent i = new Intent(Constants.UPDATE);
 	             	a.sendBroadcast(i);
 
-                    ConnectDialog(a, jid);
+                    if (e) ConnectDialog(a, jid);
 				}
 			}
 		});
@@ -218,7 +218,7 @@ public class AccountDialogs {
 	 	            Intent i = new Intent(Constants.UPDATE);
 	             	a.sendBroadcast(i);
 
-                    ConnectDialog(a, jid);
+                    if (e) ConnectDialog(a, jid);
 				}
 			}
 		});

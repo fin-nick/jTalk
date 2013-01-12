@@ -286,32 +286,28 @@ public class Notify {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
         mBuilder.setContentTitle(filename);
         mBuilder.setContentIntent(contentIntent);
+        mBuilder.setOngoing(false);
         
         if (status == Status.complete) {
         	mBuilder.setSmallIcon(android.R.drawable.stat_sys_download_done);
         	mBuilder.setTicker(service.getString(R.string.Completed));
         	mBuilder.setContentText(service.getString(R.string.Completed));
         	mBuilder.setAutoCancel(true);
-        	mBuilder.setOngoing(false);
         } else if (status == Status.cancelled) {
         	mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
         	mBuilder.setTicker(service.getString(R.string.Canceled));
         	mBuilder.setContentText(service.getString(R.string.Canceled));
         	mBuilder.setAutoCancel(true);
-        	mBuilder.setOngoing(false);
         } else if (status == Status.refused) {
         	mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
         	mBuilder.setTicker(service.getString(R.string.Canceled));
         	mBuilder.setContentText(service.getString(R.string.Canceled));
         	mBuilder.setAutoCancel(true);
-        	mBuilder.setOngoing(false);
         } else if (status == Status.negotiating_transfer) {
-        	mBuilder.setOngoing(true);
         	mBuilder.setSmallIcon(android.R.drawable.stat_sys_download_done);
         	mBuilder.setTicker(service.getString(R.string.Waiting));
         	mBuilder.setContentText(service.getString(R.string.Waiting));
         } else if (status == Status.in_progress) {
-        	mBuilder.setOngoing(true);
         	mBuilder.setSmallIcon(android.R.drawable.stat_sys_download);
         	mBuilder.setTicker(service.getString(R.string.Downloading));
         	mBuilder.setContentText(service.getString(R.string.Downloading));
@@ -320,7 +316,6 @@ public class Notify {
         	mBuilder.setTicker(service.getString(R.string.Error));
         	mBuilder.setContentText(service.getString(R.string.Error));
         	mBuilder.setAutoCancel(true);
-        	mBuilder.setOngoing(false);
         } else {
         	return;
         }

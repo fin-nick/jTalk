@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.actionbarsherlock.view.MenuItem;
 import net.ustyugov.jtalk.Notify;
 import net.ustyugov.jtalk.service.JTalkService;
 
@@ -52,9 +53,7 @@ import com.jtalk2.R;
 
 public class SendFileActivity extends SherlockActivity implements OnClickListener {
 	private static final int RESULT = 1;
-	private String account;
 	private String jid;
-	private Boolean muc = false;
 	private EditText description;
 	private Button select;
 	private Button ok;
@@ -74,9 +73,10 @@ public class SendFileActivity extends SherlockActivity implements OnClickListene
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		service = JTalkService.getInstance();
-		account = getIntent().getStringExtra("account");
-		jid = getIntent().getStringExtra("jid");
-		muc = getIntent().getBooleanExtra("muc", false);
+        Intent intent = getIntent();
+		String account = intent.getStringExtra("account");
+		jid = intent.getStringExtra("jid");
+		boolean muc = intent.getBooleanExtra("muc", false);
     	
 		Iterator<Presence> it = service.getRoster(account).getPresences(jid);
 		while (it.hasNext()) {
@@ -106,35 +106,42 @@ public class SendFileActivity extends SherlockActivity implements OnClickListene
 		
 		cancel = (Button) findViewById(R.id.cancel);
 		cancel.setOnClickListener(this);
+
+        String action = intent.getAction();
+        if (action != null && Intent.ACTION_SEND.equals(action)) selectFile(intent);
 	}
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode == RESULT_OK && requestCode == RESULT && data != null) {
-			String path = "none";
-			Uri uri = data.getData();
-			String scheme = uri.getScheme();
-
-			if (scheme.equals("file")) {
-				path = uri.getPath();
-			} else if (scheme.equals("content")) {
-				try {
-					String[] proj = { MediaStore.Files.FileColumns.DATA };
-				    Cursor cursor = managedQuery(uri, proj, null, null, null);
-				    if (cursor != null && cursor.getCount() != 0) {
-				        int columnIndex = cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA);
-				        cursor.moveToFirst();
-				        path = cursor.getString(columnIndex);
-				    }
-				} catch(Exception e) { path = "none"; }
-				
-			}
-
-			file = new File(path);
-			select.setText(path);
+			selectFile(data);
 		}
 	}
-	
+
+    private void selectFile(Intent intent) {
+        String path = "none";
+        Uri uri = intent.getData();
+        String scheme = uri.getScheme();
+
+        if (scheme.equals("file")) {
+            path = uri.getPath();
+        } else if (scheme.equals("content")) {
+            try {
+                String[] proj = { MediaStore.Files.FileColumns.DATA };
+                Cursor cursor = managedQuery(uri, proj, null, null, null);
+                if (cursor != null && cursor.getCount() != 0) {
+                    int columnIndex = cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA);
+                    cursor.moveToFirst();
+                    path = cursor.getString(columnIndex);
+                }
+            } catch(Exception e) { path = "none"; }
+
+        }
+
+        file = new File(path);
+        select.setText(path);
+    }
+
 	public void onClick(View v) {
 		if (v == select) {
 			Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -150,7 +157,7 @@ public class SendFileActivity extends SherlockActivity implements OnClickListene
 	}
 	
   	public void sendFile() {
-  		final String fullJid = jid + "/" + (String) spinner.getSelectedItem();
+  		final String fullJid = jid + "/" + spinner.getSelectedItem();
   		final String desc = description.getText().toString();
   		
   		if (file != null && file.exists()) {
@@ -168,7 +175,7 @@ public class SendFileActivity extends SherlockActivity implements OnClickListene
 							Notify.fileProgress(name, status);
 							try {
 								Thread.sleep(1000);
-							} catch (InterruptedException ex) { }
+							} catch (InterruptedException ignored) { }
 						}
 						Notify.fileProgress(name, out.getStatus());
 		  			} catch (XMPPException e) {
@@ -180,4 +187,14 @@ public class SendFileActivity extends SherlockActivity implements OnClickListene
 			}.start();
   		}
   	}
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
+        }
+        return true;
+    }
 }

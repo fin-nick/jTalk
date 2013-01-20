@@ -98,7 +98,8 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                     List<Presence> selfPresences= new ArrayList<Presence>();
                     Iterator<Presence> it =  roster.getPresences(account);
                     while (it.hasNext()) {
-                        selfPresences.add(it.next());
+                        Presence presence = it.next();
+                        if (presence.isAvailable()) selfPresences.add(presence);
                     }
                     if (prefs.getBoolean("SelfContact", true) && selfPresences.size() > 0) {
                         RosterItem selfgroup = new RosterItem(account, RosterItem.Type.group, null);

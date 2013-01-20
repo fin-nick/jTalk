@@ -106,7 +106,7 @@ public class Notify {
             mBuilder.setSmallIcon(R.drawable.stat_msg);
             mBuilder.setLights(0xFF00FF00, 2000, 3000);
             mBuilder.setContentTitle(service.getString(R.string.app_name));
-            mBuilder.setContentText(service.getString(R.string.UnreadMessage)).setNumber(service.getMessagesCount());
+            mBuilder.setContentText(service.getString(R.string.UnreadMessage)).setNumber(service.getUnreadMessages().size());
             mBuilder.setContentIntent(contentIntent);
 
             NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
@@ -227,7 +227,7 @@ public class Notify {
             mBuilder.setSmallIcon(R.drawable.stat_msg);
             mBuilder.setLights(0xFF00FF00, 2000, 3000);
             mBuilder.setContentTitle(service.getString(R.string.app_name));
-            mBuilder.setContentText(service.getString(R.string.UnreadMessage)).setNumber(service.getMessagesCount());
+            mBuilder.setContentText(service.getString(R.string.UnreadMessage)).setNumber(service.getUnreadMessages().size());
             mBuilder.setContentIntent(contentIntent);
             if (include) mBuilder.setTicker(service.getString(R.string.NewMessageFrom) + " " + nick + ": " + text);
             else mBuilder.setTicker(service.getString(R.string.NewMessageFrom) + " " + nick);

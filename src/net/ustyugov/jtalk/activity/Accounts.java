@@ -20,6 +20,7 @@ package net.ustyugov.jtalk.activity;
 import android.widget.AdapterView;
 import net.ustyugov.jtalk.Account;
 import net.ustyugov.jtalk.Constants;
+import net.ustyugov.jtalk.activity.vcard.SetVcardActivity;
 import net.ustyugov.jtalk.adapter.AccountsAdapter;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.dialog.AccountDialogs;
@@ -45,8 +46,10 @@ import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
 
 public class Accounts extends SherlockActivity {
-	private static final int CONTEXT_EDIT = 1;
-	private static final int CONTEXT_REMOVE = 2;
+    private static final int CONTEXT_VCARD = 1;
+    private static final int CONTEXT_PRIVACY = 2;
+    private static final int CONTEXT_EDIT = 3;
+    private static final int CONTEXT_REMOVE = 4;
 	
 	private ListView list;
 	private AccountsAdapter adapter;
@@ -123,39 +126,51 @@ public class Accounts extends SherlockActivity {
 	     		break;
 	     	default:
 	     		return false;
-	    	}
-	    	return true;
+	    }
+	    return true;
 	 }
-	 
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo info) {
-		menu.add(Menu.NONE, CONTEXT_EDIT, Menu.NONE, R.string.Edit);
-		menu.add(Menu.NONE, CONTEXT_REMOVE, Menu.NONE, R.string.Remove);
-		menu.setHeaderTitle(getString(R.string.Actions));
-	 	super.onCreateContextMenu(menu, v, info);
-	 }
-	 
-	 @Override
-	 public boolean onContextItemSelected(android.view.MenuItem menuitem) {
-		 AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuitem.getMenuInfo();
-	     int position = info.position;
-	     Account account = (Account) list.getItemAtPosition(position);
-	     int id = account.getId();
-	     
-	     switch(menuitem.getItemId()) {
-	     	case CONTEXT_EDIT:
-	     		AccountDialogs.editDialog(this, id);
-	            break;
-	        case CONTEXT_REMOVE:
-	        	JTalkService service = JTalkService.getInstance();
-	        	if (service.isAuthenticated(account.getJid())) service.disconnect(account.getJid());
-	        	getContentResolver().delete(JTalkProvider.ACCOUNT_URI, "_id = '" + id + "'", null);
-	        	update();
-	           	break;
-	     }
-	     return true;
-	}
-	 
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo info) {
+        JTalkService service = JTalkService.getInstance();
+        int position = ((AdapterContextMenuInfo) info).position;
+        String account = ((Account)list.getItemAtPosition(position)).getJid();
+        menu.add(Menu.NONE, CONTEXT_VCARD, Menu.NONE, R.string.vcard).setEnabled(service.isAuthenticated(account));
+        menu.add(Menu.NONE, CONTEXT_PRIVACY, Menu.NONE, R.string.PrivacyLists).setEnabled(service.isAuthenticated(account));
+        menu.add(Menu.NONE, CONTEXT_EDIT, Menu.NONE, R.string.Edit);
+        menu.add(Menu.NONE, CONTEXT_REMOVE, Menu.NONE, R.string.Remove);
+        menu.setHeaderTitle(getString(R.string.Actions));
+        super.onCreateContextMenu(menu, v, info);
+    }
+
+    @Override
+    public boolean onContextItemSelected(android.view.MenuItem menuitem) {
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuitem.getMenuInfo();
+        int position = info.position;
+        Account account = (Account) list.getItemAtPosition(position);
+        int id = account.getId();
+        String jid = account.getJid();
+
+        switch(menuitem.getItemId()) {
+            case CONTEXT_VCARD:
+                startActivity(new Intent(this, SetVcardActivity.class).putExtra("account", jid));
+                break;
+            case CONTEXT_PRIVACY:
+                startActivity(new Intent(this, PrivacyListsActivity.class).putExtra("account", jid));
+                break;
+            case CONTEXT_EDIT:
+                AccountDialogs.editDialog(this, id);
+                break;
+            case CONTEXT_REMOVE:
+                JTalkService service = JTalkService.getInstance();
+                if (service.isAuthenticated(account.getJid())) service.disconnect(account.getJid());
+                getContentResolver().delete(JTalkProvider.ACCOUNT_URI, "_id = '" + id + "'", null);
+                update();
+                break;
+        }
+        return true;
+    }
+
 	private void update() {
 		adapter.update();
 		adapter.notifyDataSetChanged();

@@ -19,6 +19,7 @@ package net.ustyugov.jtalk.adapter;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 
 import net.ustyugov.jtalk.*;
@@ -88,9 +89,9 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 
                 Roster roster = service.getRoster(account);
                 if (roster != null && connection != null && connection.isAuthenticated() && !service.getCollapsedGroups().contains(account)) {
-
                     // add self contact
-                    if (prefs.getBoolean("SelfContact", true)) {
+                    Iterator<Presence> it = roster.getPresences(account);
+                    if (prefs.getBoolean("SelfContact", true) && it.hasNext() && it.next().isAvailable()) {
                         RosterEntry entry = new RosterEntry(account, account, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
                         RosterItem self = new RosterItem(account, RosterItem.Type.self, entry);
                         add(self);

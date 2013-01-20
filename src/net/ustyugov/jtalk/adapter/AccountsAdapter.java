@@ -88,7 +88,7 @@ public class AccountsAdapter extends ArrayAdapter<Account> {
 		TextView label = (TextView) v.findViewById(R.id.item);
 		label.setText(jid);
 		label.setTextSize(fontSize);
-		label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
+//		label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
     
 		ImageView icon = (ImageView)v.findViewById(R.id.status);
 		icon.setImageResource(R.drawable.icon_offline);

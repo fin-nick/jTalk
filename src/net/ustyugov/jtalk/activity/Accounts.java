@@ -59,18 +59,18 @@ public class Accounts extends SherlockActivity {
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+//		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
         setContentView(R.layout.accounts);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		setTitle(R.string.Accounts);
         
-        LinearLayout linear = (LinearLayout) findViewById(R.id.accounts_linear);
-        linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+//        LinearLayout linear = (LinearLayout) findViewById(R.id.accounts_linear);
+//        linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
 
         adapter = new AccountsAdapter(this);
 		
 		list = (ListView) findViewById(R.id.accounts_List);
-        list.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+//        list.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
         list.setDividerHeight(0);
         list.setCacheColorHint(0x00000000);
         list.setAdapter(adapter);

@@ -107,7 +107,7 @@ public class PrivacyListsActivity extends SherlockActivity implements OnItemClic
     			finish();
     			break;
     		case R.id.add:
-    			Intent intent = new Intent(this, PrivacyRulesActivity.class);
+    			Intent intent = new Intent(this, PrivacyRulesActivity.class).putExtra("account", account);
     			startActivity(intent);
 	     		break;
 	     	default:

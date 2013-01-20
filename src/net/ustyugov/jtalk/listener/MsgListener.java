@@ -17,6 +17,7 @@
 
 package net.ustyugov.jtalk.listener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -71,7 +72,7 @@ public class MsgListener implements PacketListener {
 	public void processPacket(Packet packet) {
 		Message msg = (Message) packet;
 		String from = msg.getFrom();
-		String id = msg.getPacketID();
+		final String id = msg.getPacketID();
 		String user = StringUtils.parseBareAddress(from).toLowerCase();
 		String type = msg.getType().name();
 		String body = msg.getBody();
@@ -103,32 +104,36 @@ public class MsgListener implements PacketListener {
 				service.sendReceivedPacket(connection, user, id);
 			} else if (receipt.equals("received")) {
 				if (service.getMessagesHash(account).containsKey(user)) {
-					List<MessageItem> l = service.getMessagesHash(account).get(user);
-					for (final MessageItem i : l) {
-						if (i.getId().equals(id)) i.setReceived(true);
-						final String u = user;
-						final String pid = id;
-						new Thread() {
-							public void run() {
-								try {
-					 	            ContentValues values = new ContentValues();
-					 	            values.put(MessageDbHelper.TYPE, i.getType().name());
-					 	            values.put(MessageDbHelper.JID, u);
-					 	            values.put(MessageDbHelper.ID, pid);
-					 	            values.put(MessageDbHelper.STAMP, i.getTime());
-					 	            values.put(MessageDbHelper.NICK, i.getName());
-					 	            values.put(MessageDbHelper.BODY, i.getBody());
-					 	            values.put(MessageDbHelper.COLLAPSED, i.isCollapsed() ? "true" : "false");
-					 	            values.put(MessageDbHelper.RECEIVED, "true");
-					 	            values.put(MessageDbHelper.FORM, "NULL");
-					 	            values.put(MessageDbHelper.BOB, "NULL");
-					            	service.getContentResolver().update(JTalkProvider.CONTENT_URI, values, MessageDbHelper.ID + " = '" + pid + "'", null);
-					            } catch (Exception ignored) { }
-							}
-						}.start();
-					}
-					Intent i = new Intent(Constants.RECEIVED);
-					context.sendBroadcast(i);
+                    final List<MessageItem> l = service.getMessagesHash(account).get(user);
+                    new Thread() {
+                        public void run() {
+                            for (MessageItem i : l) {
+                                String msgId = i.getId();
+                                if (msgId != null && msgId.equals(id)) {
+                                    i.setReceived(true);
+
+                                    Date d = new Date(Long.parseLong(id));
+                                    java.text.DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+                                    String stamp = df.format(d);
+
+                                    ContentValues values = new ContentValues();
+                                    values.put(MessageDbHelper.TYPE, i.getType().name());
+                                    values.put(MessageDbHelper.JID, i.getJid());
+                                    values.put(MessageDbHelper.ID, id);
+                                    values.put(MessageDbHelper.STAMP, stamp);
+                                    values.put(MessageDbHelper.NICK, i.getName());
+                                    values.put(MessageDbHelper.BODY, i.getBody());
+                                    values.put(MessageDbHelper.COLLAPSED, i.isCollapsed() ? "true" : "false");
+                                    values.put(MessageDbHelper.RECEIVED, "true");
+                                    values.put(MessageDbHelper.FORM, "NULL");
+                                    values.put(MessageDbHelper.BOB, "NULL");
+                                    service.getContentResolver().update(JTalkProvider.CONTENT_URI, values, MessageDbHelper.ID + " = '" + id + "'", null);
+                                    context.sendBroadcast(new Intent(Constants.RECEIVED));
+                                }
+                            }
+                        }
+                    }.start();
+                    return;
 				}
 			}
 		}

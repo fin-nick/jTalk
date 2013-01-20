@@ -145,13 +145,6 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         if (item.getSubject().length() > 0) subj = "\n" + context.getString(R.string.Subject) + ": " + item.getSubject() + "\n";
         body = subj + body;
         
-//        String id = item.getId();
-//        Cursor cursor = context.getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "' AND id = '" + id + "'", null, MessageDbHelper._ID);
-//        if (cursor != null && cursor.getCount() > 0) {
-//        	cursor.moveToLast();
-//        	received = Boolean.valueOf(cursor.getString(cursor.getColumnIndex(MessageDbHelper.RECEIVED)));
-//        }
-        
         String message;
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         if (type == MessageItem.Type.status) {

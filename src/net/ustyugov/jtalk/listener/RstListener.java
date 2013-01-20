@@ -69,10 +69,10 @@ public class RstListener implements RosterListener {
     public void presenceChanged(Presence presence) {
     	String[] statusArray = service.getResources().getStringArray(R.array.statusArray);
     	String jid  = StringUtils.parseBareAddress(presence.getFrom());
-      	
+
     	Presence.Mode mode = presence.getMode();
     	if (mode == null) mode = Presence.Mode.available;
-    	
+
     	String status = presence.getStatus();
     	if (status != null && status.length() > 0) status = "(" + status + ")";
     	else status = "";
@@ -80,7 +80,7 @@ public class RstListener implements RosterListener {
       	Date date = new java.util.Date();
         date.setTime(Long.parseLong(System.currentTimeMillis()+""));
         String time = DateFormat.getTimeFormat(service).format(date);
-        
+
       	MessageItem item = new MessageItem(account, jid);
 		if (presence.isAvailable()) {
             item.setBody(statusArray[getPosition(mode)] + " " + status);
@@ -95,12 +95,12 @@ public class RstListener implements RosterListener {
         item.setName(jid);
         item.setTime(time);
         item.setType(MessageItem.Type.status);
-        
+
         if (service.getMessagesHash(account).containsKey(jid)) {
-        	List<MessageItem> list = service.getMessagesHash(account).get(jid); 
+        	List<MessageItem> list = service.getMessagesHash(account).get(jid);
        		list.add(item);
         }
-        
+
         service.sendBroadcast(new Intent(Constants.PRESENCE_CHANGED).putExtra("jid", jid));
         service.sendBroadcast(new Intent(Constants.UPDATE));
         MessageLog.writeMessage(jid, item);

@@ -72,6 +72,7 @@ public class MsgListener implements PacketListener {
 	public void processPacket(Packet packet) {
 		Message msg = (Message) packet;
 		String from = msg.getFrom();
+        String ofrom = from;
 		final String id = msg.getPacketID();
 		String user = StringUtils.parseBareAddress(from).toLowerCase();
 		String type = msg.getType().name();
@@ -82,11 +83,12 @@ public class MsgListener implements PacketListener {
 			List<MultipleAddresses.Address> list = ma.getAddressesOfType(MultipleAddresses.OFROM);
 			if (!list.isEmpty()) {
 				String jid = list.get(0).getJid();
-				user = StringUtils.parseBareAddress(jid);
+                ofrom = jid;
+				user = StringUtils.parseBareAddress(ofrom);
 			}
 		}
-		
-		PacketExtension stateExt = msg.getExtension("http://jabber.org/protocol/chatstates");
+
+        PacketExtension stateExt = msg.getExtension("http://jabber.org/protocol/chatstates");
 		if (stateExt != null && !type.equals("error") && !service.getConferencesHash(account).containsKey(user)) {
 			String state = stateExt.getElementName();
 			if (state.equals(ChatState.composing.name())) {
@@ -268,7 +270,7 @@ public class MsgListener implements PacketListener {
 		            DelayInformation delayExt = (DelayInformation) msg.getExtension("jabber:x:delay");
 					if (delayExt != null) time = delayExt.getStamp().toLocaleString();
 					
-		            MessageItem item = new MessageItem(account, from);
+		            MessageItem item = new MessageItem(account, ofrom);
 		            item.setSubject(msg.getSubject());
 					item.setBody(body);
 					item.setId(id);

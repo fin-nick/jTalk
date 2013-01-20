@@ -1452,6 +1452,7 @@ public class JTalkService extends Service {
                 connection.addFeature("http://jabber.org/protocol/muc");
                 connection.addFeature("http://jabber.org/protocol/chatstates");
                 connection.addFeature("http://jabber.org/protocol/bytestreams");
+                connection.addFeature("http://jabber.org/protocol/chatstates");
                 connection.addFeature("jabber:iq:version");
                 connection.addFeature("urn:xmpp:receipts");
                 connection.addFeature("urn:xmpp:time");

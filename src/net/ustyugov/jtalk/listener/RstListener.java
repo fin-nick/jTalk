@@ -46,36 +46,26 @@ public class RstListener implements RosterListener {
 		this.service = JTalkService.getInstance();
 		this.account = account;
 	}
-	
+
+    @Override
     public void entriesAdded(Collection<String> addresses) {
     	Intent intent = new Intent(Constants.UPDATE);
-    	intent.putExtra("all", true);
        	service.sendBroadcast(intent);
     }
-    
+
+    @Override
     public void entriesDeleted(Collection<String> addresses) {
     	Intent intent = new Intent(Constants.UPDATE);
-    	intent.putExtra("all", true);
        	service.sendBroadcast(intent);
     }
     
-    public void subscribtionAllowed(String jid) { 
-    	Intent intent = new Intent(Constants.UPDATE);
-    	intent.putExtra("all", true);
-       	service.sendBroadcast(intent);
-    }
-	public void subscribtionRemoved(String jid) {
-		Intent intent = new Intent(Constants.UPDATE);
-    	intent.putExtra("all", true);
-       	service.sendBroadcast(intent);
-	}
-
+    @Override
     public void entriesUpdated(Collection<String> addresses) {
        	Intent intent = new Intent(Constants.UPDATE);
-       	intent.putExtra("all", true);
        	service.sendBroadcast(intent);
     }
 
+    @Override
     public void presenceChanged(Presence presence) {
     	String[] statusArray = service.getResources().getStringArray(R.array.statusArray);
     	String jid  = StringUtils.parseBareAddress(presence.getFrom());
@@ -91,7 +81,6 @@ public class RstListener implements RosterListener {
         date.setTime(Long.parseLong(System.currentTimeMillis()+""));
         String time = DateFormat.getTimeFormat(service).format(date);
         
-        Intent updateIntent = new Intent(Constants.UPDATE);
       	MessageItem item = new MessageItem(account, jid);
 		if (presence.isAvailable()) {
             item.setBody(statusArray[getPosition(mode)] + " " + status);
@@ -102,7 +91,6 @@ public class RstListener implements RosterListener {
         }
 		else {
 			item.setBody(statusArray[5] + " " + status);
-			updateIntent.putExtra("all", true);
 		}
         item.setName(jid);
         item.setTime(time);
@@ -113,11 +101,8 @@ public class RstListener implements RosterListener {
        		list.add(item);
         }
         
-        Intent intent = new Intent(Constants.PRESENCE_CHANGED);
-      	intent.putExtra("jid", jid);
-        service.sendBroadcast(intent);
-        
-        service.sendBroadcast(updateIntent);
+        service.sendBroadcast(new Intent(Constants.PRESENCE_CHANGED).putExtra("jid", jid));
+        service.sendBroadcast(new Intent(Constants.UPDATE));
         MessageLog.writeMessage(jid, item);
     }
     

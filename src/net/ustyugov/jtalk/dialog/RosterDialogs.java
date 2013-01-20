@@ -654,10 +654,10 @@ public class RosterDialogs {
 			public void onClick(DialogInterface dialog, int which) {
 		    	switch (which) {
 	        	case 0:
-	        		activity.startActivity(new Intent(activity, SetVcardActivity.class).putExtra("account", account));
+	        		if (JTalkService.getInstance().isAuthenticated(account)) activity.startActivity(new Intent(activity, SetVcardActivity.class).putExtra("account", account));
 	        		break;
 	        	case 1:
-	        		activity.startActivity(new Intent(activity, PrivacyListsActivity.class).putExtra("account", account));
+                    if (JTalkService.getInstance().isAuthenticated(account)) activity.startActivity(new Intent(activity, PrivacyListsActivity.class).putExtra("account", account));
 		 	        break;
 		    	}
 			}

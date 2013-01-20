@@ -46,13 +46,11 @@ public final class Constants implements BaseColumns {
 	public static final String WIDGET_UPDATE			= "net.ustyugov.jtalk.APPWIDGET_UPDATE";
 	
 	public static final String UPDATE					= "net.ustyugov.jtalk.UPDATE";
-	public static final String LOGIN					= "net.ustyugov.jtalk.LOGIN";
-	public static final String FINISH					= "net.ustyugov.jtalk.FINISH";	
+	public static final String FINISH					= "net.ustyugov.jtalk.FINISH";
 	public static final String RECEIVED 				= "net.ustyugov.jtalk.RECEIVED";
 	public static final String PASTE_TEXT 				= "net.ustyugov.jtalk.PASTE_TEXT";
 	public static final String CONNECTION_CLOSED 		= "net.ustyugov.jtalk.CONNECTION_CLOSED";
 	public static final String CONNECTION_RECONNECT		= "net.ustyugov.jtalk.CONNECTION_RECONNECT";
-	public static final String CONNECTION_STATE			= "net.ustyugov.jtalk.CONNECTION_STATE";
 	public static final String PRESENCE_CHANGED		 	= "net.ustyugov.jtalk.PRESENCE_CHANGED";
 	public static final String NEW_MESSAGE 				= "net.ustyugov.jtalk.NEW_MESSAGE";
 	public static final String ERROR					= "net.ustyugov.jtalk.ERROR";

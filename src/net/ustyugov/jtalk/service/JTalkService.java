@@ -380,7 +380,10 @@ public class JTalkService extends Service {
     	}
     	return "";
     }
-    public void setText(String jid, String text) { textHash.put(jid, text); }
+    public void setText(String jid, String text) {
+        if (text != null) textHash.put(jid, text);
+    }
+
     public String getText(String jid) {
     	if (textHash.containsKey(jid)) return textHash.get(jid);
     	else return "";
@@ -722,7 +725,7 @@ public class JTalkService extends Service {
     
     public void reconnect() {
     	globalState = getResources().getString(R.string.Reconnecting) + "...";
-    	Intent i = new Intent(Constants.CONNECTION_STATE);
+    	Intent i = new Intent(Constants.UPDATE);
     	sendBroadcast(i);
     	new Thread() {
     		@Override
@@ -735,7 +738,7 @@ public class JTalkService extends Service {
     
     public void reconnect(final String account) {
         setState(account, getResources().getString(R.string.Reconnecting) + "...");
-    	Intent i = new Intent(Constants.CONNECTION_STATE);
+    	Intent i = new Intent(Constants.UPDATE);
     	sendBroadcast(i);
     	new Thread() {
     		@Override
@@ -759,7 +762,7 @@ public class JTalkService extends Service {
 		
 		if (!mode.equals("unavailable")) {
 //			globalState = getString(R.string.Connecting) + "...";
-	    	Intent i = new Intent(Constants.CONNECTION_STATE);
+	    	Intent i = new Intent(Constants.UPDATE);
 	    	sendBroadcast(i);
 	    	
 	    	Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
@@ -785,7 +788,7 @@ public class JTalkService extends Service {
 			}
 		} else {
 //			globalState = text;
-			Intent i = new Intent(Constants.CONNECTION_STATE);
+			Intent i = new Intent(Constants.UPDATE);
 	    	sendBroadcast(i);
 		}
     }
@@ -1106,7 +1109,7 @@ public class JTalkService extends Service {
   	  					}
   	  				}
   	  				
-  					Intent i = new Intent(Constants.CONNECTION_STATE);
+  					Intent i = new Intent(Constants.UPDATE);
   		            sendBroadcast(i);
   		            	
   		            i = new Intent(Constants.UPDATE);
@@ -1153,7 +1156,7 @@ public class JTalkService extends Service {
   	  				}
                     setState(account, state);
   	  				
-  					Intent i = new Intent(Constants.CONNECTION_STATE);
+  					Intent i = new Intent(Constants.UPDATE);
   		            sendBroadcast(i);
   		            	
   		            i = new Intent(Constants.UPDATE);
@@ -1376,7 +1379,7 @@ public class JTalkService extends Service {
   	}
 
     public class ConnectionTask extends AsyncTask<String, Integer, String> {
-        Intent intent = new Intent(Constants.CONNECTION_STATE);
+        Intent intent = new Intent(Constants.UPDATE);
 
         @Override
         protected void onPreExecute() {
@@ -1490,7 +1493,7 @@ public class JTalkService extends Service {
         }
 
         @Override
-        public void onPostExecute(final String username) {
+        public void onPostExecute(String username) {
             if (username != null) {
                 XMPPConnection connection = connections.get(username);
 
@@ -1544,34 +1547,33 @@ public class JTalkService extends Service {
                     sendLocation(null);
                 }
 
-                try {
-                    OfflineMessageManager omm = new OfflineMessageManager(connection);
-                    omm.deleteMessages();
-                } catch (Exception ignored) {	}
-
-                if (connectionTasks.containsKey(username)) connectionTasks.remove(username);
-                setState(username, status);
-                Notify.updateNotify();
-                new IgnoreList(connection).createIgnoreList();
-                resetTimer();
-
-                sendBroadcast(new Intent(Constants.CONNECTION_STATE));
-                Intent updateIn = new Intent(Constants.UPDATE);
-                sendBroadcast(updateIn);
-
                 if (prefs.getBoolean("Ping", false)) {
                     int timeout = 60000;
                     try {
                         timeout = Integer.parseInt(prefs.getString("PingTimeout", 60+"")) * 1000;
                     } catch (NumberFormatException ignored) { }
+                    final PingTask task = new PingTask(username);
                     Timer pingTimer = new Timer();
                     pingTimer.schedule(new TimerTask() {
                         @Override
                         public void run() {
-                            new PingTask(username).execute();
+                            task.execute();
                         }
                     }, timeout, timeout * 2);
                 }
+
+                try {
+                    OfflineMessageManager omm = new OfflineMessageManager(connection);
+                    omm.deleteMessages();
+                } catch (Exception ignored) {	}
+
+                setState(username, status);
+                Notify.updateNotify();
+                new IgnoreList(connection).createIgnoreList();
+                resetTimer();
+
+                if (connectionTasks.containsKey(username)) connectionTasks.remove(username);
+                sendBroadcast(new Intent(Constants.UPDATE));
             }
         }
     }

@@ -83,15 +83,18 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 
                 RosterItem item = new RosterItem(account, RosterItem.Type.account, null);
                 item.setName(account);
-                add(item);
+                if (cursor.getCount() > 1) add(item);
+                else while (service.getCollapsedGroups().contains(account)) service.getCollapsedGroups().remove(account);
 
-                if (service.getRoster(account) != null && connection != null && connection.isAuthenticated() && !service.getCollapsedGroups().contains(account)) {
-                    Roster roster = service.getRoster(account);
+                Roster roster = service.getRoster(account);
+                if (roster != null && connection != null && connection.isAuthenticated() && !service.getCollapsedGroups().contains(account)) {
 
                     // add self contact
-                    RosterEntry entry = new RosterEntry(account, account, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                    RosterItem self = new RosterItem(account, RosterItem.Type.self, entry);
-                    add(self);
+                    if (prefs.getBoolean("SelfContact", true)) {
+                        RosterEntry entry = new RosterEntry(account, account, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+                        RosterItem self = new RosterItem(account, RosterItem.Type.self, entry);
+                        add(self);
+                    }
 
                     // add conferences and privates
                     if (!service.getConferencesHash(account).isEmpty()) {

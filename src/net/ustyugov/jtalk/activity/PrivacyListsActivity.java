@@ -181,7 +181,7 @@ public class PrivacyListsActivity extends SherlockActivity implements OnItemClic
 	private class Init extends AsyncTask<String, Void, Void> {
 		@Override
 		protected Void doInBackground(String... params) {
-			adapter = new PrivacyListAdapter(PrivacyListsActivity.this, account);
+			if (service.isAuthenticated(account)) adapter = new PrivacyListAdapter(PrivacyListsActivity.this, account);
 			return null;
 		}
 		

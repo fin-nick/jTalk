@@ -38,7 +38,6 @@ public class ConListener implements ConnectionListener {
 
 	public void connectionClosed() {
         context.sendBroadcast(new Intent(Constants.UPDATE));
-        context.sendBroadcast(new Intent(Constants.CONNECTION_STATE));
         service.leaveAllRooms(account);
 	}
 
@@ -47,7 +46,6 @@ public class ConListener implements ConnectionListener {
         service.leaveAllRooms(account);
         
         context.sendBroadcast(new Intent(Constants.UPDATE));
-        context.sendBroadcast(new Intent(Constants.CONNECTION_STATE));
         service.setState(account, "Connection closed");
 //        service.reconnect(account);
 	}

@@ -33,6 +33,10 @@
                 android:key="SortByStatuses"
                 android:title="Sort by statuses"
                 android:defaultValue="true" />
+        <CheckBoxPreference
+                android:key="SelfContact"
+                android:title="Show self resources"
+                android:defaultValue="true" />
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/Chat">

@@ -88,29 +88,35 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 
                 RosterItem acc = new RosterItem(account, RosterItem.Type.account, null);
                 acc.setName(account);
-                add(acc);
+                if (cursor.getCount() > 1) add(acc);
+                else while (service.getCollapsedGroups().contains(account)) service.getCollapsedGroups().remove(account);
 
-                if (service != null && service.getRoster(account) != null && connection != null && connection.isAuthenticated() && !service.getCollapsedGroups().contains(account)) {
-                    Roster roster = service.getRoster(account);
+                Roster roster = service.getRoster(account);
+                if (service != null && roster != null && connection != null && connection.isAuthenticated() && !service.getCollapsedGroups().contains(account)) {
 
                     // Self
-                    RosterItem selfgroup = new RosterItem(account, RosterItem.Type.group, null);
-                    selfgroup.setName(service.getString(R.string.SelfGroup));
-                    add(selfgroup);
+                    List<Presence> selfPresences= new ArrayList<Presence>();
+                    Iterator<Presence> it =  roster.getPresences(account);
+                    while (it.hasNext()) {
+                        selfPresences.add(it.next());
+                    }
+                    if (prefs.getBoolean("SelfContact", true) && selfPresences.size() > 0) {
+                        RosterItem selfgroup = new RosterItem(account, RosterItem.Type.group, null);
+                        selfgroup.setName(service.getString(R.string.SelfGroup));
+                        add(selfgroup);
 
-                    if (!service.getCollapsedGroups().contains(service.getString(R.string.SelfGroup))) {
-                        Iterator<Presence> it =  roster.getPresences(account);
-                        while (it.hasNext()) {
-                            Presence p = it.next();
-                            if (p.isAvailable()) {
-                                String from = p.getFrom();
-                                RosterEntry entry = new RosterEntry(from, StringUtils.parseResource(from), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                                RosterItem self = new RosterItem(account, RosterItem.Type.self, entry);
-                                add(self);
+                        if (!service.getCollapsedGroups().contains(service.getString(R.string.SelfGroup))) {
+                            for (Presence presence : selfPresences) {
+                                if (presence.isAvailable()) {
+                                    String from = presence.getFrom();
+                                    RosterEntry entry = new RosterEntry(from, StringUtils.parseResource(from), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+                                    RosterItem self = new RosterItem(account, RosterItem.Type.self, entry);
+                                    add(self);
+                                }
                             }
+                        } else {
+                            selfgroup.setCollapsed(true);
                         }
-                    } else {
-                        selfgroup.setCollapsed(true);
                     }
 
                     // Add conferences

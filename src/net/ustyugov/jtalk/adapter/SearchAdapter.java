@@ -83,7 +83,7 @@ public class SearchAdapter extends ArrayAdapter<RosterItem> {
 
                 RosterItem item = new RosterItem(account, RosterItem.Type.account, null);
                 item.setName(account);
-                add(item);
+                if (cursor.getCount() > 1) add(item);
 
                 if (service.getRoster(account) != null && connection != null && connection.isAuthenticated() && !service.getCollapsedGroups().contains(account)) {
                     Roster roster = service.getRoster(account);

@@ -177,7 +177,6 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
   		
   		registerReceiver(errorReceiver, new IntentFilter(Constants.ERROR));
       	registerReceiver(updateReceiver, new IntentFilter(Constants.UPDATE));
-      	registerReceiver(updateReceiver, new IntentFilter(Constants.CONNECTION_STATE));
       	registerReceiver(updateReceiver, new IntentFilter(Constants.NEW_MESSAGE));
       	
         if (service != null) service.resetTimer();
@@ -375,7 +374,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
                             }
                         }
 					}
-                });
+                       });
     		}
     	}.start();
     }

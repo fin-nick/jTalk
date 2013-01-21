@@ -114,9 +114,12 @@ public class MsgListener implements PacketListener {
                                 if (msgId != null && msgId.equals(id)) {
                                     i.setReceived(true);
 
-                                    Date d = new Date(Long.parseLong(id));
-                                    java.text.DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-                                    String stamp = df.format(d);
+                                    String stamp = i.getTime();
+                                    try {
+                                        Date d = new Date(Long.parseLong(id));
+                                        java.text.DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+                                        stamp = df.format(d);
+                                    } catch (NumberFormatException ignored) { }
 
                                     ContentValues values = new ContentValues();
                                     values.put(MessageDbHelper.TYPE, i.getType().name());

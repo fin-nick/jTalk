@@ -205,6 +205,7 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
             holder.status.setText(status);
             holder.state.setVisibility(status.length() > 0 ? View.VISIBLE : View.GONE);
             holder.state.setImageResource(item.isCollapsed() ? R.drawable.close : R.drawable.open);
+            holder.avatar.setVisibility(View.INVISIBLE);
             Avatars.loadAvatar(activity, account, holder.avatar);
             return convertView;
 		} else if (item.isEntry() || item.isSelf()) {

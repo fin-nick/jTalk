@@ -706,6 +706,7 @@ public class JTalkService extends Service {
     }
     
     public void disconnect(String account) {
+        Log.e("Disconnect", account);
     	if (connections.containsKey(account)) {
             if (connectionTasks.containsKey(account)) {
                 connectionTasks.remove(account).cancel(true);
@@ -713,7 +714,6 @@ public class JTalkService extends Service {
 
     		XMPPConnection connection = connections.remove(account);
             if (isAuthenticated(account)) {
-                if (connectionTasks.containsKey(account)) { connectionTasks.remove(account).cancel(true); }
                 removeConnectionListener(account);
                 Presence presence = new Presence(Presence.Type.unavailable, "", 0, null);
                 connection.disconnect(presence);
@@ -937,7 +937,7 @@ public class JTalkService extends Service {
   	public boolean isAuthenticated(String account) {
   		if (account != null && connections.containsKey(account)) {
   			XMPPConnection connection = connections.get(account);
-              return connection.getUser() != null && connection.isAuthenticated();
+            return connection.getUser() != null && connection.isAuthenticated();
   		} else return false;
   	}
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.jtalk2" android:versionName="@string/version" android:installLocation="auto" android:versionCode="371">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.jtalk2" android:versionName="@string/version" android:installLocation="auto" android:versionCode="372">
     <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="16"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -7,6 +7,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
+
     
     <application android:icon="@drawable/ic_launcher" android:label="@string/app_name" android:theme="@style/AppThemeDark">
     	<!-- Provider -->
@@ -33,6 +37,7 @@
         <activity android:name="net.ustyugov.jtalk.activity.DataFormActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
         <activity android:name="net.ustyugov.jtalk.activity.CommandsActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
         <activity android:name="net.ustyugov.jtalk.activity.Accounts" android:configChanges="keyboard|keyboardHidden|orientation"/>
+        <activity android:name="net.ustyugov.jtalk.activity.AddAccountActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
         <activity android:name="net.ustyugov.jtalk.activity.muc.MucUsers" android:configChanges="keyboard|keyboardHidden|orientation" />
         <activity android:name="net.ustyugov.jtalk.activity.TemplatesActivity" android:configChanges="keyboard|keyboardHidden|orientation"/>
         <activity android:name="net.ustyugov.jtalk.activity.SendToActivity" android:label="@string/app_name" android:configChanges="keyboard|keyboardHidden|orientation">
@@ -51,5 +56,11 @@
         
         <!-- Services -->
         <service android:name="net.ustyugov.jtalk.service.JTalkService" />
+        <service android:name="net.ustyugov.jtalk.service.AuthenticationService" android:exported="true" android:process=":auth">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator"/>
+            </intent-filter>
+            <meta-data android:name="android.accounts.AccountAuthenticator" android:resource="@xml/authenticator"/>
+        </service>
     </application>
 </manifest>

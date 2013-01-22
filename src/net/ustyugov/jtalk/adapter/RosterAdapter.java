@@ -269,6 +269,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
             holder.status.setText(status);
             holder.state.setVisibility(status.length() > 0 ? View.VISIBLE : View.GONE);
             holder.state.setImageResource(ri.isCollapsed() ? R.drawable.close : R.drawable.open);
+            holder.avatar.setVisibility(View.INVISIBLE);
             Avatars.loadAvatar(activity, account, holder.avatar);
             return convertView;
 		} else if (ri.isEntry() || ri.isSelf()) {

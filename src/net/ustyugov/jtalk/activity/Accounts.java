@@ -1,42 +1,40 @@
 /*
  * Copyright (C) 2012, Igor Ustyugov <igor@ustyugov.net>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License,
  * or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/
  */
 
 package net.ustyugov.jtalk.activity;
 
+import android.accounts.AccountManager;
+import android.app.AlertDialog;
+import android.content.*;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import net.ustyugov.jtalk.Account;
 import net.ustyugov.jtalk.Constants;
+import net.ustyugov.jtalk.Notify;
 import net.ustyugov.jtalk.activity.vcard.SetVcardActivity;
 import net.ustyugov.jtalk.adapter.AccountsAdapter;
 import net.ustyugov.jtalk.db.JTalkProvider;
-import net.ustyugov.jtalk.dialog.AccountDialogs;
 import net.ustyugov.jtalk.service.JTalkService;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.ContextMenu;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockActivity;
@@ -46,6 +44,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
 
 public class Accounts extends SherlockActivity {
+    private static final int REQUEST_ACCOUNT = 8;
     private static final int CONTEXT_VCARD = 1;
     private static final int CONTEXT_PRIVACY = 2;
     private static final int CONTEXT_EDIT = 3;
@@ -59,18 +58,18 @@ public class Accounts extends SherlockActivity {
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-//		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
         setContentView(R.layout.accounts);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		setTitle(R.string.Accounts);
         
-//        LinearLayout linear = (LinearLayout) findViewById(R.id.accounts_linear);
-//        linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+        LinearLayout linear = (LinearLayout) findViewById(R.id.accounts_linear);
+        linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
 
         adapter = new AccountsAdapter(this);
 		
 		list = (ListView) findViewById(R.id.accounts_List);
-//        list.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+        list.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
         list.setDividerHeight(0);
         list.setCacheColorHint(0x00000000);
         list.setAdapter(adapter);
@@ -79,7 +78,7 @@ public class Accounts extends SherlockActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Account account = (Account) adapterView.getItemAtPosition(i);
                 int id = account.getId();
-                AccountDialogs.editDialog(Accounts.this, id);
+                startActivityForResult(new Intent(Accounts.this, AddAccountActivity.class).putExtra("id", id), REQUEST_ACCOUNT);
             }
         });
 
@@ -106,6 +105,23 @@ public class Accounts extends SherlockActivity {
 		super.onPause();
 		unregisterReceiver(refreshReceiver);
 	}
+
+    @Override
+    public void onActivityResult(int request, int result, Intent data) {
+        if (request == REQUEST_ACCOUNT && result == RESULT_OK) {
+            boolean enabled = data.getBooleanExtra("enabled", true);
+            String account = data.getStringExtra("account");
+            if (enabled) connectDialog(account);
+            else {
+                JTalkService service = JTalkService.getInstance();
+                if (service.isAuthenticated(account)) {
+                    service.disconnect(account);
+                    if (service.isAuthenticated()) Notify.updateNotify();
+                    else Notify.offlineNotify(service.getGlobalState());
+                }
+            }
+        }
+    }
 	
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -121,8 +137,7 @@ public class Accounts extends SherlockActivity {
 	   			finish();
 	   			break;
 	     	case R.id.add:
-	     		AccountDialogs.addDialog(this);
-	     		onResume();
+	     		startActivityForResult(new Intent(this, AddAccountActivity.class), REQUEST_ACCOUNT);
 	     		break;
 	     	default:
 	     		return false;
@@ -159,11 +174,20 @@ public class Accounts extends SherlockActivity {
                 startActivity(new Intent(this, PrivacyListsActivity.class).putExtra("account", jid));
                 break;
             case CONTEXT_EDIT:
-                AccountDialogs.editDialog(this, id);
+                startActivityForResult(new Intent(this, AddAccountActivity.class).putExtra("id", id), REQUEST_ACCOUNT);
                 break;
             case CONTEXT_REMOVE:
                 JTalkService service = JTalkService.getInstance();
-                if (service.isAuthenticated(account.getJid())) service.disconnect(account.getJid());
+                if (service.isAuthenticated(account.getJid())) {
+                    service.disconnect(account.getJid());
+                    if (service.isAuthenticated()) Notify.updateNotify();
+                    else Notify.offlineNotify(service.getGlobalState());
+                }
+
+                android.accounts.Account acc = new android.accounts.Account(jid, getString(R.string.app_name));
+                AccountManager am = AccountManager.get(this);
+                am.removeAccount(acc, null, null);
+
                 getContentResolver().delete(JTalkProvider.ACCOUNT_URI, "_id = '" + id + "'", null);
                 update();
                 break;
@@ -175,4 +199,20 @@ public class Accounts extends SherlockActivity {
 		adapter.update();
 		adapter.notifyDataSetChanged();
 	}
+
+    public void connectDialog(final String account) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Connect?");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                JTalkService.getInstance().connect(account);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
+    }
 }

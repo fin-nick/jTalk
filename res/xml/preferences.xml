@@ -10,7 +10,7 @@
                 android:defaultValue="true" />
         <CheckBoxPreference
                 android:key="ShowMucGroup"
-                android:title="Always show MUC group"
+                android:title="@string/ShowMucGroup"
                 android:defaultValue="false" />
         <CheckBoxPreference
                 android:key="ShowStatuses"
@@ -31,11 +31,11 @@
                 android:defaultValue="@string/DefaultFontSize" />
         <CheckBoxPreference
                 android:key="SortByStatuses"
-                android:title="Sort by statuses"
+                android:title="@string/SortByStatuses"
                 android:defaultValue="true" />
         <CheckBoxPreference
                 android:key="SelfContact"
-                android:title="Show self resources"
+                android:title="@string/ShowSelfResources"
                 android:defaultValue="true" />
     </PreferenceScreen>
 
@@ -66,7 +66,7 @@
                 android:defaultValue="false" />
         <CheckBoxPreference
                 android:key="HideKeyboard"
-                android:title="Hide keyboard on send"
+                android:title="@string/HideKeyboard"
                 android:defaultValue="true" />
         <EditTextPreference
                 android:key="FontSize"
@@ -82,14 +82,12 @@
                 android:defaultValue="false" />
         <EditTextPreference
                 android:key="MaxMucMessages"
-                android:title="Number messages"
-                android:summary="Keep messages in log"
+                android:title="@string/MaxMucMessages"
                 android:defaultValue="100"
                 android:numeric="integer"/>
         <EditTextPreference
                 android:key="nickSeparator"
-                android:title="Add after nick"
-                android:summary="When reply"
+                android:title="@string/AddAfterNick"
                 android:defaultValue=", " />
     </PreferenceScreen>
 
@@ -123,9 +121,10 @@
                 android:key="MessageInNotification"
                 android:defaultValue="false"/>
         <EditTextPreference
+                android:dependency="MessageInNotification"
                 android:key="MessageInNotificationCount"
                 android:numeric="integer"
-                android:title="Number of characters"
+                android:title="@string/NumberOfCharacters"
                 android:defaultValue="64" />
     </PreferenceScreen>
 
@@ -184,7 +183,7 @@
                     android:numeric="integer"/>
             <EditTextPreference
                     android:key="SmilesColumns"
-                    android:title="Columns"
+                    android:title="@string/Columns"
                     android:summary="The number of columns in the dialog"
                     android:defaultValue="3"
                     android:numeric="integer"/>
@@ -195,15 +194,15 @@
         <PreferenceScreen android:title="@string/Sidebar">
             <CheckBoxPreference
                     android:key="CompactMode"
-                    android:title="Compact in portrait mode"
+                    android:title="@string/CompactMode"
                     android:defaultValue="true" />
             <CheckBoxPreference
                     android:key="ColoredBar"
-                    android:title="Use colors"
+                    android:title="@string/UseColors"
                     android:defaultValue="true" />
             <CheckBoxPreference
                     android:key="InMUC"
-                    android:title="Only in MUC"
+                    android:title="@string/OnlyInMUC"
                     android:defaultValue="false" />
         </PreferenceScreen>
     </PreferenceScreen>
@@ -223,7 +222,7 @@
 
     <PreferenceScreen android:title="Other">
         <CheckBoxPreference
-                android:title="Autostart on boot"
+                android:title="@string/AutostartOnBoot"
                 android:key="AUTOSTART"
                 android:defaultValue="false"/>
         <CheckBoxPreference
@@ -234,13 +233,13 @@
                 android:title="Wi-Fi Lock"
                 android:key="WifiLock"
                 android:defaultValue="false"/>
+        <CheckBoxPreference
+                android:title="@string/Locations"
+                android:key="Locations"
+                android:defaultValue="false"/>
     </PreferenceScreen>
 
     <PreferenceScreen android:title="Experimental">
-        <CheckBoxPreference
-                android:title="Locations"
-                android:key="Locations"
-                android:defaultValue="false"/>
         <CheckBoxPreference
                 android:title="Auto load avatars"
                 android:key="LoadAllAvatars"

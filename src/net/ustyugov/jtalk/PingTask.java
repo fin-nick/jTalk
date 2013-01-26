@@ -25,7 +25,6 @@ import net.ustyugov.jtalk.service.JTalkService;
 import org.jivesoftware.smack.PacketCollector;
 import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.packet.IQ;
-import org.jivesoftware.smackx.packet.PingExtension;
 
 public class PingTask extends AsyncTask<Void, Void, Void> {
     private String account;

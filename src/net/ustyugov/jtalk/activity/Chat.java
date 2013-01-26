@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import android.view.inputmethod.EditorInfo;
 import android.widget.*;
 import com.actionbarsherlock.widget.SearchView;
 import net.ustyugov.jtalk.Constants;

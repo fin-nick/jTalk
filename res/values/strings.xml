@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">jTalk</string>
     <string name="version">0.47</string>
-    <string name="build">372</string>
+    <string name="build">373</string>
     
     <string name="Connect">Connect</string>
     <string name="Disconnect">Disconnect</string>
@@ -98,7 +98,20 @@
     <string name="Size">Size</string>
     <string name="Interface">Interface</string>
     <string name="Sidebar">Sidebar</string>
-    
+    <string name="ShowMucGroup">Always show MUC group</string>
+    <string name="SortByStatuses">Sort by statuses</string>
+    <string name="ShowSelfResources">Show self resources</string>
+    <string name="HideKeyboard">Hide keyboard on send</string>
+    <string name="MaxMucMessages">Number messages in log</string>
+    <string name="AddAfterNick">Add after nick</string>
+    <string name="NumberOfCharacters">Number of characters</string>
+    <string name="Columns">Columns</string>
+    <string name="Locations">Send location information</string>
+    <string name="AutostartOnBoot">Autostart on boot</string>
+    <string name="CompactMode">Compact mode</string>
+    <string name="UseColors">Use colors</string>
+    <string name="OnlyInMUC">Use only in MUC</string>
+
     <!--  Menus -->
     <string name="Update">Update</string>
     <string name="ExecuteCommand">Execute command</string>

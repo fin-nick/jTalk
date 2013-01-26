@@ -90,6 +90,19 @@
     <string name="Size">Размер</string>
     <string name="Interface">Интерфейс</string>
     <string name="Sidebar">Боковая панель</string>
+    <string name="ShowMucGroup">Всегда показывать группу Конференции</string>
+    <string name="SortByStatuses">Сортировать по статусам</string>
+    <string name="ShowSelfResources">Показывать свои ресурсы</string>
+    <string name="HideKeyboard">Прятать клавиатуру при отправке</string>
+    <string name="MaxMucMessages">Число сообщений в логе</string>
+    <string name="AddAfterNick">Добавлять после ника</string>
+    <string name="NumberOfCharacters">Число символов</string>
+    <string name="Columns">Число колонок</string>
+    <string name="Locations">Отправлять информацию о местоположении</string>
+    <string name="AutostartOnBoot">Запуск при загрузке устройства</string>
+    <string name="CompactMode">Компактный режим</string>
+    <string name="UseColors">Использовать цвета</string>
+    <string name="OnlyInMUC">Только в конференциях</string>
     
     <!--  Menus -->
     <string name="Update">Обновить</string>

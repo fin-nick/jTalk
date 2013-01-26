@@ -24,8 +24,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
-import com.jtalk2.R;
 import net.ustyugov.jtalk.Notify;
 import net.ustyugov.jtalk.activity.AddAccountActivity;
 import net.ustyugov.jtalk.db.AccountDbHelper;

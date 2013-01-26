@@ -27,9 +27,9 @@ public class RosterItem {
 	private boolean isCollapsed = false;
 	private Object object;
 	
-	public enum Type {account, group, entry, self, muc};
-	
-	public RosterItem(String account, Type type, RosterEntry entry) { 
+	public enum Type {account, group, entry, self, muc}
+
+    public RosterItem(String account, Type type, RosterEntry entry) {
 		this.account = account; 
 		this.type = type;
 		this.entry = entry;

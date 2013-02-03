@@ -205,11 +205,11 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 				add(item);
                 if (!prefs.getBoolean("SortByStatuses", true)) {
                     List<String> participants = new ArrayList<String>();
-                    participants.addAll(mOnline);
-                    participants.addAll(mChat);
-                    participants.addAll(mAway);
-                    participants.addAll(mXa);
-                    participants.addAll(mDnd);
+                    participants.addAll(pOnline);
+                    participants.addAll(pChat);
+                    participants.addAll(pAway);
+                    participants.addAll(pXa);
+                    participants.addAll(pDnd);
                     Collections.sort(participants, new SortList.StringComparator());
 
                     for (String jid : participants) {
@@ -253,11 +253,11 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 				add(item);
                 if (!prefs.getBoolean("SortByStatuses", true)) {
                     List<String> visitors = new ArrayList<String>();
-                    visitors.addAll(mOnline);
-                    visitors.addAll(mChat);
-                    visitors.addAll(mAway);
-                    visitors.addAll(mXa);
-                    visitors.addAll(mDnd);
+                    visitors.addAll(vOnline);
+                    visitors.addAll(vChat);
+                    visitors.addAll(vAway);
+                    visitors.addAll(vXa);
+                    visitors.addAll(vDnd);
                     Collections.sort(visitors, new SortList.StringComparator());
 
                     for (String jid : visitors) {

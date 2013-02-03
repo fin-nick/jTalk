@@ -115,8 +115,10 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
             @Override
             public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
                 account = (String) parent.getItemAtPosition(position);
-                String host = service.getConnection(account).getServiceName();
-                input.setText(host);
+                if (service != null && service.getConnection(account) != null) {
+                    String host = service.getConnection(account).getServiceName();
+                    input.setText(host);
+                }
             }
             @Override
             public void onNothingSelected(AdapterView<?> arg0) {}

@@ -518,9 +518,11 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 							createForm();
 						}
 					} else if (status == AdHocCommand.Status.completed || status == AdHocCommand.Status.canceled) {
-                        form = rc.getForm().getDataFormToSend();
-                        createForm();
+                        if (rc.getForm() != null) {
+                            form = rc.getForm().getDataFormToSend();
+                            createForm();
 //                        finish();
+                        }
                     }
 				} catch (XMPPException e) { finish(); }
 			} else finish();

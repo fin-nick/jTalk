@@ -1494,7 +1494,7 @@ public class JTalkService extends Service {
         }
 
         @Override
-        public void onPostExecute(String username) {
+        public void onPostExecute(final String username) {
             if (username != null) {
                 XMPPConnection connection = connections.get(username);
 
@@ -1553,12 +1553,11 @@ public class JTalkService extends Service {
                     try {
                         timeout = Integer.parseInt(prefs.getString("PingTimeout", 60+"")) * 1000;
                     } catch (NumberFormatException ignored) { }
-                    final PingTask task = new PingTask(username);
                     Timer pingTimer = new Timer();
                     pingTimer.schedule(new TimerTask() {
                         @Override
                         public void run() {
-                            task.execute();
+                            new PingTask(username).execute();
                         }
                     }, timeout, timeout * 2);
                 }

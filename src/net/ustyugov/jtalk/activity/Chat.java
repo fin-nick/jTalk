@@ -289,7 +289,6 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         compose = false;
         jid = getIntent().getStringExtra("jid");
         account = getIntent().getStringExtra("account");
-        service.removeUnreadMesage(account, jid);
 
         if (service.getConferencesHash(account).containsKey(jid)) {
             isMuc = true;
@@ -344,6 +343,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         }
 
         service.setCurrentJid(jid);
+        service.removeUnreadMesage(account, jid);
         service.removeHighlight(account, jid);
 
         listView.setOnItemLongClickListener(new MessageMenuDialog(this, account, jid));
@@ -372,20 +372,6 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                     }
                     sendButton.setEnabled(false);
                 }
-//
-//                if (!isMuc) {
-//                    if (length > 0) {
-//                        if (!compose) {
-//                            compose = true;
-//                            service.setChatState(account, jid, ChatState.composing);
-//                        }
-//                    } else if (length == 0) {
-//                        if (compose) {
-//                            compose = false;
-//                            service.setChatState(account, jid, ChatState.active);
-//                        }
-//                    }
-//                }
             }
 
             public void beforeTextChanged(CharSequence s, int start, int count, int after) { }

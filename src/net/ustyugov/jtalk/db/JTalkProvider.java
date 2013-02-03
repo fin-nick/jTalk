@@ -24,6 +24,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import net.ustyugov.jtalk.Constants;
 
@@ -44,8 +45,8 @@ public class JTalkProvider  extends ContentProvider {
 	public boolean onCreate() {
         String path = "msg.db";
         String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            path = Constants.PATH_LOG + "/msg.db";
+        if (Build.VERSION.SDK_INT > 7 && Environment.MEDIA_MOUNTED.equals(state)) {
+            path = Constants.PATH_LOG + "msg.db";
             try {
                 File file = new File(Constants.PATH_LOG);
                 file.mkdirs();

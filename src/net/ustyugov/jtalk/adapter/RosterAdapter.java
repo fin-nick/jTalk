@@ -17,11 +17,7 @@
 
 package net.ustyugov.jtalk.adapter;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.Holders.GroupHolder;
@@ -83,6 +79,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 		if (cursor != null && cursor.getCount() > 0) {
 			cursor.moveToFirst();
 			do {
+                List<String> activeChats = new ArrayList<String>();
 				String account = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
 				XMPPConnection connection = service.getConnection(account);
 
@@ -118,6 +115,25 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                         } else {
                             selfgroup.setCollapsed(true);
                         }
+                    }
+
+                    // Active chats
+                    if (prefs.getBoolean("ShowActiveChatsGroup", false) && service.getMessagesHash(account).size() > 0) {
+                        RosterItem group = new RosterItem(account, RosterItem.Type.group, null);
+                        group.setName(service.getString(R.string.ActiveChats));
+                        add(group);
+
+                        activeChats = Collections.list(service.getMessagesHash(account).keys());
+                        if (!service.getCollapsedGroups().contains(service.getString(R.string.ActiveChats))) {
+                            for (String jid: activeChats) {
+                                if (!service.getConferencesHash(account).containsKey(jid)) {
+                                    RosterEntry entry = roster.getEntry(jid);
+                                    if (entry == null) entry = new RosterEntry(jid, jid, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+                                    RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
+                                    add(item);
+                                }
+                            }
+                        } else group.setCollapsed(true);
                     }
 
                     // Add conferences
@@ -159,10 +175,28 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                         for (RosterEntry re: entrys) {
                             String jid = re.getUser();
                             Presence.Type presenceType = service.getType(account, jid);
-                            if (hideOffline) {
-                                if (presenceType != Presence.Type.unavailable) list.add(jid);
+                            if (prefs.getBoolean("ShowActiveChatsGroup", false)) {
+                                if (prefs.getBoolean("ShowDoubles", false)) {
+                                    if (hideOffline) {
+                                        if (presenceType != Presence.Type.unavailable) list.add(jid);
+                                    } else {
+                                        list.add(jid);
+                                    }
+                                } else {
+                                    if (!activeChats.contains(jid)) {
+                                        if (hideOffline) {
+                                            if (presenceType != Presence.Type.unavailable) list.add(jid);
+                                        } else {
+                                            list.add(jid);
+                                        }
+                                    }
+                                }
                             } else {
-                                list.add(jid);
+                                if (hideOffline) {
+                                    if (presenceType != Presence.Type.unavailable) list.add(jid);
+                                } else {
+                                    list.add(jid);
+                                }
                             }
                         }
                         if (list.size() > 0) {
@@ -187,10 +221,28 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                     for (RosterEntry re: entrys) {
                         String jid = re.getUser();
                         Presence.Type presenceType = service.getType(account, jid);
-                        if (hideOffline) {
-                            if (presenceType != Presence.Type.unavailable) list.add(jid);
+                        if (prefs.getBoolean("ShowActiveChatsGroup", false)) {
+                            if (prefs.getBoolean("ShowDoubles", false)) {
+                                if (hideOffline) {
+                                    if (presenceType != Presence.Type.unavailable) list.add(jid);
+                                } else {
+                                    list.add(jid);
+                                }
+                            } else {
+                                if (!activeChats.contains(jid)) {
+                                    if (hideOffline) {
+                                        if (presenceType != Presence.Type.unavailable) list.add(jid);
+                                    } else {
+                                        list.add(jid);
+                                    }
+                                }
+                            }
                         } else {
-                            list.add(jid);
+                            if (hideOffline) {
+                                if (presenceType != Presence.Type.unavailable) list.add(jid);
+                            } else {
+                                list.add(jid);
+                            }
                         }
                     }
 

@@ -3,7 +3,7 @@
     <item android:id="@+id/chats"
 	    android:showAsAction="always"
 	    android:icon="@drawable/ic_menu_cc"
-        android:title="@string/OpenedChats"/>
+        android:title="@string/ActiveChats"/>
     <item android:id="@+id/status"
         android:showAsAction="never"
         android:title="@string/Status"/>

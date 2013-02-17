@@ -103,6 +103,8 @@
     <string name="CompactMode">Компактный режим</string>
     <string name="UseColors">Использовать цвета</string>
     <string name="OnlyInMUC">Только в конференциях</string>
+    <string name="ShowActiveChatsGroup">Группа \"Активные чаты\"</string>
+    <string name="ShowActiveContacts">Дублировать открытые чаты</string>
     
     <!--  Menus -->
     <string name="Update">Обновить</string>
@@ -123,7 +125,7 @@
     <string name="Allow">Разрешить</string>
     <string name="Rename">Переименовать</string>
     <string name="SendStatus">Отправить статус</string>
-    <string name="OpenedChats">Открытые чаты</string>
+    <string name="ActiveChats">Открытые чаты</string>
     <string name="Quote">Цитировать</string>
     <string name="CopySelectedMessages">Скопировать выбранные сообщения</string>
     <string name="CopyTextMessage">Скопировать текст сообщения</string>

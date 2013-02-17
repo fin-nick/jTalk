@@ -5,9 +5,19 @@
                 android:title="@string/OfflineContacts"
                 android:defaultValue="false" />
         <CheckBoxPreference
-                android:key="ShowGroups"
-                android:title="@string/ShowGroups"
-                android:defaultValue="true" />
+            android:key="ShowGroups"
+            android:title="@string/ShowGroups"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+                android:key="ShowActiveChatsGroup"
+                android:dependency="ShowGroups"
+                android:title="@string/ShowActiveChatsGroup"
+                android:defaultValue="false" />
+        <CheckBoxPreference
+                android:key="ShowDoubles"
+                android:dependency="ShowActiveChatsGroup"
+                android:title="@string/ShowActiveContacts"
+                android:defaultValue="false" />
         <CheckBoxPreference
                 android:key="ShowMucGroup"
                 android:title="@string/ShowMucGroup"

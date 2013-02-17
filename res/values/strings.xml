@@ -43,7 +43,7 @@
     <string name="Composes">Composes message...</string>
     <string name="Templates">Templates</string>
     <string name="and">and</string>
-    
+
     <!--  Service Discovery -->
     <string name="Registration">Registration</string>
     <string name="AddInRoster">Add in roster</string>
@@ -111,6 +111,8 @@
     <string name="CompactMode">Compact mode</string>
     <string name="UseColors">Use colors</string>
     <string name="OnlyInMUC">Use only in MUC</string>
+    <string name="ShowActiveChatsGroup">Group \"Active chats\"</string>
+    <string name="ShowActiveContacts">Show doubles of active chats</string>
 
     <!--  Menus -->
     <string name="Update">Update</string>
@@ -132,7 +134,7 @@
     <string name="Rename">Rename</string>
     <string name="Subject">Subject</string>
     <string name="SendStatus">Send status</string>
-    <string name="OpenedChats">Opened Chats</string>
+    <string name="ActiveChats">Active Chats</string>
     <string name="Quote">Quote</string>
     <string name="CopySelectedMessages">Copy of selected messages</string>
     <string name="CopyTextMessage">Copy text of message</string>

@@ -27,7 +27,7 @@ import net.ustyugov.jtalk.IgnoreList;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.activity.CommandsActivity;
 import net.ustyugov.jtalk.activity.PrivacyListsActivity;
-import net.ustyugov.jtalk.activity.SendFileActivity;
+import net.ustyugov.jtalk.activity.filetransfer.SendFileActivity;
 import net.ustyugov.jtalk.activity.vcard.SetVcardActivity;
 import net.ustyugov.jtalk.activity.vcard.VCardActivity;
 import net.ustyugov.jtalk.adapter.ResourceAdapter;

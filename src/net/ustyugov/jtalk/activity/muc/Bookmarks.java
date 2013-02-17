@@ -212,19 +212,20 @@ public class Bookmarks extends SherlockActivity {
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		String account = (String) mPages.get(mPager.getCurrentItem()).getTag();
 		switch (item.getItemId()) {
 			case android.R.id.home:
 				finish();
 				break;
   	    	case R.id.join:
+                String account = (String) mPages.get(mPager.getCurrentItem()).getTag();
   	    		MucDialogs.joinDialog(this, account, null, null);
   	    		break;
   	    	case R.id.chats:
   	    		ChangeChatDialog.show(this);
   	    		break;
   	    	case R.id.add:
-  	    		BookmarksDialogs.AddDialog(this, account, null, null);
+                String acc = (String) mPages.get(mPager.getCurrentItem()).getTag();
+  	    		BookmarksDialogs.AddDialog(this, acc, null, null);
   	    		break;
   	    	default:
   	    		return false;

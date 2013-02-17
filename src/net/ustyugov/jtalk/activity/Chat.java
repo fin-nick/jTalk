@@ -28,6 +28,7 @@ import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.Notify;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.Smiles;
+import net.ustyugov.jtalk.activity.filetransfer.SendFileActivity;
 import net.ustyugov.jtalk.activity.vcard.VCardActivity;
 import net.ustyugov.jtalk.adapter.*;
 import net.ustyugov.jtalk.db.JTalkProvider;
@@ -61,7 +62,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.View.OnKeyListener;
 import android.view.View.OnLongClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView.OnScrollListener;
@@ -530,6 +530,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
+                startActivity(new Intent(this, RosterActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
                 finish();
                 break;
             case R.id.smile:
@@ -645,7 +646,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 }
                 break;
             default:
-                return false;
+                return super.onOptionsItemSelected(item);
         }
         return true;
     }

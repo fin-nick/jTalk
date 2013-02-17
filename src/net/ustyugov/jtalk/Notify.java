@@ -18,8 +18,12 @@
 package net.ustyugov.jtalk;
 
 import java.util.List;
+
+import net.ustyugov.jtalk.activity.Chat;
 import net.ustyugov.jtalk.activity.DataFormActivity;
 import net.ustyugov.jtalk.activity.RosterActivity;
+import net.ustyugov.jtalk.activity.filetransfer.ReceiveFileActivity;
+import net.ustyugov.jtalk.activity.muc.Invite;
 import net.ustyugov.jtalk.service.JTalkService;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
@@ -97,9 +101,13 @@ public class Notify {
             NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
             mng.notify(NOTIFICATION, mBuilder.build());
     	} else {
-           	Intent i = new Intent(service, RosterActivity.class);
+            List<MessageItem> list = service.getUnreadMessages();
+            MessageItem messageItem = list.get(0);
+
+           	Intent i = new Intent(service, Chat.class);
            	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        	i.putExtra("msg", true);
+            i.putExtra("jid", messageItem.getJid());
+            i.putExtra("account", messageItem.getAccount());
             PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
@@ -112,7 +120,6 @@ public class Notify {
             NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
             inboxStyle.setBigContentTitle(service.getString(R.string.UnreadMessage));
 
-            List<MessageItem> list = service.getUnreadMessages();
             for (MessageItem item : list) {
                 String account = item.getAccount();
                 String jid = item.getJid();
@@ -217,9 +224,9 @@ public class Notify {
     		
         	Uri sound_file = Uri.parse(soundPath);
         	
-        	Intent i = new Intent(service, RosterActivity.class);
+        	Intent i = new Intent(service, Chat.class);
         	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        	i.putExtra("msg", true);
+            i.putExtra("jid", from);
         	i.putExtra("account", account);
             PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
           
@@ -335,7 +342,7 @@ public class Notify {
     
     public static void incomingFile() {
     	JTalkService service = JTalkService.getInstance();
-    	Intent i = new Intent(service, RosterActivity.class);
+    	Intent i = new Intent(service, ReceiveFileActivity.class);
     	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
     	i.putExtra("file", true);
         PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -354,10 +361,9 @@ public class Notify {
     public static void inviteNotify(String account, String room, String from, String reason, String password) {
     	JTalkService service = JTalkService.getInstance();
     	
-    	Intent i = new Intent(service, RosterActivity.class);
+    	Intent i = new Intent(service, Invite.class);
     	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
     	i.putExtra("account", account);
-        i.putExtra("invite", true);
         i.putExtra("room", room);
         i.putExtra("from", from);
         i.putExtra("reason", reason);

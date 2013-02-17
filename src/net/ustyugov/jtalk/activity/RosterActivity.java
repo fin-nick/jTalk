@@ -26,7 +26,6 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.actionbarsherlock.widget.SearchView;
 import net.ustyugov.jtalk.Constants;
-import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.Notify;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.activity.muc.Bookmarks;
@@ -37,14 +36,11 @@ import net.ustyugov.jtalk.adapter.SearchAdapter;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.dialog.ChangeChatDialog;
-import net.ustyugov.jtalk.dialog.IncomingFileDialog;
-import net.ustyugov.jtalk.dialog.InviteDialog;
 import net.ustyugov.jtalk.dialog.MucDialogs;
 import net.ustyugov.jtalk.dialog.RosterDialogs;
 import net.ustyugov.jtalk.service.JTalkService;
 
 import org.jivesoftware.smack.RosterEntry;
-import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
 
 import android.database.Cursor;
 import android.location.Location;
@@ -109,38 +105,6 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
 
         if (getIntent().getBooleanExtra("status", false)) {
             RosterDialogs.changeStatusDialog(this, null, null);
-        }
-
-       	if (getIntent().getBooleanExtra("file", false)) {
-           	if (service.getIncomingRequests().size() > 0) {
-           		FileTransferRequest request = service.getIncomingRequests().remove(0);
-           		new IncomingFileDialog(this, request).show();
-           		if(service.getIncomingRequests().isEmpty()) Notify.cancelFileRequest();
-           	}
-       	}
-       	
-       	if (getIntent().getBooleanExtra("invite", false)) {
-       		String account = getIntent().getStringExtra("account");
-       		String room = getIntent().getStringExtra("room");
-       		String from = getIntent().getStringExtra("from");
-       		String reason = getIntent().getStringExtra("reason");
-       		String password = getIntent().getStringExtra("password");
-       		
-       		new InviteDialog(this, account, room, from, reason, password).show();
-       	}
-
-        if (getIntent().getBooleanExtra("msg", false)) {
-            MessageItem item = service.getUnreadMessage();
-            if (item != null) {
-                String jid = item.getJid();
-                String account = item.getAccount();
-
-                Intent intent = new Intent(this, Chat.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("account", account);
-                intent.putExtra("jid", jid);
-                startActivity(intent);
-            }
         }
        	Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
 		if (cursor == null || cursor.getCount() < 1) startActivity(new Intent(this, Accounts.class));

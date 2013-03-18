@@ -102,7 +102,7 @@
     <string name="SortByStatuses">Sort by statuses</string>
     <string name="ShowSelfResources">Show self resources</string>
     <string name="HideKeyboard">Hide keyboard on send</string>
-    <string name="MaxMucMessages">Number messages in log</string>
+    <string name="MaxMessages">Maximum messages in log</string>
     <string name="AddAfterNick">Add after nick</string>
     <string name="NumberOfCharacters">Number of characters</string>
     <string name="Columns">Columns</string>

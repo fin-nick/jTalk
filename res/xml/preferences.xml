@@ -83,6 +83,11 @@
                 android:title="@string/FontSize"
                 android:defaultValue="@string/DefaultFontSize"
                 android:numeric="integer"/>
+        <EditTextPreference
+                android:key="MaxLogMessages"
+                android:title="@string/MaxMessages"
+                android:defaultValue="0"
+                android:numeric="integer"/>
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/MUC">
@@ -92,8 +97,8 @@
                 android:defaultValue="false" />
         <EditTextPreference
                 android:key="MaxMucMessages"
-                android:title="@string/MaxMucMessages"
-                android:defaultValue="100"
+                android:title="@string/MaxMessages"
+                android:defaultValue="0"
                 android:numeric="integer"/>
         <EditTextPreference
                 android:key="nickSeparator"

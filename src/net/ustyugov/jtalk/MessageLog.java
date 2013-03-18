@@ -19,13 +19,9 @@ package net.ustyugov.jtalk;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.db.MessageDbHelper;
 import net.ustyugov.jtalk.service.JTalkService;
-
-
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -33,71 +29,59 @@ import android.util.Log;
 
 public class MessageLog {
 	
-	public static void writeMessage(final String jid, final MessageItem message) {
-		new Thread() {
-			@Override
-			public void run() {
-				try {
-					JTalkService service = JTalkService.getInstance();
-					
-	 	            ContentValues values = new ContentValues();
-	 	            values.put(MessageDbHelper.TYPE, message.getType().name());
-	 	            values.put(MessageDbHelper.JID, jid);
-	 	            values.put(MessageDbHelper.ID, message.getId());
-	 	            values.put(MessageDbHelper.STAMP, getStamp());
-	 	            values.put(MessageDbHelper.NICK, message.getName());
-	 	            values.put(MessageDbHelper.BODY, message.getBody());
-	 	            values.put(MessageDbHelper.COLLAPSED, message.isCollapsed() ? "true" : "false");
-	 	            values.put(MessageDbHelper.RECEIVED, message.isReceived() ? "true" : "false");
-	 	            values.put(MessageDbHelper.FORM, "NULL");
-	 	            values.put(MessageDbHelper.BOB, "NULL");
-	            	service.getContentResolver().insert(JTalkProvider.CONTENT_URI, values);
-	            } catch (Exception sqle) {
-	            	Log.i("SQL", sqle.getLocalizedMessage());
-	            }
-			}
-		}.start();
+	public static void writeMessage(String account, String jid, MessageItem message) {
+            try {
+                JTalkService service = JTalkService.getInstance();
+
+                ContentValues values = new ContentValues();
+                values.put(MessageDbHelper.TYPE, message.getType().name());
+                values.put(MessageDbHelper.JID, jid);
+                values.put(MessageDbHelper.ID, message.getId());
+                values.put(MessageDbHelper.STAMP, getStamp());
+                values.put(MessageDbHelper.NICK, message.getName());
+                values.put(MessageDbHelper.BODY, message.getBody());
+                values.put(MessageDbHelper.COLLAPSED, message.isCollapsed() ? "true" : "false");
+                values.put(MessageDbHelper.RECEIVED, message.isReceived() ? "true" : "false");
+                values.put(MessageDbHelper.FORM, "NULL");
+                values.put(MessageDbHelper.BOB, "NULL");
+                service.getContentResolver().insert(JTalkProvider.CONTENT_URI, values);
+
+                if (message.getType() == MessageItem.Type.message && !service.getActiveChats(account).contains(jid))
+                    service.addActiveChat(account, jid);
+
+                if (service.getActiveChats(account).contains(jid)) service.addMsgCounter(jid);
+                service.sendBroadcast(new Intent(Constants.NEW_MESSAGE).putExtra("jid", jid));
+            } catch (Exception sqle) {
+                Log.i("SQL", sqle.getLocalizedMessage());
+            }
 	}
 	
 	public static void writeMucMessage(final String group, final String nick, final MessageItem message) {
-		new Thread() {
-			@Override
-			public void run() {
-				try {
-					JTalkService service = JTalkService.getInstance();
-					
-	 	            ContentValues values = new ContentValues();
-	 	            values.put(MessageDbHelper.TYPE, message.getType().name());
-	 	            values.put(MessageDbHelper.JID, group);
-	 	            values.put(MessageDbHelper.ID, message.getId());
-	 	            values.put(MessageDbHelper.STAMP, getStamp());
-	 	            values.put(MessageDbHelper.NICK, nick);
-	 	            values.put(MessageDbHelper.BODY, message.getBody());
-	 	            values.put(MessageDbHelper.COLLAPSED, message.isCollapsed() ? "true" : "false");
-	 	            values.put(MessageDbHelper.RECEIVED, message.isReceived() ? "true" : "false");
-	 	            values.put(MessageDbHelper.FORM, "NULL");
-	 	            values.put(MessageDbHelper.BOB, "NULL");
-	            	service.getContentResolver().insert(JTalkProvider.CONTENT_URI, values);
-	            } catch (Exception sqle) {
-	            	Log.i("SQL", sqle.getLocalizedMessage());
-	            }
-			}
-		}.start();
+        try {
+            JTalkService service = JTalkService.getInstance();
+
+            ContentValues values = new ContentValues();
+            values.put(MessageDbHelper.TYPE, message.getType().name());
+            values.put(MessageDbHelper.JID, group);
+            values.put(MessageDbHelper.ID, message.getId());
+            values.put(MessageDbHelper.STAMP, getStamp());
+            values.put(MessageDbHelper.NICK, nick);
+            values.put(MessageDbHelper.BODY, message.getBody());
+            values.put(MessageDbHelper.COLLAPSED, message.isCollapsed() ? "true" : "false");
+            values.put(MessageDbHelper.RECEIVED, message.isReceived() ? "true" : "false");
+            values.put(MessageDbHelper.FORM, "NULL");
+            values.put(MessageDbHelper.BOB, "NULL");
+            service.getContentResolver().insert(JTalkProvider.CONTENT_URI, values);
+
+            service.addMsgCounter(group);
+            service.sendBroadcast(new Intent(Constants.NEW_MESSAGE).putExtra("jid", group));
+        } catch (Exception sqle) {
+            Log.i("SQL", sqle.getLocalizedMessage());
+        }
 	}
 	
 	public static void editMessage(final String account, final String jid, final String id, final String text) {
 		final JTalkService service = JTalkService.getInstance();
-		if (service.getMessagesHash(account).containsKey(jid)) {
-			List<MessageItem> l = service.getMessagesHash(account).get(jid);
-			for (MessageItem item : l) {
-				String i = item.getId();
-				if (i != null && i.equals(id)) {
-					item.setEdited(true);
-					item.setBody(text);
-				}
-			}
-		}
-		
 		new Thread() {
 			@Override
 			public void run() {
@@ -134,7 +118,7 @@ public class MessageLog {
 		 	            service.sendBroadcast(intent);
 					}
 	            } catch (Exception sqle) {
-//	            	Log.i("SQL", sqle.getLocalizedMessage());
+	            	Log.i("SQL", sqle.getLocalizedMessage());
 	            }
 			}
 		}.start();

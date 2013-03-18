@@ -144,11 +144,11 @@ public class RosterDialogs {
 		           		service.connect(account);
 					}
 				} else {
-					service.setPreference(a, "currentPriority", priority);
-	        		service.setPreference(a, "currentSelection", pos);
-	        		service.setPreference(a, "currentMode", mode);
-	        		service.setPreference(a, "currentStatus", text);
-	        		service.setPreference(a, "lastStatus"+mode, text);
+					service.setPreference("currentPriority", priority);
+	        		service.setPreference("currentSelection", pos);
+	        		service.setPreference("currentMode", mode);
+	        		service.setPreference("currentStatus", text);
+	        		service.setPreference("lastStatus"+mode, text);
 	        		
 					Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
 					if (cursor != null && cursor.getCount() > 0) {
@@ -397,7 +397,7 @@ public class RosterDialogs {
     	final RosterEntry entry = item.getEntry();
     	
     	CharSequence[] items;
-    	if (service.getMessagesHash(account).containsKey(entry.getUser())) {
+    	if (service.getActiveChats(account).contains(entry.getUser())) {
     		items = new CharSequence[10];
     		items[9] = activity.getString(R.string.Close);
     	}
@@ -455,9 +455,7 @@ public class RosterDialogs {
 		        	 break;
 	        	case 7:
 	        		activity.getContentResolver().delete(JTalkProvider.CONTENT_URI, "jid = '" + jid + "'", null);
-	  	    		if (service.getMessagesHash(account).containsKey(jid)) {
-	  	    			service.getMessagesHash(account).remove(jid);
-	  	    		}
+	  	    		service.removeActiveChat(account, jid);
 	  	    		service.sendBroadcast(new Intent(Constants.UPDATE));
 	  	    		break;
 	        	case 8:
@@ -467,7 +465,7 @@ public class RosterDialogs {
 		 	        break;
 	        	case 9:
 	        		service.setChatState(account, jid, ChatState.gone);
-		        	if (service.getMessagesHash(account).containsKey(jid)) service.getMessagesHash(account).remove(jid);
+		        	service.removeActiveChat(account, jid);
 					if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));
 					else service.sendBroadcast(new Intent(Constants.UPDATE));
 		        	break;
@@ -483,7 +481,7 @@ public class RosterDialogs {
         final RosterEntry entry = item.getEntry();
 
         CharSequence[] items;
-        if (service.getMessagesHash(account).containsKey(entry.getUser())) {
+        if (service.getActiveChats(account).contains(entry.getUser())) {
             items = new CharSequence[6];
             items[5] = activity.getString(R.string.Close);
         }
@@ -526,14 +524,12 @@ public class RosterDialogs {
                         break;
                     case 4:
                         activity.getContentResolver().delete(JTalkProvider.CONTENT_URI, "jid = '" + jid + "'", null);
-                        if (service.getMessagesHash(account).containsKey(jid)) {
-                            service.getMessagesHash(account).remove(jid);
-                        }
+                        service.removeActiveChat(account, jid);
                         service.sendBroadcast(new Intent(Constants.UPDATE));
                         break;
                     case 5:
                         service.setChatState(account, jid, ChatState.gone);
-                        if (service.getMessagesHash(account).containsKey(jid)) service.getMessagesHash(account).remove(jid);
+                        service.removeActiveChat(account, jid);
                         if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));
                         else service.sendBroadcast(new Intent(Constants.UPDATE));
                         break;
@@ -583,7 +579,7 @@ public class RosterDialogs {
     	final RosterEntry entry = item.getEntry();
     	
     	CharSequence[] items;
-    	if (service.getMessagesHash(account).containsKey(entry.getUser())) {
+    	if (service.getActiveChats(account).contains(entry.getUser())) {
     		items = new CharSequence[5];
     		items[4] = activity.getString(R.string.Close);
     	}
@@ -623,14 +619,12 @@ public class RosterDialogs {
 	        		break;
 	        	case 3:
 	        		activity.getContentResolver().delete(JTalkProvider.CONTENT_URI, "jid = '" + jid + "'", null);
-	  	    		if (service.getMessagesHash(account).containsKey(jid)) {
-	  	    			service.getMessagesHash(account).remove(jid);
-	  	    		}
+                    service.removeActiveChat(account, jid);
 	  	    		service.sendBroadcast(new Intent(Constants.UPDATE));
 		 	        break;
 	        	case 4:
 	        		service.setChatState(account, jid, ChatState.gone);
-		        	if (service.getMessagesHash(account).containsKey(jid)) service.getMessagesHash(account).remove(jid);
+                    service.removeActiveChat(account, jid);
 					if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));
 					else service.sendBroadcast(new Intent(Constants.UPDATE));
 					break;

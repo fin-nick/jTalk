@@ -381,8 +381,8 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 			if (service.getComposeList().contains(jid)) holder.name.setTextColor(0xFFAA2323);
 			else holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFEEEEEE : 0xFF343434);
 			
-			if (service.getMessagesHash(account).containsKey(jid)) {
-				if (service.getMessagesHash(account).get(jid).size() > 0) holder.name.setTypeface(Typeface.DEFAULT_BOLD);
+			if (service.getActiveChats(account).contains(jid)) {
+				holder.name.setTypeface(Typeface.DEFAULT_BOLD);
 			} else holder.name.setTypeface(Typeface.DEFAULT);
 			
 	        if (count > 0) {

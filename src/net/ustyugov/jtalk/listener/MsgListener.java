@@ -17,11 +17,11 @@
 
 package net.ustyugov.jtalk.listener;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import android.database.Cursor;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.MessageLog;
@@ -105,41 +105,30 @@ public class MsgListener implements PacketListener {
 			if (receipt.equals("request")) {
 				service.sendReceivedPacket(connection, user, id);
 			} else if (receipt.equals("received")) {
-				if (service.getMessagesHash(account).containsKey(user)) {
-                    final List<MessageItem> l = service.getMessagesHash(account).get(user);
-                    new Thread() {
-                        public void run() {
-                            for (MessageItem i : l) {
-                                String msgId = i.getId();
-                                if (msgId != null && msgId.equals(id)) {
-                                    i.setReceived(true);
+                Cursor cursor = context.getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + user + "' and id = '" + id + "'", null, MessageDbHelper._ID);
+                if (cursor != null && cursor.getCount() > 0) {
+                    cursor.moveToLast();
+                    String nick = cursor.getString(cursor.getColumnIndex(MessageDbHelper.NICK));
+                    String t = cursor.getString(cursor.getColumnIndex(MessageDbHelper.TYPE));
+                    String stamp = cursor.getString(cursor.getColumnIndex(MessageDbHelper.STAMP));
+                    String b = cursor.getString(cursor.getColumnIndex(MessageDbHelper.BODY));
+                    String collapsed = cursor.getString(cursor.getColumnIndex(MessageDbHelper.COLLAPSED));
 
-                                    String stamp = i.getTime();
-                                    try {
-                                        Date d = new Date(Long.parseLong(id));
-                                        java.text.DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-                                        stamp = df.format(d);
-                                    } catch (NumberFormatException ignored) { }
-
-                                    ContentValues values = new ContentValues();
-                                    values.put(MessageDbHelper.TYPE, i.getType().name());
-                                    values.put(MessageDbHelper.JID, i.getJid());
-                                    values.put(MessageDbHelper.ID, id);
-                                    values.put(MessageDbHelper.STAMP, stamp);
-                                    values.put(MessageDbHelper.NICK, i.getName());
-                                    values.put(MessageDbHelper.BODY, i.getBody());
-                                    values.put(MessageDbHelper.COLLAPSED, i.isCollapsed() ? "true" : "false");
-                                    values.put(MessageDbHelper.RECEIVED, "true");
-                                    values.put(MessageDbHelper.FORM, "NULL");
-                                    values.put(MessageDbHelper.BOB, "NULL");
-                                    service.getContentResolver().update(JTalkProvider.CONTENT_URI, values, MessageDbHelper.ID + " = '" + id + "'", null);
-                                    context.sendBroadcast(new Intent(Constants.RECEIVED));
-                                }
-                            }
-                        }
-                    }.start();
+                    ContentValues values = new ContentValues();
+                    values.put(MessageDbHelper.TYPE, t);
+                    values.put(MessageDbHelper.JID, user);
+                    values.put(MessageDbHelper.ID, id);
+                    values.put(MessageDbHelper.STAMP, stamp);
+                    values.put(MessageDbHelper.NICK, nick);
+                    values.put(MessageDbHelper.BODY, b);
+                    values.put(MessageDbHelper.COLLAPSED, collapsed);
+                    values.put(MessageDbHelper.RECEIVED, "true");
+                    values.put(MessageDbHelper.FORM, "NULL");
+                    values.put(MessageDbHelper.BOB, "NULL");
+                    service.getContentResolver().update(JTalkProvider.CONTENT_URI, values, MessageDbHelper.ID + " = '" + id + "'", null);
+                    context.sendBroadcast(new Intent(Constants.RECEIVED));
                     return;
-				}
+                }
 			}
 		}
 		
@@ -167,21 +156,8 @@ public class MsgListener implements PacketListener {
 					item.setReceived(false);
 		            item.setName(nick);
 		            
-	            	MessageLog.writeMucMessage(group, nick, item);
-
                     if (!service.getCurrentJid().equals(group)) {
                         service.addMessagesCount(account, group);
-                    }
-
-                    if (service.getMucMessagesHash(account).containsKey(group)) {
-                        List<MessageItem> list = service.getMucMessagesHash(account).get(group);
-                        list.add(item);
-                        int max = Integer.parseInt(prefs.getString("MaxMucMessages", "100"));
-                        if (list.size() > max) list.remove(0);
-                    } else {
-                        List<MessageItem> list = new ArrayList<MessageItem>();
-                        list.add(item);
-                        service.getMucMessagesHash(account).put(group, list);
                     }
 
                     if (body.contains(mynick)) {
@@ -193,9 +169,7 @@ public class MsgListener implements PacketListener {
                         }
                     } else Notify.messageNotify(account, group, Notify.Type.Conference, body);
 
-	                Intent intent = new Intent(Constants.NEW_MESSAGE);
-	                intent.putExtra("jid", group);
-	                context.sendBroadcast(intent);
+                    MessageLog.writeMucMessage(group, nick, item);
 	            }
 	        } else if (type.equals("chat") || type.equals("normal") || type.equals("headline")) {
 	        	ReplaceExtension replace = (ReplaceExtension) msg.getExtension("urn:xmpp:message-correct:0");
@@ -203,7 +177,6 @@ public class MsgListener implements PacketListener {
 	    			String rid = replace.getId();
 	    			MessageLog.editMessage(account, user, rid, body);
 	    		} else {
-	    			String action = Constants.NEW_MESSAGE;
 		        	String name = null;
 		        	String group = null;
 		        	
@@ -211,8 +184,7 @@ public class MsgListener implements PacketListener {
 		        	if (service.getConferencesHash(account).containsKey(user)) {
 		        		group = StringUtils.parseBareAddress(from);
 		        		name = StringUtils.parseResource(from);
-		        		action = Constants.NEW_MESSAGE;
-		        		
+
 		        		if (name == null || name.length() <= 0) {
                             Date date = new java.util.Date();
                             date.setTime(Long.parseLong(System.currentTimeMillis()+""));
@@ -236,25 +208,12 @@ public class MsgListener implements PacketListener {
 			            		
 			            		Notify.captchaNotify(account, mucMsg);
 			            	}
-		    	            
-		        			if (service.getMucMessagesHash(account).containsKey(group)) {
-		                       	List<MessageItem> list = service.getMucMessagesHash(account).get(group);
-		                       	list.add(mucMsg);
-		                    } else {
-		                    	List<MessageItem> list = new ArrayList<MessageItem>();
-		                    	list.add(mucMsg);
-		                    	service.getMucMessagesHash(account).put(group, list);
-		                    }
 
 		                    if (!service.getCurrentJid().equals(group)) {
 		                    	service.addUnreadMessage(mucMsg);
 		                    }
-		                        
-		                    Intent intent = new Intent(Constants.NEW_MESSAGE);
-		                    intent.putExtra("jid", group);
-		                    context.sendBroadcast(intent);
-		                    
-		    	            MessageLog.writeMessage(group, mucMsg);
+
+                            MessageLog.writeMessage(account, group, mucMsg);
 		                    return;
 		        		}
 		        	} else { // from user
@@ -286,28 +245,13 @@ public class MsgListener implements PacketListener {
 		            
 		            if (group != null && group.length() > 0) user = group + "/" + name; 
 		        	
-		            MessageLog.writeMessage(user, item);
-		            
-		            if (service.getMessagesHash(account).containsKey(user)) {
-		            	List<MessageItem> list = service.getMessagesHash(account).get(user); 
-		           		list.add(item);
-		            } else {
-		        		List<MessageItem> list = new ArrayList<MessageItem>();
-		        		list.add(item);
-		        		service.getMessagesHash(account).put(user, list);
-		        	}
-		            
 		            if (!service.getCurrentJid().equals(user)) {
 		            	service.addMessagesCount(account, user);
                         service.addUnreadMessage(item);
 		            }
 		            
 		            updateComposeList(user, false, false);
-		            
-		            Intent intent = new Intent(action);
-		            intent.putExtra("jid", user);
-		            context.sendBroadcast(intent);
-		            
+                    MessageLog.writeMessage(account, user, item);
 		            Notify.messageNotify(account, user, Notify.Type.Chat, body);
 	    		}
 	        }

@@ -123,6 +123,8 @@ public class JTalkService extends Service {
 	private static JTalkService js = new JTalkService();
     private static List<String> collapsedGroups = new ArrayList<String>();
     private static List<String> composeList = new ArrayList<String>();
+    private static Hashtable<String, List<String>> activeChats = new Hashtable<String, List<String>>();
+    private Hashtable<String, Integer> msgCounter = new Hashtable<String, Integer>();
     private static List<MessageItem> unreadMessages = new ArrayList<MessageItem>();
     private static Hashtable<String, List<String>> mucHighlightsList = new Hashtable<String, List<String>>();
     private static Hashtable<String, String> textHash = new Hashtable<String, String>();
@@ -132,8 +134,6 @@ public class JTalkService extends Service {
     private static Hashtable<String, Conference> joinedConferences = new Hashtable<String, Conference>();
     private static Hashtable<String, Hashtable<String, MultiUserChat>> conferences = new Hashtable<String, Hashtable<String, MultiUserChat>>();
     private static Hashtable<String, Bitmap> avatarsHash = new Hashtable<String, Bitmap>();
-    private static Hashtable<String, Hashtable<String, List<MessageItem>>> messages = new Hashtable<String, Hashtable<String, List<MessageItem>>>();
-    private static Hashtable<String, Hashtable<String, List<MessageItem>>> mucMessages = new Hashtable<String, Hashtable<String, List<MessageItem>>>();
     private static Hashtable<String, Hashtable<String, Integer>> messagesCount = new Hashtable<String, Hashtable<String, Integer>>();
     private static Hashtable<String, DataForm> formHash = new Hashtable<String, DataForm>(); 
     private static Hashtable<String, XMPPConnection> connections = new Hashtable<String, XMPPConnection>();
@@ -235,7 +235,22 @@ public class JTalkService extends Service {
     	}
 //    	updateWidget();
     }
-    
+
+    public void setMsgCounter(String jid, int count) {
+        msgCounter.put(jid, count);
+    }
+
+    public int getMsgCount(String jid) {
+        if (msgCounter.containsKey(jid)) return msgCounter.get(jid);
+        else return 0;
+    }
+
+    public void addMsgCounter(String jid) {
+        int count = 0;
+        if (msgCounter.containsKey(jid)) count = msgCounter.get(jid);
+        msgCounter.put(jid, count+1);
+    }
+
     public void addDataForm(String id, DataForm form) {
     	formHash.put(id, form);
     }
@@ -338,34 +353,40 @@ public class JTalkService extends Service {
     	}
     	mucHighlightsList.put(account, list);
     }
-    
-    public Hashtable<String, Hashtable<String, List<MessageItem>>> getMessages() { return messages; }
-    public Hashtable<String, List<MessageItem>> getMessagesHash(String account) { 
-    	if (messages.containsKey(account)) return messages.get(account);
-    	else {
-    		messages.put(account, new Hashtable<String, List<MessageItem>>());
-    		return messages.get(account);
-    	}
+
+    public void addActiveChat(String account, String jid) {
+        if (activeChats.containsKey(account)) {
+            List<String> chats = activeChats.get(account);
+            if (!chats.contains(jid)) chats.add(jid);
+        }
+        else {
+            List<String> chats = new ArrayList<String>();
+            chats.add(jid);
+            activeChats.put(account, chats);
+        }
+    }
+
+    public void removeActiveChat(String account, String jid) {
+        if (activeChats.containsKey(account)) {
+            List<String> chats = activeChats.remove(account);
+            while(chats.contains(jid)) chats.remove(jid);
+            activeChats.put(account, chats);
+        }
+    }
+
+    public List<String> getActiveChats(String account) {
+        if (activeChats.containsKey(account)) return activeChats.get(account);
+        else return new ArrayList<String>();
     }
 
     public List<String> getPrivateMessages(String account) {
         List<String> list = new ArrayList<String>();
-        Enumeration<String> chatEnum = getMessagesHash(account).keys();
-        while (chatEnum.hasMoreElements()) {
-            String jid = chatEnum.nextElement();
-            if (getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {
+        for (String jid : getActiveChats(account)) {
+            if (getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid)) && !getConferencesHash(account).containsKey(jid)) {
                 list.add(jid);
             }
         }
         return list;
-    }
-    
-    public Hashtable<String, List<MessageItem>> getMucMessagesHash(String account) { 
-    	if (mucMessages.containsKey(account)) return mucMessages.get(account);
-    	else {
-    		mucMessages.put(account, new Hashtable<String, List<MessageItem>>());
-    		return mucMessages.get(account);
-    	}
     }
     
     public void setResource(String account, String jid, String resource) {
@@ -658,7 +679,7 @@ public class JTalkService extends Service {
 		startForeground(1, mBuilder.build());
 
         WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-		wifiLock = wifiManager.createWifiLock("jTalk");
+		wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "jTalk");
 
         Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
         if (cursor != null && cursor.getCount() > 0) {
@@ -757,7 +778,7 @@ public class JTalkService extends Service {
 		
 		if (mode.equals("online")) {
 			mode = "available";
-			setPreference(this, "currentSelection", 0);
+			setPreference("currentSelection", 0);
 		}
 		
 		if (!mode.equals("unavailable")) {
@@ -882,7 +903,6 @@ public class JTalkService extends Service {
 			} catch (IllegalStateException ignored) { }
 			getConferencesHash(account).remove(group);
 	    }
-	    if (mucMessages.containsKey(account)) mucMessages.get(account).remove(group);
 	    if (joinedConferences.containsKey(group)) joinedConferences.remove(group);
 	    Intent updateIntent = new Intent(Constants.PRESENCE_CHANGED);
 		sendBroadcast(updateIntent);
@@ -976,17 +996,8 @@ public class JTalkService extends Service {
   	  		msgItem.setBody(message);
   	  		msgItem.setReceived(false);
   	  		
-  	  		MessageLog.writeMessage(user, msgItem);
-  	  		
-  	  		if (getMessagesHash(account).containsKey(user)) {
-  				List<MessageItem> list = getMessagesHash(account).get(user);
-  				list.add(msgItem);
-  			} else {
-  				List<MessageItem> list = new ArrayList<MessageItem>();
-  				list.add(msgItem);
-  				getMessagesHash(account).put(user, list);
-  			}
-  	  		
+  	  		MessageLog.writeMessage(account, user, msgItem);
+
   	  		new Thread() {
   	  			@Override
   	  			public void run() {
@@ -1241,8 +1252,8 @@ public class JTalkService extends Service {
   		return pos;
   	}
   	
-  	public void setPreference(Context context, String name, Object value) {
-  		if (prefs == null) prefs = PreferenceManager.getDefaultSharedPreferences(context);
+  	public void setPreference(String name, Object value) {
+  		if (prefs == null) prefs = PreferenceManager.getDefaultSharedPreferences(this);
   		SharedPreferences.Editor editor = prefs.edit();
   		if(value instanceof String) editor.putString(name, String.valueOf(value));
   		else if(value instanceof Integer) editor.putInt(name, Integer.parseInt(String.valueOf(value)));
@@ -1262,24 +1273,15 @@ public class JTalkService extends Service {
         item.setTime(time);
 
         MessageLog.writeMucMessage(group, nick, item);
-
-        List<MessageItem> list = new ArrayList<MessageItem>();
-        if (getMucMessagesHash(account).containsKey(group)) {
-            list = getMucMessagesHash(account).get(group);
-            list.add(item);
-        } else {
-            list.add(item);
-            getMucMessagesHash(account).put(group, list);
-        }
     }
-  	
+
   	private void clearAll() {
+        activeChats.clear();
+        msgCounter.clear();
   		autoStatusTimer.cancel();
         collapsedGroups.clear();
         composeList.clear();
         unreadMessages.clear();
-        messages.clear();
-        mucMessages.clear();
         conferences.clear();
         joinedConferences.clear();
         avatarsHash.clear();

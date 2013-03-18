@@ -18,11 +18,8 @@
 package net.ustyugov.jtalk.listener;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
-import android.util.Log;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.MessageLog;
@@ -72,18 +69,6 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         item.setBody(statusArray[getPosition(mode)] + " " + status);
         
         MessageLog.writeMucMessage(g, nick, item);
-        
-		List<MessageItem> list = new ArrayList<MessageItem>();
-        if (service.getMucMessagesHash(account).containsKey(g)) {
-           	list = service.getMucMessagesHash(account).get(g);
-           	list.add(item);
-        } else {
-          	list.add(item);
-           	service.getMucMessagesHash(account).put(g, list);
-        }
-        
-		Intent i = new Intent(Constants.PRESENCE_CHANGED);
-        service.sendBroadcast(i);
 	}
 	
 	public void nicknameChanged(String p, String newNick) {
@@ -99,17 +84,6 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 		item.setTime(time);
 		item.setType(MessageItem.Type.status);
 		
-		MessageLog.writeMucMessage(g, nick, item);
-		
-		List<MessageItem> list = new ArrayList<MessageItem>();
-        if (service.getMucMessagesHash(account).containsKey(g)) {
-           	list = service.getMucMessagesHash(account).get(g);
-           	list.add(item);
-        } else {
-          	list.add(item);
-           	service.getMucMessagesHash(account).put(g, list);
-        }
-    	
         try {
         	File oldFile = new File(Constants.PATH + "/" + p.replaceAll("/", "%"));
         	if (oldFile.exists()) {
@@ -117,10 +91,8 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         		oldFile.renameTo(newFile);
         	}
         } catch (Exception ignored) { }
-        
-    	Intent intent = new Intent(Constants.PRESENCE_CHANGED);
-    	intent.putExtra("update", true);
-        service.sendBroadcast(intent);
+
+        MessageLog.writeMucMessage(g, nick, item);
 	}
 
 	public void banned(String p, String actor, String reason) {
@@ -137,19 +109,6 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         item.setTime(time);
         
         MessageLog.writeMucMessage(g, nick, item);
-            
-        List<MessageItem> list = new ArrayList<MessageItem>();
-        if (service.getMucMessagesHash(account).containsKey(g)) {
-           	list = service.getMucMessagesHash(account).get(g);
-           	list.add(item);
-        } else {
-          	list.add(item);
-           	service.getMucMessagesHash(account).put(g, list);
-        }
-    	
-    	Intent intent = new Intent(Constants.PRESENCE_CHANGED);
-    	intent.putExtra("update", true);
-        service.sendBroadcast(intent);
 	}
 	
 	public void kicked(String p, String actor, String reason) {
@@ -167,19 +126,6 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         item.setType(MessageItem.Type.status);
         
         MessageLog.writeMucMessage(g, nick, item);
-            
-        List<MessageItem> list = new ArrayList<MessageItem>();
-        if (service.getMucMessagesHash(account).containsKey(g)) {
-           	list = service.getMucMessagesHash(account).get(g);
-           	list.add(item);
-        } else {
-           	list.add(item);
-          	service.getMucMessagesHash(account).put(g, list);
-        }
-    	
-    	Intent intent = new Intent(Constants.PRESENCE_CHANGED);
-    	intent.putExtra("update", true);
-        service.sendBroadcast(intent);
 	}
 	
 	public void joined(String participant) { 
@@ -209,19 +155,6 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         item.setTime(time);
         
         MessageLog.writeMucMessage(g, nick, item);
-            
-        List<MessageItem> list = new ArrayList<MessageItem>();
-        if (service.getMucMessagesHash(account).containsKey(g)) {
-           	list = service.getMucMessagesHash(account).get(g);
-           	list.add(item);
-        } else {
-          	list.add(item);
-           	service.getMucMessagesHash(account).put(g, list);
-        }
-    	
-    	Intent intent = new Intent(Constants.PRESENCE_CHANGED);
-    	intent.putExtra("update", true);
-        service.sendBroadcast(intent);
 	}
 	
 	public void left(String participant) {
@@ -238,19 +171,6 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         item.setTime(time);
         
         MessageLog.writeMucMessage(g, nick, item);
-            
-        List<MessageItem> list = new ArrayList<MessageItem>();
-        if (service.getMucMessagesHash(account).containsKey(g)) {
-           	list = service.getMucMessagesHash(account).get(g);
-           	list.add(item);
-        } else {
-          	list.add(item);
-           	service.getMucMessagesHash(account).put(g, list);
-        }
-    	
-    	Intent intent = new Intent(Constants.PRESENCE_CHANGED);
-    	intent.putExtra("update", true);
-        service.sendBroadcast(intent);
 	}
 	
 	public void adminGranted(String participant) { stateChanged(participant); }
@@ -291,18 +211,6 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 	        item.setTime(time);
 	        
 	        MessageLog.writeMucMessage(g, nick, item);
-	            
-	        List<MessageItem> list = new ArrayList<MessageItem>();
-	        if (service.getMucMessagesHash(account).containsKey(g)) {
-	           	list = service.getMucMessagesHash(account).get(g);
-	           	list.add(item);
-	        } else {
-	          	list.add(item);
-	           	service.getMucMessagesHash(account).put(g, list);
-	        }
-	    	
-	    	Intent intent = new Intent(Constants.PRESENCE_CHANGED);
-	        service.sendBroadcast(intent);
 		}
 	}
 	

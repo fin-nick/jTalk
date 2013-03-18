@@ -96,14 +96,9 @@ public class RstListener implements RosterListener {
         item.setTime(time);
         item.setType(MessageItem.Type.status);
 
-        if (service.getMessagesHash(account).containsKey(jid)) {
-        	List<MessageItem> list = service.getMessagesHash(account).get(jid);
-       		list.add(item);
-        }
-
+        MessageLog.writeMessage(account, jid, item);
         service.sendBroadcast(new Intent(Constants.PRESENCE_CHANGED).putExtra("jid", jid));
         service.sendBroadcast(new Intent(Constants.UPDATE));
-        MessageLog.writeMessage(jid, item);
     }
     
     private int getPosition(Presence.Mode m) {

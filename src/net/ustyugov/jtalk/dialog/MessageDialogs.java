@@ -22,8 +22,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.database.Cursor;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
+import net.ustyugov.jtalk.db.JTalkProvider;
+import net.ustyugov.jtalk.db.MessageDbHelper;
 import net.ustyugov.jtalk.service.JTalkService;
 
 import com.jtalk2.R;
@@ -46,8 +49,9 @@ import org.jivesoftware.smack.util.StringUtils;
 public class MessageDialogs {
 	private static Pattern pattern = Pattern.compile("(ht|f)tps?://[a-z0-9\\-\\.]+[a-z]{2,}/?[^\\s\\n]*", Pattern.CASE_INSENSITIVE);
 	
-	public static void QuoteDialog(final Activity activity, final String jid, final MessageItem message) {
-		final String body = message.getBody();
+	public static void QuoteDialog(final Activity activity, final List<MessageItem> msgList, final int index) {
+		final MessageItem message = msgList.get(index);
+        final String body = message.getBody();
 		final List<String> urls = new ArrayList<String>();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
     	final boolean showtime = prefs.getBoolean("ShowTime", false);
@@ -83,19 +87,6 @@ public class MessageDialogs {
         		switch(which) {
                     case 0:
                         String str = "";
-                        JTalkService service = JTalkService.getInstance();
-                        List<MessageItem> msgList = new ArrayList<MessageItem>();
-
-                        String account = message.getAccount();
-                        if (service.getConferencesHash(account).containsKey(jid)) {
-                            if (service.getMucMessagesHash(account).containsKey(jid)) {
-                                msgList = service.getMucMessagesHash(account).get(jid);
-                            }
-                        } else {
-                            if (service.getMessagesHash(account).containsKey(jid)) {
-                                msgList = service.getMessagesHash(account).get(jid);
-                            }
-                        }
                         for (MessageItem item : msgList) {
                             if (item.isSelected()) {
                                 String time = item.getTime();
@@ -125,8 +116,9 @@ public class MessageDialogs {
         builder.create().show();
 	}
 
-	public static void CopyDialog(final Activity activity, final String jid, final MessageItem message) {
-		final String body = message.getBody();
+	public static void CopyDialog(final Activity activity, final List<MessageItem> msgList, final int index) {
+		final MessageItem message = msgList.get(index);
+        final String body = message.getBody();
 		final List<String> urls = new ArrayList<String>();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
     	final boolean showtime = prefs.getBoolean("ShowTime", false);
@@ -162,18 +154,6 @@ public class MessageDialogs {
                 switch(which) {
                     case 0:
                         String str = "";
-                        JTalkService service = JTalkService.getInstance();
-                        List<MessageItem> msgList = new ArrayList<MessageItem>();
-                        String account = message.getAccount();
-                        if (service.getConferencesHash(account).containsKey(jid)) {
-                            if (service.getMucMessagesHash(account).containsKey(jid)) {
-                                msgList = service.getMucMessagesHash(account).get(jid);
-                            }
-                        } else {
-                            if (service.getMessagesHash(account).containsKey(jid)) {
-                                msgList = service.getMessagesHash(account).get(jid);
-                            }
-                        }
                         for (MessageItem item : msgList) {
                             if (item.isSelected()) {
                                 String time = item.getTime();
@@ -255,4 +235,38 @@ public class MessageDialogs {
 		});
 		builder.create().show();
 	}
+
+//    private static List<MessageItem> getMessagesList(Activity activity, String account, String jid) {
+//        List<MessageItem> result = new ArrayList<MessageItem>();
+//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+//
+//        Cursor cursor = activity.getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "' AND type = 'message'", null, MessageDbHelper._ID);
+//        if (cursor != null && cursor.getCount() > 0) {
+//            int count = prefs.getInt(jid, 0);
+//            if (cursor.getCount() > count) {
+//                cursor.moveToLast();
+//                cursor.move(-count);
+//            } else cursor.moveToFirst();
+//
+//            do {
+//                String id = cursor.getString(cursor.getColumnIndex(MessageDbHelper.ID));
+//                String nick = cursor.getString(cursor.getColumnIndex(MessageDbHelper.NICK));
+//                String type = cursor.getString(cursor.getColumnIndex(MessageDbHelper.TYPE));
+//                String stamp = cursor.getString(cursor.getColumnIndex(MessageDbHelper.STAMP));
+//                String body = cursor.getString(cursor.getColumnIndex(MessageDbHelper.BODY));
+//                boolean received = Boolean.valueOf(cursor.getString(cursor.getColumnIndex(MessageDbHelper.RECEIVED)));
+//
+//                MessageItem item = new MessageItem(account, jid);
+//                item.setId(id);
+//                item.setName(nick);
+//                item.setType(MessageItem.Type.valueOf(type));
+//                item.setTime(stamp);
+//                item.setBody(body);
+//                item.setReceived(received);
+//
+//                result.add(item);
+//            } while (cursor.moveToNext());
+//        }
+//        return result;
+//    }
 }

@@ -17,11 +17,11 @@
 
 package net.ustyugov.jtalk.adapter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
+import android.text.format.DateFormat;
+import android.util.Log;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.Smiles;
@@ -78,32 +78,18 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         applyColors();
     }
 	
-	public void update(String account, String jid, String searchString) {
-        JTalkService service = JTalkService.getInstance();
+	public void update(String jid, List<MessageItem> list, String searchString) {
 		this.jid = jid;
         this.searchString = searchString;
 		clear();
 
-        List<MessageItem> list = new ArrayList<MessageItem>();
-        if (service.getMessagesHash(account).containsKey(jid)) {
-            list = service.getMessagesHash(account).get(jid);
-        }
-
-        List<MessageItem> messages = new ArrayList<MessageItem>();
-        if (!prefs.getBoolean("ShowStatus", false)) {
-            for (MessageItem item : list) {
-                if (item.getType() == MessageItem.Type.message) {
-                    messages.add(item);
-                }
-            }
-        } else messages = list;
-
-        for (MessageItem item : messages) {
+        for (MessageItem item : list) {
             if (searchString.length() > 0) {
                 String name = item.getName();
                 String body = item.getBody();
                 MessageItem.Type type = item.getType();
-                String time = "(" + item.getTime() + ")";
+                String time = createTimeString(item.getTime());
+
                 if (type == MessageItem.Type.status) {
                     if (showtime) body = time + "  " + body;
                 } else {
@@ -141,14 +127,15 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         String nick = item.getName();
         final boolean collapsed = item.isCollapsed();
         boolean received = item.isReceived();
-        String t = "(" + item.getTime() + ")";
+        String time = createTimeString(item.getTime());
+
         if (item.getSubject().length() > 0) subj = "\n" + context.getString(R.string.Subject) + ": " + item.getSubject() + "\n";
         body = subj + body;
         
         String message;
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         if (type == MessageItem.Type.status) {
-        	if (showtime) message = t + "  " + body;
+        	if (showtime) message = time + "  " + body;
         	else message = body;
         	ssb.append(message);
         	ssb.setSpan(new ForegroundColorSpan(0xFF239923), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -157,9 +144,9 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         	int boldLength = colorLength;
         	
         	if (showtime) {
-        		message = t + " " + name + ": " + body; 
-        		colorLength = name.length() + t.length() + 1;
-        		boldLength = name.length() + t.length() + subj.length() + 2;
+        		message = time + " " + name + ": " + body;
+        		colorLength = name.length() + time.length() + 1;
+        		boldLength = name.length() + time.length() + subj.length() + 2;
         	}
         	else message = name + ": " + body;
         	ssb.append(message);
@@ -300,4 +287,12 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
 		    outColor = 0xFF2323AA;
 		}
 	}
+
+    private String createTimeString(String time) {
+        Date d = new Date();
+        java.text.DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        String currentDate = df.format(d).substring(0,10);
+        if (currentDate.equals(time.substring(0,10))) return "(" + time.substring(11) + ")";
+        else return "(" + time + ")";
+    }
 }

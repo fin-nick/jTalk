@@ -17,7 +17,8 @@
 
 package net.ustyugov.jtalk.adapter;
 
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -82,33 +83,18 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
 
     public String getGroup() { return this.group; }
 
-    public void update(String account, String group, String nick, String searchString) {
-        JTalkService service = JTalkService.getInstance();
+    public void update(String group, String nick, List<MessageItem> messages, String searchString) {
         this.group = group;
         this.nick = nick;
         this.searchString = searchString;
         clear();
-
-        List<MessageItem> list = new ArrayList<MessageItem>();
-        if (service.getMucMessagesHash(account).containsKey(group)) {
-            list = service.getMucMessagesHash(account).get(group);
-        }
-
-        List<MessageItem> messages = new ArrayList<MessageItem>();
-        if (!prefs.getBoolean("ShowStatus", false)) {
-            for (MessageItem item : list) {
-                if (item.getType() == MessageItem.Type.message) {
-                    messages.add(item);
-                }
-            }
-        } else messages = list;
 
         for (MessageItem item : messages) {
             if (searchString.length() > 0) {
                 String name = item.getName();
                 String body = item.getBody();
                 MessageItem.Type type = item.getType();
-                String time = "(" + item.getTime() + ")";
+                String time = createTimeString(item.getTime());
                 if (type == MessageItem.Type.status) {
                     if (showtime) body = time + "  " + body;
                 } else {
@@ -138,23 +124,20 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
         }
 
         final MessageItem item = getItem(position);
-        String time = item.getTime();
+        String time = createTimeString(item.getTime());
         String body = item.getBody();
         String name = item.getName();
         String n    = item.getName();
         MessageItem.Type type = item.getType();
         final boolean collapsed = item.isCollapsed();
-        String t = null;
-        if (time != null) {
-            t = "(" + time + ")";
-            if (showtime && t.length() > 2) name = t + " " + name;
-        }
+
+        if (showtime) name = time + " " + name;
 
         String message;
         if (type == MessageItem.Type.status) message = name + " " + body;
         else {
             if (body.length() > 4 && body.substring(0, 3).equals("/me")) {
-                if (showtime && t.length() > 2) message = t + " * " + n + " " + body.substring(3);
+                if (showtime && time.length() > 2) message = time + " * " + n + " " + body.substring(3);
                 else message = " * " + n + " " + body.substring(3);
             } else {
                 message = name + ": " + body;
@@ -166,8 +149,8 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
         if (type == MessageItem.Type.status) {
             ssb.setSpan(new ForegroundColorSpan(0xFF239923), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         } else {
-            if (showtime && t.length() > 2) {
-                ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, t.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if (showtime && time.length() > 2) {
+                ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, time.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
             if (n.equals(nick)) {
                 int idx = message.indexOf(n);
@@ -313,5 +296,13 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
             outColor = 0xFFAA2323;
             inColor = 0xFF2323AA;
         }
+    }
+
+    private String createTimeString(String time) {
+        Date d = new Date();
+        java.text.DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+        String currentDate = df.format(d).substring(0,10);
+        if (currentDate.equals(time.substring(0,10))) return "(" + time.substring(11) + ")";
+        else return "(" + time + ")";
     }
 }

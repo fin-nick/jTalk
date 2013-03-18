@@ -32,7 +32,7 @@ public class ChangeConnectionReceiver extends BroadcastReceiver {
         if (service != null) {
             if (!nocon && service.getAllConnections().size() > 0 && !service.isAuthenticated()) {
                 service.connect();
-            } else if (nocon && service.getAllConnections().size() > 0 && service.isAuthenticated()) {
+            } else if (nocon && service.getAllConnections().size() > 0) {
                 service.disconnect(false);
             }
         }

@@ -33,11 +33,7 @@ import net.ustyugov.jtalk.activity.vcard.VCardActivity;
 import net.ustyugov.jtalk.adapter.*;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.db.MessageDbHelper;
-import net.ustyugov.jtalk.dialog.ChangeChatDialog;
-import net.ustyugov.jtalk.dialog.MessageMenuDialog;
-import net.ustyugov.jtalk.dialog.MucDialogs;
-import net.ustyugov.jtalk.dialog.RosterDialogs;
-import net.ustyugov.jtalk.dialog.SendToResourceDialog;
+import net.ustyugov.jtalk.dialog.*;
 import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.view.MyListView;
 
@@ -77,11 +73,12 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.MenuItem.OnActionExpandListener;
 import com.jtalk2.R;
 
-public class Chat extends SherlockActivity implements View.OnClickListener, OnScrollListener {
+public class Chat extends SherlockActivity implements View.OnClickListener, OnScrollListener, OnItemLongClickListener {
     public static final int REQUEST_TEMPLATES = 1;
 
     private boolean isMuc = false;
     private boolean isPrivate = false;
+    private boolean showStatuses = false;
     private MultiUserChat muc;
 
     private SharedPreferences prefs;
@@ -96,7 +93,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     private MyListView listView;
     private ListView chatsList;
     private ListView nickList;
-    private List<MessageItem> msgList;
+    private List<MessageItem> msgList = new ArrayList<MessageItem>();
     private EditText messageInput;
     private Button sendButton;
 
@@ -105,6 +102,8 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     private String resource;
     private String searchString = "";
     private boolean compose = false;
+    private int maxCount = 0;
+    private int maxMucCount = 0;
 
     private BroadcastReceiver textReceiver;
     private BroadcastReceiver finishReceiver;
@@ -123,6 +122,12 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         super.onCreate(icicle);
         service = JTalkService.getInstance();
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        showStatuses = prefs.getBoolean("ShowStatus", false);
+        try {
+            maxCount = Integer.parseInt(prefs.getString("MaxLogMessages", "0"));
+            maxMucCount = Integer.parseInt(prefs.getString("MaxMucMessages", "0"));
+        } catch (NumberFormatException ignored) {	}
+
         setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
 
         chatsSpinnerAdapter = new ChatsSpinnerAdapter(this);
@@ -206,7 +211,6 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 }
                 return true;
             }
-
         });
 
         listAdapter = new ChatAdapter(this, smiles);
@@ -295,12 +299,12 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
             muc = service.getConferencesHash(account).get(jid);
             messageInput.setHint("From " + StringUtils.parseName(account));
 
-            if (service.getMucMessagesHash(account).containsKey(jid)) {
-                msgList = service.getMucMessagesHash(account).get(jid);
-            } else msgList = new ArrayList<MessageItem>();
+//            if (service.getMucMessagesHash(account).containsKey(jid)) {
+//                msgList = service.getMucMessagesHash(account).get(jid);
+//            } else msgList = new ArrayList<MessageItem>();
 
             String group = listMucAdapter.getGroup();
-            listMucAdapter.update(account, jid, muc.getNickname(), searchString);
+//            listMucAdapter.update(account, jid, muc.getNickname(), searchString);
             if (listView.getAdapter() instanceof ChatAdapter) {
                 listView.setAdapter(listMucAdapter);
                 listView.setScroll(true);
@@ -318,21 +322,14 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 isPrivate = false;
             } else isPrivate = true;
 
-            if (resource.equals("")) resource = service.getResource(account, jid);
+            if (resource == null || resource.equals("")) resource = service.getResource(account, jid);
 
             if (resource != null && !resource.equals("")) {
                 messageInput.setHint("To " + resource + " from " + StringUtils.parseName(account));
             } else messageInput.setHint("From " + StringUtils.parseName(account));
 
-            if (service.getMessagesHash(account).containsKey(jid)) {
-                msgList = service.getMessagesHash(account).get(jid);
-            } else {
-                msgList = new ArrayList<MessageItem>();
-                loadStory(false);
-            }
-
             String j = listAdapter.getJid();
-            listAdapter.update(account, jid, searchString);
+            listAdapter.update(jid, msgList, searchString);
             if (listView.getAdapter() instanceof MucChatAdapter) {
                 listView.setAdapter(listAdapter);
                 listView.setScroll(true);
@@ -342,11 +339,16 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
             }
         }
 
+        if (!service.getActiveChats(account).contains(jid)) {
+            setLastMessagesCounter();
+            service.addActiveChat(account, jid);
+        }
+
         service.setCurrentJid(jid);
         service.removeUnreadMesage(account, jid);
         service.removeHighlight(account, jid);
 
-        listView.setOnItemLongClickListener(new MessageMenuDialog(this, account, jid));
+        listView.setOnItemLongClickListener(this);
 
         usersAdapter = new MucUserAdapter(this, account, jid);
         nickList.setAdapter(usersAdapter);
@@ -422,6 +424,8 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 item.expandActionView();
             }
         }
+
+        updateList();
     }
 
     @Override
@@ -432,6 +436,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         if (!isMuc)  {
             service.setChatState(account, jid, ChatState.active);
             service.setResource(account, jid, resource);
+            if (msgList.isEmpty()) service.removeActiveChat(account, jid);
         }
         service.setCurrentJid("me");
         service.setText(jid, messageInput.getText().toString());
@@ -442,9 +447,9 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     public void onDestroy() {
         super.onDestroy();
         if (msgList.isEmpty()) {
-            clearChat();
             if (!isMuc) service.setChatState(account, jid, ChatState.gone);
         }
+        msgList.clear();
         jid = null;
         account = null;
     }
@@ -594,8 +599,8 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 break;
             case R.id.sidebar:
                 boolean showSidebar = prefs.getBoolean("EnabledSidebar", true);
-                if (showSidebar) service.setPreference(this, "EnabledSidebar", false);
-                else service.setPreference(this, "EnabledSidebar", true);
+                if (showSidebar) service.setPreference("EnabledSidebar", false);
+                else service.setPreference("EnabledSidebar", true);
                 updateChats();
                 break;
             case R.id.info:
@@ -614,16 +619,13 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 MucDialogs.inviteDialog(this, account, jid);
                 break;
             case R.id.history:
-                loadStory(true);
+                loadStory();
                 updateList();
                 break;
             case R.id.delete_history:
                 getContentResolver().delete(JTalkProvider.CONTENT_URI, "jid = '" + jid + "'", null);
                 msgList.clear();
-                if (service.getMessagesHash(account).containsKey(jid)) {
-                    service.getMessagesHash(account).remove(jid);
-                    updateList();
-                }
+                updateList();
                 break;
             case R.id.chats:
                 ChangeChatDialog.show(this);
@@ -676,6 +678,93 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         }
     }
 
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+        CharSequence[] items;
+        final MessageItem message = (MessageItem) parent.getAdapter().getItem(position);
+
+        if (message.getName().equals(getResources().getString(R.string.Me))) {
+            items = new CharSequence[6];
+            items[4] = getString(R.string.Edit);
+        }
+        else if (message.containsCaptcha()) {
+            items = new CharSequence[6];
+            items[4] = "Captcha";
+        }
+        else if (service.getConferencesHash(account).containsKey(jid)) {
+            items = new CharSequence[6];
+            items[4] = getString(R.string.Reply);
+        }
+        else items = new CharSequence[5];
+
+        if (message.isSelected()) items[0] = getString(R.string.DeselectMessage);
+        else items[0] = getString(R.string.SelectMessage);
+        items[1] = getString(R.string.Quote);
+        items[2] = getString(R.string.Copy);
+        items[3] = getString(R.string.SelectText);
+        items[items.length-1] = getString(R.string.DeselectAllMessages);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(Chat.this);
+        builder.setTitle(R.string.Actions);
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case 0:
+                        message.select(!message.isSelected());
+                        sendBroadcast(new Intent(Constants.RECEIVED));
+                        break;
+                    case 1:
+                        MessageDialogs.QuoteDialog(Chat.this, msgList, position);
+                        break;
+                    case 2:
+                        MessageDialogs.CopyDialog(Chat.this, msgList, position);
+                        break;
+                    case 3:
+                        MessageDialogs.SelectTextDialog(Chat.this, message);
+                        break;
+                    case 4:
+                        if (message.containsCaptcha()) {
+                            String id = message.getId();
+
+                            JTalkService.getInstance().addDataForm(id, message.getForm());
+                            Intent in = new Intent(Chat.this, DataFormActivity.class);
+                            in.putExtra("id", id);
+                            in.putExtra("cap", true);
+                            in.putExtra("jid", message.getName());
+                            in.putExtra("bob", message.getBob().getData());
+                            in.putExtra("cid", message.getBob().getCid());
+                            startActivity(in);
+                            break;
+                        } else if (message.getName().equals(getString(R.string.Me))) {
+                            MessageDialogs.EditMessageDialog(Chat.this, account, message, jid);
+                            break;
+                        } else if (service.getConferencesHash(account).containsKey(jid)) {
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(Chat.this);
+                            String separator = prefs.getString("nickSeparator", ", ");
+
+                            Intent intent = new Intent(Constants.PASTE_TEXT);
+                            intent.putExtra("text", message.getName() + separator);
+                            sendBroadcast(intent);
+                            break;
+                        } else {
+
+                        }
+                    case 5:
+                        for (MessageItem item : msgList) {
+                            if (item.isSelected()) {
+                                item.select(false);
+                            }
+                        }
+                        sendBroadcast(new Intent(Constants.RECEIVED));
+                        break;
+                }
+            }
+        });
+        builder.create().show();
+        return true;
+    }
+
     private void updateMessage(String id, String body) {
         for (MessageItem item : msgList) {
             if (item.getType() == MessageItem.Type.message) {
@@ -690,19 +779,52 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
 
     private void updateList() {
         boolean scroll = listView.isScroll();
+        int count = service.getMsgCount(jid);
+        if (isMuc) {
+            if (maxMucCount > 0) count = maxMucCount;
+        } else {
+            if (maxCount > 0) count = maxCount;
+        }
+
+        msgList.clear();
+        Cursor cursor;
+        if (showStatuses) {
+            cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "'", null, MessageDbHelper._ID);
+        } else {
+            cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "' AND type = 'message'", null, MessageDbHelper._ID);
+        }
+
+        if (cursor != null && cursor.getCount() > 0 && count > 0) {
+            if (cursor.getCount() > count) {
+                cursor.moveToPosition(cursor.getCount()-count);
+            } else cursor.moveToFirst();
+
+            do {
+                String id = cursor.getString(cursor.getColumnIndex(MessageDbHelper.ID));
+                String nick = cursor.getString(cursor.getColumnIndex(MessageDbHelper.NICK));
+                String type = cursor.getString(cursor.getColumnIndex(MessageDbHelper.TYPE));
+                String stamp = cursor.getString(cursor.getColumnIndex(MessageDbHelper.STAMP));
+                String body = cursor.getString(cursor.getColumnIndex(MessageDbHelper.BODY));
+                boolean received = Boolean.valueOf(cursor.getString(cursor.getColumnIndex(MessageDbHelper.RECEIVED)));
+
+                MessageItem item = new MessageItem(account, jid);
+                item.setId(id);
+                item.setName(nick);
+                item.setType(MessageItem.Type.valueOf(type));
+                item.setTime(stamp);
+                item.setBody(body);
+                item.setReceived(received);
+
+                msgList.add(item);
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
 
         if (isMuc) {
-            if (service.getMucMessagesHash(account).containsKey(jid)) {
-                msgList = service.getMucMessagesHash(account).get(jid);
-            } else msgList = new ArrayList<MessageItem>();
-
-            listMucAdapter.update(account, jid, muc.getNickname(), searchString);
+            listMucAdapter.update(jid, muc.getNickname(), msgList, searchString);
             listMucAdapter.notifyDataSetChanged();
         } else {
-            if (service.getMessagesHash(account).containsKey(jid)) {
-                msgList = service.getMessagesHash(account).get(jid);
-            }
-            listAdapter.update(account, jid, searchString);
+            listAdapter.update(jid, msgList, searchString);
             listAdapter.notifyDataSetChanged();
         }
 
@@ -805,8 +927,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         receivedReceiver =  new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (!isMuc) listAdapter.notifyDataSetChanged();
-                else listMucAdapter.notifyDataSetChanged();
+                if (!isMuc) updateList();
             }
         };
 
@@ -876,7 +997,6 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
             else if (resource.length() > 0) to = jid + "/" + resource;
             service.sendMessage(account, to, message);
         }
-        updateList();
     }
 
     public void onScrollStateChanged(AbsListView view, int scrollState) { }
@@ -885,58 +1005,56 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         else listView.setScroll(false);
     }
 
-    private void loadStory(boolean all) {
-        msgList.clear();
+    private void loadStory() {
         Cursor cursor;
-        if (all) {
+        if (showStatuses) {
             cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "'", null, MessageDbHelper._ID);
-            if (cursor != null && cursor.getCount() > 0) cursor.moveToFirst();
-        }
-        else {
+        } else {
             cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "' AND type = 'message'", null, MessageDbHelper._ID);
-            if (cursor != null) {
-                if (cursor.getCount() > 5) {
-                    cursor.moveToLast();
-                    cursor.move(-5);
-                } else cursor.moveToFirst();
-            }
         }
         if (cursor != null && cursor.getCount() > 0) {
-            do {
-                String id = cursor.getString(cursor.getColumnIndex(MessageDbHelper.ID));
-                String nick = cursor.getString(cursor.getColumnIndex(MessageDbHelper.NICK));
-                String type = cursor.getString(cursor.getColumnIndex(MessageDbHelper.TYPE));
-                String stamp = cursor.getString(cursor.getColumnIndex(MessageDbHelper.STAMP));
-                String body = cursor.getString(cursor.getColumnIndex(MessageDbHelper.BODY));
-                boolean received = Boolean.valueOf(cursor.getString(cursor.getColumnIndex(MessageDbHelper.RECEIVED)));
-
-                MessageItem item = new MessageItem(account, jid);
-                item.setId(id);
-                item.setName(nick);
-                item.setType(MessageItem.Type.valueOf(type));
-                item.setTime(stamp);
-                item.setBody(body);
-                item.setReceived(received);
-
-                msgList.add(item);
-            } while (cursor.moveToNext());
-        }
-        service.getMessagesHash(account).put(jid, msgList);
-    }
-
-    private void clearChat() {
-        msgList.clear();
-        if (service.getMessagesHash(account).containsKey(jid)) {
-            service.getMessagesHash(account).remove(jid);
-        }
-        if (service.getMucMessagesHash(account).containsKey(jid)) {
-            service.getMucMessagesHash(account).remove(jid);
+            service.setMsgCounter(jid, cursor.getCount());
+            cursor.close();
         }
         updateList();
     }
 
+    private void setLastMessagesCounter() {
+        int index = 5;
+        int i = 0;
+        Cursor cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "'", null, MessageDbHelper._ID);
+        if (cursor != null) {
+            if (cursor.getCount() > 5) {
+                cursor.moveToLast();
+
+                do {
+                    String type = cursor.getString(cursor.getColumnIndex(MessageDbHelper.TYPE));
+                    if (MessageItem.Type.valueOf(type) == MessageItem.Type.status) index++;
+                    else i++;
+                    if (i == 5) {
+                        cursor.close();
+                        service.setMsgCounter(jid, index);
+                        return;
+                    }
+                } while (cursor.moveToPrevious());
+                cursor.close();
+            } else {
+                cursor.close();
+                service.setMsgCounter(jid, cursor.getCount());
+            }
+        }
+    }
+
+    private void clearChat() {
+        service.setMsgCounter(jid, 0);
+//        if (service.getMucMessagesHash(account).containsKey(jid)) {
+//            service.getMucMessagesHash(account).remove(jid);
+//        }
+        updateList();
+    }
+
     private void closeChat() {
-        clearChat();
+        service.removeActiveChat(account, jid);
         finish();
     }
 }

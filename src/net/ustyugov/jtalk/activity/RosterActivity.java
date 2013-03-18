@@ -211,8 +211,6 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
             menu.findItem(R.id.muc).setEnabled(service.isAuthenticated());
             menu.findItem(R.id.disco).setEnabled(service.isAuthenticated());
             menu.findItem(R.id.offline).setTitle(prefs.getBoolean("hideOffline", false) ? R.string.ShowOfflineContacts : R.string.HideOfflineContacts);
-            if (!service.getMessages().isEmpty() || !service.getConferences().isEmpty()) menu.findItem(R.id.chats).setEnabled(true);
-            else menu.findItem(R.id.chats).setEnabled(false);
 
             if (Build.VERSION.SDK_INT >= 8) {
                 MenuItem.OnActionExpandListener listener = new MenuItem.OnActionExpandListener() {
@@ -263,8 +261,8 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
     		case R.id.offline:
-    			if (prefs.getBoolean("hideOffline", false)) service.setPreference(this, "hideOffline", false);
-    			else service.setPreference(this, "hideOffline", true);
+    			if (prefs.getBoolean("hideOffline", false)) service.setPreference("hideOffline", false);
+    			else service.setPreference("hideOffline", true);
     			updateMenu();
     			updateList();
     			break;
@@ -309,6 +307,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
   	    		finish();
   	    		Notify.cancelAll(this);
   	    		service.disconnect(true);
+                stopService(new Intent(this, JTalkService.class));
   	    		break;
   	    	default:
   	    		return false;

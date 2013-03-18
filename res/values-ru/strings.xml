@@ -94,7 +94,7 @@
     <string name="SortByStatuses">Сортировать по статусам</string>
     <string name="ShowSelfResources">Показывать свои ресурсы</string>
     <string name="HideKeyboard">Прятать клавиатуру при отправке</string>
-    <string name="MaxMucMessages">Число сообщений в логе</string>
+    <string name="MaxMessages">Число сообщений в логе</string>
     <string name="AddAfterNick">Добавлять после ника</string>
     <string name="NumberOfCharacters">Число символов</string>
     <string name="Columns">Число колонок</string>
@@ -103,7 +103,7 @@
     <string name="CompactMode">Компактный режим</string>
     <string name="UseColors">Использовать цвета</string>
     <string name="OnlyInMUC">Только в конференциях</string>
-    <string name="ShowActiveChatsGroup">Группа \"Активные чаты\"</string>
+    <string name="ShowActiveChatsGroup">Группа \"Открытые чаты\"</string>
     <string name="ShowActiveContacts">Дублировать открытые чаты</string>
     
     <!--  Menus -->

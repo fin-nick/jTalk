@@ -67,21 +67,17 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 			do {
 				String account = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
 				XMPPConnection connection = service.getConnection(account);
-				
-				Enumeration<String> chatEnum = service.getMessagesHash(account).keys();
-				while (chatEnum.hasMoreElements()) {
-					if (service != null && service.getRoster(account) != null && connection != null && connection.isAuthenticated()) {
-						String name = chatEnum.nextElement();
-						if (!service.getConferencesHash(account).containsKey(name)) {
-							Roster roster = service.getRoster(account);
-							RosterEntry entry = roster.getEntry(name);
-							if (entry == null) entry = new RosterEntry(name, name, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-							RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
-							add(item);
-						}
-					}
-				}
-				
+
+                for(String jid : service.getActiveChats(account)) {
+                    if (!service.getConferencesHash(account).containsKey(jid)) {
+                        Roster roster = service.getRoster(account);
+                        RosterEntry entry = roster.getEntry(jid);
+                        if (entry == null) entry = new RosterEntry(jid, jid, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+                        RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
+                        add(item);
+                    }
+                }
+
 				Enumeration<String> groupEnum = service.getConferencesHash(account).keys();
 				while(groupEnum.hasMoreElements()) {
 					String name = groupEnum.nextElement();

@@ -44,10 +44,8 @@ public class ConListener implements ConnectionListener {
 	public void connectionClosedOnError(Exception e) {
         if (!service.isAuthenticated()) Notify.offlineNotify("Connection closed");
         service.leaveAllRooms(account);
-        
-        context.sendBroadcast(new Intent(Constants.UPDATE));
         service.setState(account, "Connection closed");
-//        service.reconnect(account);
+        context.sendBroadcast(new Intent(Constants.UPDATE));
 	}
 
 	public void reconnectingIn(int seconds) { }

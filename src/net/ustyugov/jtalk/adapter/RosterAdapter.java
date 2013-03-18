@@ -118,16 +118,17 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                     }
 
                     // Active chats
-                    if (prefs.getBoolean("ShowActiveChatsGroup", false) && service.getMessagesHash(account).size() > 0) {
+                    if (prefs.getBoolean("ShowActiveChatsGroup", false) && service.getActiveChats(account).size() > 0) {
                         RosterItem group = new RosterItem(account, RosterItem.Type.group, null);
                         group.setName(service.getString(R.string.ActiveChats));
                         add(group);
 
-                        activeChats = Collections.list(service.getMessagesHash(account).keys());
+                        activeChats = service.getActiveChats(account);
                         if (!service.getCollapsedGroups().contains(service.getString(R.string.ActiveChats))) {
                             for (String jid: activeChats) {
                                 if (!service.getConferencesHash(account).containsKey(jid)) {
                                     RosterEntry entry = roster.getEntry(jid);
+                                    if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
                                     if (entry == null) entry = new RosterEntry(jid, jid, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
                                     RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
                                     add(item);
@@ -153,19 +154,21 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                     }
 
                     // Add privates
-                    List<String> privates = service.getPrivateMessages(account);
-                    if (!privates.isEmpty()) {
-                        RosterItem group = new RosterItem(account, RosterItem.Type.group, null);
-                        group.setName(service.getString(R.string.Privates));
-                        add(group);
+                    if (!prefs.getBoolean("ShowActiveChatsGroup", false)) {
+                        List<String> privates = service.getPrivateMessages(account);
+                        if (!privates.isEmpty()) {
+                            RosterItem group = new RosterItem(account, RosterItem.Type.group, null);
+                            group.setName(service.getString(R.string.Privates));
+                            add(group);
 
-                        if (!service.getCollapsedGroups().contains(service.getString(R.string.Privates))) {
-                            for (String jid : privates) {
-                                RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                                RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
-                                add(item);
-                            }
-                        } else group.setCollapsed(true);
+                            if (!service.getCollapsedGroups().contains(service.getString(R.string.Privates))) {
+                                for (String jid : privates) {
+                                    RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+                                    RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
+                                    add(item);
+                                }
+                            } else group.setCollapsed(true);
+                        }
                     }
 
                     Collection<RosterGroup> groups = roster.getGroups();
@@ -363,8 +366,8 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 			}
 			
 	        holder.name.setText(name);
-	        if (service.getMessagesHash(account).containsKey(jid)) {
-				if (service.getMessagesHash(account).get(jid).size() > 0) holder.name.setTypeface(Typeface.DEFAULT_BOLD);
+	        if (service.getActiveChats(account).contains(jid)) {
+				holder.name.setTypeface(Typeface.DEFAULT_BOLD);
 			} else holder.name.setTypeface(Typeface.DEFAULT);
 	        
 	        if (prefs.getBoolean("ShowStatuses", false)) {

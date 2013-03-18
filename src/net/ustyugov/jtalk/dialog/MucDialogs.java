@@ -234,8 +234,8 @@ public class MucDialogs {
 				
 				if (group.length() > 0) {
 					if (nick == null || nick.length() < 1) nick = StringUtils.parseName(service.getConnection(account).getUser());
-					service.setPreference(activity, "lastGroup", group);
-  	  				service.setPreference(activity, "lastNick", nick);
+					service.setPreference("lastGroup", group);
+  	  				service.setPreference("lastNick", nick);
   	  				service.joinRoom(account, group, nick, pass);
   	  				
 					Intent i = new Intent(Constants.PRESENCE_CHANGED);

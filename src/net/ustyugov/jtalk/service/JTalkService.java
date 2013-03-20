@@ -120,25 +120,26 @@ import android.util.Log;
 import com.jtalk2.R;
  
 public class JTalkService extends Service {
+    private boolean started = false;
 	private static JTalkService js = new JTalkService();
-    private static List<String> collapsedGroups = new ArrayList<String>();
-    private static List<String> composeList = new ArrayList<String>();
-    private static Hashtable<String, List<String>> activeChats = new Hashtable<String, List<String>>();
+    private List<String> collapsedGroups = new ArrayList<String>();
+    private List<String> composeList = new ArrayList<String>();
+    private Hashtable<String, List<String>> activeChats = new Hashtable<String, List<String>>();
     private Hashtable<String, Integer> msgCounter = new Hashtable<String, Integer>();
-    private static List<MessageItem> unreadMessages = new ArrayList<MessageItem>();
-    private static Hashtable<String, List<String>> mucHighlightsList = new Hashtable<String, List<String>>();
-    private static Hashtable<String, String> textHash = new Hashtable<String, String>();
-    private static Hashtable<String, String> stateHash = new Hashtable<String, String>();
-    private static Hashtable<String, Hashtable<String, String>> resourceHash = new Hashtable<String, Hashtable<String, String>>();
-    private static Hashtable<String, Integer> positionHash = new Hashtable<String, Integer>();
-    private static Hashtable<String, Conference> joinedConferences = new Hashtable<String, Conference>();
-    private static Hashtable<String, Hashtable<String, MultiUserChat>> conferences = new Hashtable<String, Hashtable<String, MultiUserChat>>();
-    private static Hashtable<String, Bitmap> avatarsHash = new Hashtable<String, Bitmap>();
-    private static Hashtable<String, Hashtable<String, Integer>> messagesCount = new Hashtable<String, Hashtable<String, Integer>>();
-    private static Hashtable<String, DataForm> formHash = new Hashtable<String, DataForm>(); 
-    private static Hashtable<String, XMPPConnection> connections = new Hashtable<String, XMPPConnection>();
-    private static Hashtable<String, VCard> vcards = new Hashtable<String, VCard>();
-    private static Hashtable<String, ConListener> conListeners = new Hashtable<String, ConListener>();
+    private List<MessageItem> unreadMessages = new ArrayList<MessageItem>();
+    private Hashtable<String, List<String>> mucHighlightsList = new Hashtable<String, List<String>>();
+    private Hashtable<String, String> textHash = new Hashtable<String, String>();
+    private Hashtable<String, String> stateHash = new Hashtable<String, String>();
+    private Hashtable<String, Hashtable<String, String>> resourceHash = new Hashtable<String, Hashtable<String, String>>();
+    private Hashtable<String, Integer> positionHash = new Hashtable<String, Integer>();
+    private Hashtable<String, Conference> joinedConferences = new Hashtable<String, Conference>();
+    private Hashtable<String, Hashtable<String, MultiUserChat>> conferences = new Hashtable<String, Hashtable<String, MultiUserChat>>();
+    private Hashtable<String, Bitmap> avatarsHash = new Hashtable<String, Bitmap>();
+    private Hashtable<String, Hashtable<String, Integer>> messagesCount = new Hashtable<String, Hashtable<String, Integer>>();
+    private Hashtable<String, DataForm> formHash = new Hashtable<String, DataForm>();
+    private Hashtable<String, XMPPConnection> connections = new Hashtable<String, XMPPConnection>();
+    private Hashtable<String, VCard> vcards = new Hashtable<String, VCard>();
+    private Hashtable<String, ConListener> conListeners = new Hashtable<String, ConListener>();
     private Hashtable<String, ConnectionTask> connectionTasks = new Hashtable<String, ConnectionTask>();
     private String currentJid = "me";
     private String sidebarMode = "users";
@@ -282,7 +283,7 @@ public class JTalkService extends Service {
     public String getGlobalState() { return globalState; }
     public void setGlobalState(String s) { globalState = s; }
     public Roster getRoster(String account) {
-    	if (connections.containsKey(account)) return connections.get(account).getRoster();
+    	if (connections != null && connections.containsKey(account)) return connections.get(account).getRoster();
     	else return null;
     }
     public List<String> getCollapsedGroups() { return collapsedGroups; }
@@ -681,6 +682,8 @@ public class JTalkService extends Service {
         WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 		wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "jTalk");
 
+        started = true;
+
         Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
         if (cursor != null && cursor.getCount() > 0) {
             connect();
@@ -694,19 +697,22 @@ public class JTalkService extends Service {
 
     @Override
     public void onDestroy() {
-    	stopForeground(true);
-
     	try {
     		unregisterReceiver(updateReceiver);
     		unregisterReceiver(connectionReceiver);
     	} catch(Exception ignored) { }
-        
+
         Notify.cancelAll(this);
+        stopForeground(true);
+        disconnect();
         clearAll();
 //        updateWidget();
+        started = false;
     }
 
-    public void disconnect(final boolean exit) {
+    public void disconnect() {
+        if (!started) return;
+        if (wifiLock != null && wifiLock.isHeld()) wifiLock.release();
     	if (locationManager != null && locationListener != null) locationManager.removeUpdates(locationListener);
     	Collection<XMPPConnection> con = getAllConnections();
 		for (XMPPConnection connection: con) {
@@ -720,13 +726,10 @@ public class JTalkService extends Service {
             setState(account, getString(R.string.Disconnect));
             connections.remove(connection);
 		}
-        if (exit) {
-            if (wifiLock != null && wifiLock.isHeld()) wifiLock.release();
-            stopSelf();
-        }
     }
     
     public void disconnect(String account) {
+        if (!started) return;
         Log.e("Disconnect", account);
     	if (connections.containsKey(account)) {
             if (connectionTasks.containsKey(account)) {
@@ -745,19 +748,21 @@ public class JTalkService extends Service {
     }
     
     public void reconnect() {
+        if (!started) return;
     	globalState = getResources().getString(R.string.Reconnecting) + "...";
     	Intent i = new Intent(Constants.UPDATE);
     	sendBroadcast(i);
     	new Thread() {
     		@Override
     		public void run() {
-    			disconnect(false);
+    			disconnect();
     			connect();
     		}
     	}.start();
     }
     
     public void reconnect(final String account) {
+        if (!started) return;
         setState(account, getResources().getString(R.string.Reconnecting) + "...");
     	Intent i = new Intent(Constants.UPDATE);
     	sendBroadcast(i);
@@ -771,6 +776,7 @@ public class JTalkService extends Service {
     }
     
     public void connect() {
+        if (!started) return;
     	if (prefs.getBoolean("WifiLock", false)) wifiLock.acquire();
     	
 //		String text  = prefs.getString("currentStatus", "");
@@ -815,6 +821,7 @@ public class JTalkService extends Service {
     }
     
     public void connect(String account) {
+        if (!started) return;
     	Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.JID + " = '" + account + "'", null, null);
 		if (cursor != null && cursor.getCount() > 0) {
 			cursor.moveToFirst();

@@ -304,10 +304,9 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
   	    		if (prefs.getBoolean("DeleteHistory", false)) {
   	    			getContentResolver().delete(JTalkProvider.CONTENT_URI, null, null);
   	    		}
-  	    		finish();
   	    		Notify.cancelAll(this);
-  	    		service.disconnect(true);
                 stopService(new Intent(this, JTalkService.class));
+                finish();
   	    		break;
   	    	default:
   	    		return false;

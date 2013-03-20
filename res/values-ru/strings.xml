@@ -105,6 +105,7 @@
     <string name="OnlyInMUC">Только в конференциях</string>
     <string name="ShowActiveChatsGroup">Группа \"Открытые чаты\"</string>
     <string name="ShowActiveContacts">Дублировать открытые чаты</string>
+    <string name="NoMaxLines">Автовысота поля ввода</string>
     
     <!--  Menus -->
     <string name="Update">Обновить</string>

@@ -113,6 +113,7 @@
     <string name="OnlyInMUC">Use only in MUC</string>
     <string name="ShowActiveChatsGroup">Group \"Active chats\"</string>
     <string name="ShowActiveContacts">Show doubles of active chats</string>
+    <string name="NoMaxLines">Automatic height of message input</string>
 
     <!--  Menus -->
     <string name="Update">Update</string>

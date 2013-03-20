@@ -377,6 +377,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
 
         messageInput.setText(service.getText(jid));
         messageInput.setSelection(messageInput.getText().length());
+        if (!prefs.getBoolean("NoMaxLines", true)) messageInput.setMaxLines(3);
 
         if (service.isAuthenticated()) Notify.updateNotify();
         else Notify.offlineNotify(service.getGlobalState());

@@ -88,6 +88,10 @@
                 android:title="@string/MaxMessages"
                 android:defaultValue="0"
                 android:numeric="integer"/>
+        <CheckBoxPreference
+                android:key="NoMaxLines"
+                android:title="@string/NoMaxLines"
+                android:defaultValue="true" />
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/MUC">

@@ -40,8 +40,7 @@
 			android:layout_height="wrap_content"
 			android:layout_width="0dip"
 			android:layout_weight="1"
-            android:inputType="textCapSentences|textMultiLine"
-			android:maxLines="3"/>
+            android:inputType="textCapSentences|textMultiLine"/>
 	   <Button android:id="@+id/SendButton"
 	       android:layout_width="wrap_content" 
 	       android:layout_height="wrap_content" 

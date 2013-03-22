@@ -19,6 +19,7 @@ package net.ustyugov.jtalk.adapter;
 
 import java.util.Enumeration;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.IconPicker;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.db.AccountDbHelper;
@@ -126,12 +127,12 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 	       	label.setTextSize(fontSize);
 	        label.setText("Chats: " + (getCount()-1));
 	        if (prefs.getBoolean("DarkColors", false)) {
-    			label.setTextColor(0xFFFFFFFF);
-    			v.setBackgroundColor(0x77525252);
+    			label.setTextColor(Colors.PRIMARY_TEXT_DARK);
+    			v.setBackgroundColor(Colors.GROUP_BACKGROUND_DARK);
     		}
     		else {
-    			label.setTextColor(0xFF000000);
-    			v.setBackgroundColor(0xEEEEEEEE);
+    			label.setTextColor(Colors.PRIMARY_TEXT);
+    			v.setBackgroundColor(Colors.GROUP_BACKGROUND);
     		}
         } else {
         	RosterItem ri = getItem(position);
@@ -154,9 +155,9 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
             TextView label = (TextView) v.findViewById(R.id.name);
            	label.setTextSize(fontSize);
             label.setText(name);
-           	if (service.getComposeList().contains(jid)) label.setTextColor(0xFFAA2323);
-           	else if (service.isHighlight(account, jid)) label.setTextColor(0xFFAA2323);
-    		else label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFEEEEEE : 0xFF343434);
+           	if (service.getComposeList().contains(jid)) label.setTextColor(Colors.HIGHLIGHT_TEXT);
+           	else if (service.isHighlight(account, jid)) label.setTextColor(Colors.HIGHLIGHT_TEXT);
+    		else label.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
            	
             ImageView icon = (ImageView)v.findViewById(R.id.status_icon);
             if (minimal && service.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT && !isFragment) {
@@ -189,12 +190,12 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
             if (jid.equals(service.getCurrentJid())) {
             	label.setTypeface(Typeface.DEFAULT_BOLD);
             	if (prefs.getBoolean("DarkColors", false)) {
-        			label.setTextColor(0xFFFFFFFF);
-        			v.setBackgroundColor(0x77525252);
+        			label.setTextColor(Colors.PRIMARY_TEXT_DARK);
+        			v.setBackgroundColor(Colors.ENTRY_BACKGROUND_DARK);
         		}
         		else {
-        			label.setTextColor(0xFF000000);
-        			v.setBackgroundColor(0xEEEEEEEE);
+        			label.setTextColor(Colors.PRIMARY_TEXT);
+        			v.setBackgroundColor(Colors.ENTRY_BACKGROUND);
         		}
             } else {
             	label.setTypeface(Typeface.DEFAULT);

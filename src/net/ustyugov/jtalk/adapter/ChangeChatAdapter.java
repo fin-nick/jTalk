@@ -19,6 +19,7 @@ package net.ustyugov.jtalk.adapter;
 
 import java.util.Enumeration;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.IconPicker;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.db.AccountDbHelper;
@@ -104,11 +105,11 @@ public class ChangeChatAdapter extends ArrayAdapter<RosterItem> {
         }
         
         TextView label = (TextView) v.findViewById(R.id.item);
-        if (service.isHighlight(account, jid)) label.setTextColor(0xFFAA2323);
+        if (service.isHighlight(account, jid)) label.setTextColor(Colors.HIGHLIGHT_TEXT);
         else {
         	if (Build.VERSION.SDK_INT >= 11) {
-            	label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
-            } else label.setTextColor(0xFF232323);
+            	label.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
+            } else label.setTextColor(Colors.PRIMARY_TEXT);
         }
         
 		ImageView msg  = (ImageView) v.findViewById(R.id.msg);

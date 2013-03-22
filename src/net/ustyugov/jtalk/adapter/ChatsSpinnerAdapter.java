@@ -19,11 +19,8 @@ package net.ustyugov.jtalk.adapter;
 
 import java.util.Enumeration;
 
-import net.ustyugov.jtalk.Avatars;
-import net.ustyugov.jtalk.ClientIcons;
+import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.Holders.ItemHolder;
-import net.ustyugov.jtalk.IconPicker;
-import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -134,8 +131,8 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
         TextView label = (TextView) v.findViewById(android.R.id.text1);
         label.setText(name);
         if (service.getComposeList().contains(jid)) {
-    		label.setTextColor(0xFFFF0000);
-    	} else label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
+    		label.setTextColor(Colors.HIGHLIGHT_TEXT);
+    	} else label.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
         
         return v;
 	}
@@ -162,7 +159,7 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 			holder.name.setTextSize(fontSize);
 			holder.status = (TextView) convertView.findViewById(R.id.status);
 			holder.status.setTextSize(statusSize);
-			holder.status.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFBBBBBB : 0xFF555555);
+			holder.status.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.SECONDARY_TEXT_DARK : Colors.SECONDARY_TEXT);
 			
 			holder.counter = (TextView) convertView.findViewById(R.id.msg_counter);
 			holder.counter.setTextSize(fontSize);
@@ -196,8 +193,8 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 			Presence presence = service.getPresence(account, jid);
 			int count = service.getMessagesCount(account, jid);
 			
-			if (service.getComposeList().contains(jid)) holder.name.setTextColor(0xFFFF0000);
-			else holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFEEEEEE : 0xFF343434);
+			if (service.getComposeList().contains(jid)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
+			else holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
 	        holder.name.setText(name);
 	        holder.name.setTypeface(Typeface.DEFAULT_BOLD);
 	        
@@ -239,8 +236,8 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 				joined = muc.isJoined();
 			}
 			
-			if (service.isHighlight(account, name)) holder.name.setTextColor(0xFFFF0000);
-			else holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFEEEEEE : 0xFF343434);
+			if (service.isHighlight(account, name)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
+			else holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.SECONDARY_TEXT);
 	        holder.name.setText(StringUtils.parseName(name));
 	        holder.name.setTypeface(Typeface.DEFAULT_BOLD);
 	        

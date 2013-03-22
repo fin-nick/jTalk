@@ -270,6 +270,11 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 	        if (prefs.getBoolean("LoadAvatar", false)) {
 				Avatars.loadAvatar(activity, jid, holder.avatar);
 			}
+
+            if (prefs.getBoolean("ColorLines", false)) {
+                if ((position % 2) != 0) convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? Colors.ENTRY_BACKGROUND_DARK : Colors.ENTRY_BACKGROUND);
+                else convertView.setBackgroundColor(0x00000000);
+            }
 	        
 			if (iconPicker != null) holder.statusIcon.setImageBitmap(iconPicker.getIconByPresence(presence));
 			return convertView;

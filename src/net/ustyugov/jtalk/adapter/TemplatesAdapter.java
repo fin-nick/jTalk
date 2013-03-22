@@ -17,6 +17,7 @@
 
 package net.ustyugov.jtalk.adapter;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.IconPicker;
 import net.ustyugov.jtalk.Template;
 import net.ustyugov.jtalk.db.JTalkProvider;
@@ -83,7 +84,7 @@ public class TemplatesAdapter extends ArrayAdapter<Template> {
         	holder.icon.setImageBitmap(ip.getMsgBitmap());
         	
         	holder.label = (TextView) convertView.findViewById(R.id.name);
-        	holder.label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFEEEEEE : 0xFF343434);
+        	holder.label.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
             holder.label.setTextSize(fontSize);
         	
             holder.jid = (TextView) convertView.findViewById(R.id.status);

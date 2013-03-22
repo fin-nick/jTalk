@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Holders.GroupHolder;
 import net.ustyugov.jtalk.Holders.ItemHolder;
 import net.ustyugov.jtalk.IconPicker;
@@ -318,11 +319,11 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 				holder.messageIcon = (ImageView) convertView.findViewById(R.id.msg);
 	            holder.text = (TextView) convertView.findViewById(R.id.name);
 	            holder.text.setTextSize(fontSize);
-	            holder.text.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
+	            holder.text.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
 	            holder.state = (ImageView) convertView.findViewById(R.id.state);
 	            holder.state.setVisibility(View.GONE);
 	            convertView.setTag(holder);
-	            convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0x77525252 : 0xEEEEEEEE);
+	            convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? Colors.GROUP_BACKGROUND_DARK : Colors.GROUP_BACKGROUND);
 			} else {
 				holder = (GroupHolder) convertView.getTag();
 			}
@@ -378,8 +379,8 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 			
 			ItemHolder holder = (ItemHolder) convertView.getTag();
 			holder.name.setText(name);
-			if (service.getComposeList().contains(jid)) holder.name.setTextColor(0xFFAA2323);
-			else holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFEEEEEE : 0xFF343434);
+			if (service.getComposeList().contains(jid)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
+			else holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
 			
 			if (service.getActiveChats(account).contains(jid)) {
 				holder.name.setTypeface(Typeface.DEFAULT_BOLD);
@@ -397,13 +398,13 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 	        if (color) {
 	        	if (type == Presence.Type.available) {
 	       			if(mode == Presence.Mode.away) {
-	       				holder.name.setTextColor(0xFF22bcef);
+	       				holder.name.setTextColor(Colors.STATUS_AWAY);
 	       			} else if (mode == Presence.Mode.xa) {
-	       				holder.name.setTextColor(0xFF3c788c);
+	       				holder.name.setTextColor(Colors.STATUS_XA);
 	       			} else if (mode == Presence.Mode.dnd) {
-	       				holder.name.setTextColor(0xFFee0000);
+	       				holder.name.setTextColor(Colors.STATUS_DND);
 	       			} else if (mode == Presence.Mode.chat) {
-	       				holder.name.setTextColor(0xFF008e00);
+	       				holder.name.setTextColor(Colors.STATUS_CHAT);
 	       			}
 	       		}
 	        }

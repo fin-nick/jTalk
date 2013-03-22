@@ -19,6 +19,7 @@ package net.ustyugov.jtalk.adapter;
 
 import java.util.List;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.DiscoItem;
 
 import com.jtalk2.R;
@@ -97,12 +98,12 @@ public class DiscoveryAdapter extends ArrayAdapter<DiscoItem>{
 		if (node != null) id.setText(id.getText() + " (" + node + ")");
 		
 		if (prefs.getBoolean("DarkColors", false)) {
-        	label.setTextColor(0xFFEEEEEE);
-        	id.setTextColor(0xFFBBBBBB);
+        	label.setTextColor(Colors.PRIMARY_TEXT_DARK);
+        	id.setTextColor(Colors.SECONDARY_TEXT_DARK);
         }
 		else {
-			label.setTextColor(0xFF222222);
-			id.setTextColor(0xFF343434);
+			label.setTextColor(Colors.PRIMARY_TEXT);
+			id.setTextColor(Colors.SECONDARY_TEXT);
 		}
 
 		return v;

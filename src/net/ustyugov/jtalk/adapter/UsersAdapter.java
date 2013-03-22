@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.IconPicker;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.SortList;
@@ -93,8 +94,8 @@ public class UsersAdapter extends ArrayAdapter<RosterItem> {
         TextView label = (TextView) v.findViewById(R.id.item);
         label.setText(nick);
         if (Build.VERSION.SDK_INT >= 11) {
-        	label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
-        } else label.setTextColor(0xFF232323);
+        	label.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
+        } else label.setTextColor(Colors.PRIMARY_TEXT);
         
 		Presence presence = service.getRoster(account).getPresenceResource(group + "/" + nick);
       	ImageView icon = (ImageView)v.findViewById(R.id.status);

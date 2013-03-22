@@ -19,6 +19,7 @@ package net.ustyugov.jtalk.adapter;
 
 import java.util.List;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.IconPicker;
 import net.ustyugov.jtalk.service.JTalkService;
 
@@ -71,7 +72,7 @@ public class PrivacyRulesAdapter extends ArrayAdapter<PrivacyItem> {
             
             holder = new ViewHolder();
             holder.name = (TextView) convertView.findViewById(R.id.item);
-            holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
+            holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
             holder.icon = (ImageView) convertView.findViewById(R.id.status);
             convertView.setTag(holder);
         } else {

@@ -106,6 +106,7 @@
     <string name="ShowActiveChatsGroup">Группа \"Открытые чаты\"</string>
     <string name="ShowActiveContacts">Дублировать открытые чаты</string>
     <string name="NoMaxLines">Автовысота поля ввода</string>
+    <string name="ColorLines">Цветные линии</string>
     
     <!--  Menus -->
     <string name="Update">Обновить</string>

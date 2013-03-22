@@ -47,6 +47,10 @@
                 android:key="SelfContact"
                 android:title="@string/ShowSelfResources"
                 android:defaultValue="true" />
+        <CheckBoxPreference
+                android:key="ColorLines"
+                android:title="@string/ColorLines"
+                android:defaultValue="false" />
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/Chat">

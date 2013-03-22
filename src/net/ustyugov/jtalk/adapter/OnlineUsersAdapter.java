@@ -19,6 +19,7 @@ package net.ustyugov.jtalk.adapter;
 
 import java.util.Collection;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.IconPicker;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -90,7 +91,7 @@ public class OnlineUsersAdapter extends ArrayAdapter<RosterItem> {
         TextView label = (TextView) v.findViewById(R.id.item);
         label.setText(name);
         if (Build.VERSION.SDK_INT >= 11) {
-        	label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
+        	label.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
         } else label.setTextColor(0xFF232323);
         
 		Presence presence = service.getRoster(item.getAccount()).getPresence(entry.getUser());

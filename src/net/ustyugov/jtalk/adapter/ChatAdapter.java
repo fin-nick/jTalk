@@ -22,6 +22,7 @@ import java.util.*;
 
 import android.text.format.DateFormat;
 import android.util.Log;
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.Smiles;
@@ -169,7 +170,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
                 int start = -1;
                 while ((start = ssb.toString().toLowerCase().indexOf(searchString.toLowerCase(), from)) != -1) {
                     from = start + searchString.length();
-                    ssb.setSpan(new BackgroundColorSpan(Constants.SEARCH_BACKGROUND), start, start + searchString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    ssb.setSpan(new BackgroundColorSpan(Colors.SEARCH_BACKGROUND), start, start + searchString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
             }
         }
@@ -248,7 +249,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         
         textView.setTextSize(fontSize);
 
-        if (item.isSelected()) convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF444444 : 0xFFCCCCCC);
+        if (item.isSelected()) convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? Colors.SELECTED_MESSAGE_DARK : Colors.SELECTED_MESSAGE);
         else convertView.setBackgroundColor(0X00000000);
         return convertView;
     }
@@ -275,16 +276,16 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
 	
 	private void applyColors() {
 		if (prefs.getBoolean("DarkColors", false)) {
-        	textColor = 0xFFEEEEEE;
-        	linkColor = 0xFF5180b7;
-        	inColor = 0xFFAA2323;
-        	outColor = 0xFF5180b7;
+        	textColor = Colors.PRIMARY_TEXT_DARK;
+        	linkColor = Colors.LINK_DARK;
+        	inColor = Colors.INBOX_MESSAGE_DARK;
+        	outColor = Colors.OUTBOX_MESSAGE_DARK;
         }
 		else {
-			textColor = 0xFF232323;
-			linkColor = 0xFF2323AA;
-		    inColor = 0xFFAA2323;
-		    outColor = 0xFF2323AA;
+			textColor = Colors.PRIMARY_TEXT;
+			linkColor = Colors.LINK;
+		    inColor = Colors.INBOX_MESSAGE;
+		    outColor = Colors.OUTBOX_MESSAGE;
 		}
 	}
 

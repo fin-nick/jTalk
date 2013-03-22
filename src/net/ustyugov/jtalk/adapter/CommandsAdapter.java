@@ -17,6 +17,7 @@
 
 package net.ustyugov.jtalk.adapter;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.service.JTalkService;
 
 import org.jivesoftware.smackx.commands.AdHocCommandManager;
@@ -71,7 +72,7 @@ public class CommandsAdapter extends ArrayAdapter<Item> {
         }
         
         TextView label = (TextView) v.findViewById(R.id.item);
-        label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
+        label.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
         label.setText(name);
         
         ImageView icon = (ImageView)v.findViewById(R.id.status);

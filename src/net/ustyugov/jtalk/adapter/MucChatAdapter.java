@@ -25,6 +25,7 @@ import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.Smiles;
@@ -147,7 +148,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
         SpannableStringBuilder ssb = new SpannableStringBuilder();
         ssb.append(message);
         if (type == MessageItem.Type.status) {
-            ssb.setSpan(new ForegroundColorSpan(0xFF239923), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new ForegroundColorSpan(Colors.STATUS_MESSAGE), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         } else {
             if (showtime && time.length() > 2) {
                 ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, time.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -181,7 +182,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
                 int start = -1;
                 while ((start = ssb.toString().toLowerCase().indexOf(searchString.toLowerCase(), from)) != -1) {
                     from = start + searchString.length();
-                    ssb.setSpan(new BackgroundColorSpan(Constants.SEARCH_BACKGROUND), start, start + searchString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    ssb.setSpan(new BackgroundColorSpan(Colors.SEARCH_BACKGROUND), start, start + searchString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
             }
         }
@@ -257,7 +258,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
             }
         }
 
-        if (item.isSelected()) v.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF444444 : 0xFFCCCCCC);
+        if (item.isSelected()) v.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? Colors.SELECTED_MESSAGE_DARK : Colors.SELECTED_MESSAGE);
         else v.setBackgroundColor(0X00000000);
         return v;
     }
@@ -285,16 +286,16 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
 
     private void applyColors() {
         if (prefs.getBoolean("DarkColors", false)) {
-            textColor = 0xFFEEEEEE;
-            linkColor = 0xFF5180b7;
-            outColor = 0xFFAA2323;
-            inColor = 0xFF5180b7;
+            textColor = Colors.PRIMARY_TEXT_DARK;
+            linkColor = Colors.LINK_DARK;
+            outColor = Colors.OUTBOX_MESSAGE_DARK;
+            inColor = Colors.INBOX_MESSAGE_DARK;
         }
         else {
-            textColor = 0xFF232323;
-            linkColor = 0xFF2323AA;
-            outColor = 0xFFAA2323;
-            inColor = 0xFF2323AA;
+            textColor = Colors.PRIMARY_TEXT;
+            linkColor = Colors.LINK;
+            outColor = Colors.OUTBOX_MESSAGE;
+            inColor = Colors.INBOX_MESSAGE;
         }
     }
 

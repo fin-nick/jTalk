@@ -19,6 +19,7 @@ package net.ustyugov.jtalk.adapter;
 
 import java.util.List;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.IconPicker;
 import net.ustyugov.jtalk.service.JTalkService;
 
@@ -73,7 +74,7 @@ public class ResourceAdapter extends ArrayAdapter<String> {
        	TextView label = (TextView) v.findViewById(R.id.item);
        	if (Build.VERSION.SDK_INT >= 11) {
         	label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
-        } else label.setTextColor(0xFF232323);
+        } else label.setTextColor(Colors.PRIMARY_TEXT);
         label.setText(resource);
         return v;
     }

@@ -31,7 +31,6 @@ public final class Constants implements BaseColumns {
 	
 //	public static final int MAX_MUC_MESSAGES = 100;
 	public static final long PING_DELAY = 45000;
-	public static final int SEARCH_BACKGROUND = 0xFFAAAA66;
 
 	
 	// Statuses

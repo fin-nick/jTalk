@@ -19,6 +19,7 @@ package net.ustyugov.jtalk.adapter;
 
 import java.util.Collection;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.IconPicker;
 import net.ustyugov.jtalk.RosterItem;
@@ -95,12 +96,12 @@ public class BookmarksAdapter extends ArrayAdapter<RosterItem> {
         	holder.icon.setImageBitmap(ip.getMucBitmap());
         	
         	holder.label = (TextView) convertView.findViewById(R.id.name);
-        	holder.label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFEEEEEE : 0xFF343434);
+        	holder.label.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
             holder.label.setTextSize(fontSize);
         	
             holder.jid = (TextView) convertView.findViewById(R.id.status);
             holder.jid.setVisibility(View.VISIBLE);
-            holder.jid.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFBBBBBB : 0xFF555555);
+            holder.jid.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.SECONDARY_TEXT_DARK : Colors.SECONDARY_TEXT);
             holder.jid.setTextSize(fontSize - 4);
             convertView.setTag(holder);
         } else {

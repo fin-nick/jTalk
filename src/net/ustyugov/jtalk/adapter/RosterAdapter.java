@@ -93,7 +93,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 
                     // Self
                     List<Presence> selfPresences= new ArrayList<Presence>();
-                    Iterator<Presence> it =  roster.getPresences(account);
+                    Iterator<Presence> it = roster.getPresences(account);
                     while (it.hasNext()) {
                         Presence presence = it.next();
                         if (presence.isAvailable()) selfPresences.add(presence);

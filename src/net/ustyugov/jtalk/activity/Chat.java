@@ -418,6 +418,10 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 if (listView.isScroll()) listView.setSelection(listView.getCount());
             }
         }
+
+        if (account.equals(jid)) {
+            service.removeMessagesCountForJid(account, jid);
+        }
         service.removeMessagesCount(account, jid);
     }
 

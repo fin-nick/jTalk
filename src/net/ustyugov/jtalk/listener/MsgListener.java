@@ -246,6 +246,7 @@ public class MsgListener implements PacketListener {
 		            if (group != null && group.length() > 0) user = group + "/" + name; 
 		        	
 		            if (!service.getCurrentJid().equals(user)) {
+                        if (account.equals(user)) service.addMessagesCount(account, from);
 		            	service.addMessagesCount(account, user);
                         service.addUnreadMessage(item);
 		            }

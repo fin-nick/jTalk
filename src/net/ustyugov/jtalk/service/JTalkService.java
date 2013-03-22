@@ -237,6 +237,20 @@ public class JTalkService extends Service {
 //    	updateWidget();
     }
 
+    public void removeMessagesCountForJid(String account, String jid) {
+        if (messagesCount.containsKey(account)) {
+            Hashtable<String, Integer> hash = messagesCount.get(account);
+            Enumeration<String> keys = hash.keys();
+            while (keys.hasMoreElements()) {
+                String key = keys.nextElement();
+                if (key.startsWith(jid)) {
+                    hash.remove(key);
+                }
+            }
+        }
+//    	updateWidget();
+    }
+
     public void setMsgCounter(String jid, int count) {
         msgCounter.put(jid, count);
     }
@@ -303,9 +317,16 @@ public class JTalkService extends Service {
     public void addUnreadMessage(MessageItem item) {
         String account = item.getAccount();
         String jid = item.getJid();
-        for (MessageItem i : unreadMessages) {
-            if (i.getAccount().equals(account) && i.getJid().equals(jid)) return;
+        if (!getConferencesHash(account).containsKey(jid) && !getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid)))
+            jid = StringUtils.parseBareAddress(jid);
+
+        for (MessageItem message : unreadMessages) {
+            if (message.getAccount().equals(account)) {
+                String j = StringUtils.parseBareAddress(message.getJid());
+                if (j.equals(jid)) return;
+            }
         }
+
         unreadMessages.add(item);
     }
 
@@ -315,14 +336,16 @@ public class JTalkService extends Service {
     }
 
     public void removeUnreadMesage(String account, String jid) {
+        if (!getConferencesHash(account).containsKey(jid) && !getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid)))
+            jid = StringUtils.parseBareAddress(jid);
+
         for (MessageItem i : unreadMessages) {
-            String a = i.getAccount();
-            String j = i.getJid();
-            if (!getConferencesHash(account).containsKey(j) && !getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid)))
-                j = StringUtils.parseBareAddress(j);
-            if (a.equals(account) && j.equals(jid)) {
-                unreadMessages.remove(i);
-                return;
+            if (i.getAccount().equals(account)) {
+                String j = i.getJid();
+                if (j.startsWith(jid)) {
+                    unreadMessages.remove(i);
+                    return;
+                }
             }
         }
     }

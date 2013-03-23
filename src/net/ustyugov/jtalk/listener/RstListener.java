@@ -95,6 +95,7 @@ public class RstListener implements RosterListener {
         item.setName(jid);
         item.setTime(time);
         item.setType(MessageItem.Type.status);
+        item.setId(System.currentTimeMillis()+"");
 
         MessageLog.writeMessage(account, jid, item);
         service.sendBroadcast(new Intent(Constants.PRESENCE_CHANGED).putExtra("jid", jid));

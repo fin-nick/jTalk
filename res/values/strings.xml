@@ -114,7 +114,7 @@
     <string name="ShowActiveChatsGroup">Group \"Active chats\"</string>
     <string name="ShowActiveContacts">Show doubles of active chats</string>
     <string name="NoMaxLines">Automatic height of message input</string>
-    <string name="ColorLines">Color lines</string>
+    <string name="ColorLines">Striped background</string>
 
     <!--  Menus -->
     <string name="Update">Update</string>

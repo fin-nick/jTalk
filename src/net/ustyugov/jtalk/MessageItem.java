@@ -33,6 +33,7 @@ public class MessageItem {
 	private String stamp = null;
 	private String name = null;
 	private String id = null;
+    private String baseId = null;
 	private Type type = Type.message;
 	private boolean edited = false;
 	private boolean received = false;
@@ -67,6 +68,8 @@ public class MessageItem {
 		this.collapsed = false;
 	}
 
+    public void setBaseId(String id) { this.baseId = id; }
+    public String getBaseId() { return this.baseId; }
     public void setName(String name) { this.name = name; }
     public void setId(String id) { this.id = id; }
     public void setReceived(Boolean r) { this.received = r;}

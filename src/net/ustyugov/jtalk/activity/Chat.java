@@ -94,6 +94,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     private ListView chatsList;
     private ListView nickList;
     private List<MessageItem> msgList = new ArrayList<MessageItem>();
+    private List<String> selectedMessages = new ArrayList<String>();
     private EditText messageInput;
     private Button sendButton;
 
@@ -676,7 +677,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     }
 
     @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+    public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long idx) {
         CharSequence[] items;
         final MessageItem message = (MessageItem) parent.getAdapter().getItem(position);
 
@@ -708,8 +709,10 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
                     case 0:
-                        message.select(!message.isSelected());
-                        sendBroadcast(new Intent(Constants.RECEIVED));
+                        String baseId = message.getBaseId();
+                        if (selectedMessages.contains(baseId)) selectedMessages.remove(baseId);
+                        else selectedMessages.add(baseId);
+                        updateList();
                         break;
                     case 1:
                         MessageDialogs.QuoteDialog(Chat.this, msgList, position);
@@ -748,12 +751,8 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
 
                         }
                     case 5:
-                        for (MessageItem item : msgList) {
-                            if (item.isSelected()) {
-                                item.select(false);
-                            }
-                        }
-                        sendBroadcast(new Intent(Constants.RECEIVED));
+                        selectedMessages.clear();
+                        updateList();
                         break;
                 }
             }
@@ -797,6 +796,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
             } else cursor.moveToFirst();
 
             do {
+                String baseId = cursor.getString(cursor.getColumnIndex(MessageDbHelper._ID));
                 String id = cursor.getString(cursor.getColumnIndex(MessageDbHelper.ID));
                 String nick = cursor.getString(cursor.getColumnIndex(MessageDbHelper.NICK));
                 String type = cursor.getString(cursor.getColumnIndex(MessageDbHelper.TYPE));
@@ -805,12 +805,14 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 boolean received = Boolean.valueOf(cursor.getString(cursor.getColumnIndex(MessageDbHelper.RECEIVED)));
 
                 MessageItem item = new MessageItem(account, jid);
+                item.setBaseId(baseId);
                 item.setId(id);
                 item.setName(nick);
                 item.setType(MessageItem.Type.valueOf(type));
                 item.setTime(stamp);
                 item.setBody(body);
                 item.setReceived(received);
+                item.select(selectedMessages.contains(baseId));
 
                 msgList.add(item);
             } while (cursor.moveToNext());

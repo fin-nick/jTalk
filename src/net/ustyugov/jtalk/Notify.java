@@ -19,6 +19,7 @@ package net.ustyugov.jtalk;
 
 import java.util.List;
 
+import android.graphics.BitmapFactory;
 import net.ustyugov.jtalk.activity.Chat;
 import net.ustyugov.jtalk.activity.DataFormActivity;
 import net.ustyugov.jtalk.activity.RosterActivity;
@@ -92,11 +93,13 @@ public class Notify {
             PendingIntent piStatus = PendingIntent.getActivity(service, 0, i2, PendingIntent.FLAG_UPDATE_CURRENT);
 
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+            mBuilder.setLargeIcon(BitmapFactory.decodeResource(service.getResources(), R.drawable.ic_launcher));
             mBuilder.setSmallIcon(icon);
             mBuilder.setContentTitle(statusArray[pos]);
             mBuilder.setContentText(text);
             mBuilder.setContentIntent(piRoster);
             mBuilder.addAction(R.drawable.ic_action_refresh, service.getString(R.string.Status), piStatus);
+            mBuilder.setPriority(NotificationCompat.PRIORITY_MAX);
 
             NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
             mng.notify(NOTIFICATION, mBuilder.build());
@@ -111,11 +114,14 @@ public class Notify {
             PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+            mBuilder.setLargeIcon(BitmapFactory.decodeResource(service.getResources(), R.drawable.ic_launcher));
             mBuilder.setSmallIcon(R.drawable.stat_msg);
             mBuilder.setLights(0xFF00FF00, 2000, 3000);
             mBuilder.setContentTitle(service.getString(R.string.app_name));
-            mBuilder.setContentText(service.getString(R.string.UnreadMessage)).setNumber(service.getUnreadMessages().size());
+            mBuilder.setContentText(service.getString(R.string.UnreadMessage));
+            mBuilder.setNumber(service.getUnreadMessages().size());
             mBuilder.setContentIntent(contentIntent);
+            mBuilder.setPriority(NotificationCompat.PRIORITY_MAX);
 
             NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
             inboxStyle.setBigContentTitle(service.getString(R.string.UnreadMessage));
@@ -158,10 +164,12 @@ public class Notify {
         PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
    		
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+        mBuilder.setLargeIcon(BitmapFactory.decodeResource(service.getResources(), R.drawable.ic_launcher));
         mBuilder.setSmallIcon(R.drawable.stat_offline);
         mBuilder.setContentTitle(service.getString(R.string.app_name));
         mBuilder.setContentText(state);
         mBuilder.setContentIntent(contentIntent);
+        mBuilder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
         mng.notify(NOTIFICATION, mBuilder.build());
@@ -178,6 +186,7 @@ public class Notify {
     	JTalkService service = JTalkService.getInstance();
     	String nick = from;
     	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
+        String ticker = "";
     	boolean include = prefs.getBoolean("MessageInNotification", false);
     	if (include) {
     		int count = Integer.parseInt(prefs.getString("MessageInNotificationCount", "64"));
@@ -221,6 +230,10 @@ public class Notify {
         			if (re != null && re.getName() != null) nick = re.getName();
         		}
     		}
+
+            if (include) {
+                ticker = service.getString(R.string.NewMessageFrom) + " " + nick + ": " + text;
+            } else ticker = service.getString(R.string.NewMessageFrom) + " " + nick;
     		
         	Uri sound_file = Uri.parse(soundPath);
         	
@@ -229,15 +242,17 @@ public class Notify {
             i.putExtra("jid", from);
         	i.putExtra("account", account);
             PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-          
+
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+//            mBuilder.setLargeIcon(BitmapFactory.decodeResource(service.getResources(), R.drawable.ic_launcher));
             mBuilder.setSmallIcon(R.drawable.stat_msg);
             mBuilder.setLights(0xFF00FF00, 2000, 3000);
-            mBuilder.setContentTitle(service.getString(R.string.app_name));
-            mBuilder.setContentText(service.getString(R.string.UnreadMessage)).setNumber(service.getUnreadMessages().size());
+            mBuilder.setContentTitle(service.getString(R.string.UnreadMessage));
+            mBuilder.setContentText(ticker);
+            mBuilder.setNumber(service.getUnreadMessages().size());
             mBuilder.setContentIntent(contentIntent);
-            if (include) mBuilder.setTicker(service.getString(R.string.NewMessageFrom) + " " + nick + ": " + text);
-            else mBuilder.setTicker(service.getString(R.string.NewMessageFrom) + " " + nick);
+            mBuilder.setTicker(ticker);
+            mBuilder.setPriority(NotificationCompat.PRIORITY_MAX);
             if (sound) mBuilder.setSound(sound_file);
             
             NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();

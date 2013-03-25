@@ -145,7 +145,7 @@ public class JTalkService extends Service {
     private String sidebarMode = "users";
     private String globalState = "";
     private SharedPreferences prefs;
-    private BroadcastReceiver updateReceiver;
+//    private BroadcastReceiver updateReceiver;
     private ChangeConnectionReceiver connectionReceiver;
     private FileTransferManager fileTransferManager;
     private List<FileTransferRequest> incomingRequests = new ArrayList<FileTransferRequest>();
@@ -678,13 +678,13 @@ public class JTalkService extends Service {
         
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         
-        updateReceiver = new BroadcastReceiver() {
-			@Override
-			public void onReceive(Context arg0, Intent arg1) {
+//        updateReceiver = new BroadcastReceiver() {
+//			@Override
+//			public void onReceive(Context arg0, Intent arg1) {
 //				updateWidget();
-			}
-        };
-        registerReceiver(updateReceiver, new IntentFilter(Constants.UPDATE));
+//			}
+//        };
+//        registerReceiver(updateReceiver, new IntentFilter(Constants.UPDATE));
         
         connectionReceiver = new ChangeConnectionReceiver();
         registerReceiver(connectionReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
@@ -721,7 +721,7 @@ public class JTalkService extends Service {
     @Override
     public void onDestroy() {
     	try {
-    		unregisterReceiver(updateReceiver);
+//    		unregisterReceiver(updateReceiver);
     		unregisterReceiver(connectionReceiver);
     	} catch(Exception ignored) { }
 

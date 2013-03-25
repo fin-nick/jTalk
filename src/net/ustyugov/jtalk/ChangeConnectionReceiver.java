@@ -17,6 +17,7 @@
 
 package net.ustyugov.jtalk;
 
+import android.net.NetworkInfo;
 import net.ustyugov.jtalk.service.JTalkService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,12 +29,14 @@ public class ChangeConnectionReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		JTalkService service = JTalkService.getInstance();
-		boolean nocon = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
-        if (service != null) {
-            if (!nocon && service.getAllConnections().size() > 0 && !service.isAuthenticated()) {
+        boolean nocon = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+        if (nocon) {
+            service.disconnect();
+        } else {
+            ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            if (activeNetwork.isConnected()) {
                 service.connect();
-            } else if (nocon && service.getAllConnections().size() > 0) {
-                service.disconnect();
             }
         }
 	}

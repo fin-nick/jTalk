@@ -97,9 +97,17 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
         rosterAdapter = new RosterAdapter(this);
         simpleAdapter = new NoGroupsAdapter(this);
         searchAdapter = new SearchAdapter(this);
-        
+
+        int cols = 1;
+        if (!prefs.getBoolean("ShowGroups", true) && !prefs.getBoolean("ShowMucGroup", false)) {
+            try {
+                cols = Integer.parseInt(prefs.getString("RosterColumns", "1"));
+            } catch (Exception e) {
+                cols = 1;
+            }
+        }
         gridView = (GridView) findViewById(R.id.users);
-        gridView.setNumColumns(1);
+        gridView.setNumColumns(cols);
 		gridView.setCacheColorHint(0x00000000);
         gridView.setOnItemClickListener(this);
         gridView.setOnItemLongClickListener(this);

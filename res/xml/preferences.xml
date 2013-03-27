@@ -5,9 +5,9 @@
                 android:title="@string/OfflineContacts"
                 android:defaultValue="false" />
         <CheckBoxPreference
-            android:key="ShowGroups"
-            android:title="@string/ShowGroups"
-            android:defaultValue="true" />
+                android:key="ShowGroups"
+                android:title="@string/ShowGroups"
+                android:defaultValue="true" />
         <CheckBoxPreference
                 android:key="ShowActiveChatsGroup"
                 android:dependency="ShowGroups"
@@ -262,6 +262,12 @@
     </PreferenceScreen>
 
     <PreferenceScreen android:title="Experimental">
+        <EditTextPreference
+                android:key="RosterColumns"
+                android:title="Columns in roster"
+                android:summary="Only if 'Show groups' is off"
+                android:defaultValue="1"
+                android:numeric="integer"/>
         <CheckBoxPreference
                 android:title="Auto load avatars"
                 android:key="LoadAllAvatars"

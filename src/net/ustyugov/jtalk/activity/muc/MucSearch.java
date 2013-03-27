@@ -19,6 +19,7 @@ package net.ustyugov.jtalk.activity.muc;
 
 import java.util.Collection;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.adapter.MucSearchAdapter;
 import net.ustyugov.jtalk.dialog.BookmarksDialogs;
 import net.ustyugov.jtalk.dialog.MucDialogs;
@@ -62,13 +63,13 @@ public class MucSearch extends SherlockActivity implements OnClickListener, OnIt
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
         setContentView(R.layout.muc_search);
         setTitle(android.R.string.search_go);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         	
         LinearLayout linear = (LinearLayout) findViewById(R.id.muc_search);
-        linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+        linear.setBackgroundColor(Colors.BACKGROUND);
         
         searchButton = (ImageButton) findViewById(R.id.search_button);
         searchButton.setOnClickListener(this);

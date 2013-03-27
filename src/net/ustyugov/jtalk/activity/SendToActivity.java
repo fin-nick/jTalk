@@ -18,10 +18,8 @@
 package net.ustyugov.jtalk.activity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -29,6 +27,7 @@ import android.widget.*;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.activity.filetransfer.SendFileActivity;
 import net.ustyugov.jtalk.adapter.SearchAdapter;
@@ -46,11 +45,13 @@ public class SendToActivity extends SherlockActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         service = JTalkService.getInstance();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
         setContentView(R.layout.send_to);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(R.string.SendFile);
+
+        LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
+        linear.setBackgroundColor(Colors.BACKGROUND);
 
         adapter = new SearchAdapter(this);
         tv = (TextView) findViewById(R.id.label);

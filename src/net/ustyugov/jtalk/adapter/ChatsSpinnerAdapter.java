@@ -132,7 +132,7 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
         label.setText(name);
         if (service.getComposeList().contains(jid)) {
     		label.setTextColor(Colors.HIGHLIGHT_TEXT);
-    	} else label.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
+    	} else label.setTextColor(Colors.PRIMARY_TEXT);
         
         return v;
 	}
@@ -159,7 +159,7 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 			holder.name.setTextSize(fontSize);
 			holder.status = (TextView) convertView.findViewById(R.id.status);
 			holder.status.setTextSize(statusSize);
-			holder.status.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.SECONDARY_TEXT_DARK : Colors.SECONDARY_TEXT);
+			holder.status.setTextColor(Colors.SECONDARY_TEXT);
 			
 			holder.counter = (TextView) convertView.findViewById(R.id.msg_counter);
 			holder.counter.setTextSize(fontSize);
@@ -194,7 +194,7 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 			int count = service.getMessagesCount(account, jid);
 			
 			if (service.getComposeList().contains(jid)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
-			else holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
+			else holder.name.setTextColor(Colors.PRIMARY_TEXT);
 	        holder.name.setText(name);
 	        holder.name.setTypeface(Typeface.DEFAULT_BOLD);
 	        
@@ -237,7 +237,7 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 			}
 			
 			if (service.isHighlight(account, name)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
-			else holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.SECONDARY_TEXT);
+			else holder.name.setTextColor(Colors.PRIMARY_TEXT);
 	        holder.name.setText(StringUtils.parseName(name));
 	        holder.name.setTypeface(Typeface.DEFAULT_BOLD);
 	        

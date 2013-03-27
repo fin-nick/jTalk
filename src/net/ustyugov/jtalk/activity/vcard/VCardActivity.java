@@ -24,6 +24,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.adapter.MainPageAdapter;
 import net.ustyugov.jtalk.adapter.VCardAdapter;
@@ -84,8 +85,7 @@ public class VCardActivity extends SherlockActivity {
 		service = JTalkService.getInstance();
 		account = getIntent().getStringExtra("account");
 		jid = getIntent().getStringExtra("jid");
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		setContentView(R.layout.paged_activity);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 	    setTitle("vCard");
@@ -101,7 +101,7 @@ public class VCardActivity extends SherlockActivity {
         }
 
 		LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
-       	linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+       	linear.setBackgroundColor(Colors.BACKGROUND);
 		
        	LayoutInflater inflater = LayoutInflater.from(this);
 		View aboutPage = inflater.inflate(R.layout.vcard_about, null);

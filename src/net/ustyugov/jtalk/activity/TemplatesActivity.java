@@ -17,6 +17,7 @@
 
 package net.ustyugov.jtalk.activity;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Template;
 import net.ustyugov.jtalk.adapter.TemplatesAdapter;
 import net.ustyugov.jtalk.db.JTalkProvider;
@@ -61,8 +62,7 @@ public class TemplatesActivity extends SherlockActivity implements OnItemClickLi
 	@Override
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		service = JTalkService.getInstance();
 		
 		setContentView(R.layout.list_activity);
@@ -70,12 +70,11 @@ public class TemplatesActivity extends SherlockActivity implements OnItemClickLi
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
-    	linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+    	linear.setBackgroundColor(Colors.BACKGROUND);
     	
 		progress = (ProgressBar) findViewById(R.id.progress);
         
         list = (ListView) findViewById(R.id.list);
-        list.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
         list.setOnItemClickListener(this);
         list.setDividerHeight(0);
         list.setCacheColorHint(0x00000000);

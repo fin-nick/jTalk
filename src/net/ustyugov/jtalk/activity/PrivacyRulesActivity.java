@@ -20,6 +20,7 @@ package net.ustyugov.jtalk.activity;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.adapter.PrivacyRulesAdapter;
 import net.ustyugov.jtalk.dialog.PrivacyDialogs;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -33,10 +34,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.ContextMenu;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -73,15 +72,14 @@ public class PrivacyRulesActivity extends SherlockActivity {
 		account = getIntent().getStringExtra("account");
 		service = JTalkService.getInstance();
 		listName = getIntent().getStringExtra("list");
-		
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		setContentView(R.layout.rules_activity);
 		setTitle("Rules");
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
-    	linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+    	linear.setBackgroundColor(Colors.BACKGROUND);
     	
     	name = (TextView) findViewById(R.id.name);
     	if (listName == null) name.setEnabled(true);
@@ -93,8 +91,6 @@ public class PrivacyRulesActivity extends SherlockActivity {
     	progress = (ProgressBar) findViewById(R.id.progress);
     	
         list = (ListView) findViewById(R.id.list);
-        list.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
-//        list.setOnItemClickListener(this);
         list.setDividerHeight(0);
         list.setCacheColorHint(0x00000000);
         registerForContextMenu(list);

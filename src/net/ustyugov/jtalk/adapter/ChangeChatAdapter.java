@@ -34,10 +34,8 @@ import org.jivesoftware.smack.packet.RosterPacket;
 import org.jivesoftware.smack.util.StringUtils;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Build;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -96,7 +94,6 @@ public class ChangeChatAdapter extends ArrayAdapter<RosterItem> {
         else if (item.isEntry()) jid = item.getEntry().getUser();
         String name = item.getName();
         
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
         IconPicker ip = service.getIconPicker();
         
         if (v == null) {
@@ -108,8 +105,8 @@ public class ChangeChatAdapter extends ArrayAdapter<RosterItem> {
         if (service.isHighlight(account, jid)) label.setTextColor(Colors.HIGHLIGHT_TEXT);
         else {
         	if (Build.VERSION.SDK_INT >= 11) {
-            	label.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
-            } else label.setTextColor(Colors.PRIMARY_TEXT);
+            	label.setTextColor(Colors.PRIMARY_TEXT);
+            } else label.setTextColor(0xFF232323);
         }
         
 		ImageView msg  = (ImageView) v.findViewById(R.id.msg);

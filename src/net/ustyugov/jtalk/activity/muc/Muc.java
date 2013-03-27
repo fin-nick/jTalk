@@ -22,6 +22,7 @@ import android.database.Cursor;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import com.viewpagerindicator.TitlePageIndicator;
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.activity.Chat;
@@ -69,14 +70,13 @@ public class Muc extends SherlockActivity implements OnKeyListener {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         service = JTalkService.getInstance();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
         setTitle(R.string.MUC);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.paged_activity);
 
         LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
-        linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+        linear.setBackgroundColor(Colors.BACKGROUND);
 
         MainPageAdapter adapter = new MainPageAdapter(mPages);
         LayoutInflater inflater = LayoutInflater.from(this);
@@ -94,7 +94,6 @@ public class Muc extends SherlockActivity implements OnKeyListener {
                 ListView list = (ListView) page.findViewById(R.id.list);
                 list.setDividerHeight(0);
                 list.setCacheColorHint(0x00000000);
-                list.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
                 list.setOnItemClickListener(new OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View v, int position, long id) {

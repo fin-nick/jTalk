@@ -23,13 +23,12 @@ import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.*;
 import com.jtalk2.R;
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Notify;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
@@ -44,11 +43,10 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
         setContentView(R.layout.add_account_activity);
         LinearLayout linear = (LinearLayout) findViewById(R.id.account_linear);
-        linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+        linear.setBackgroundColor(Colors.BACKGROUND);
 
         jidEdit = (EditText) findViewById(R.id.account_jid);
         passEdit = (EditText) findViewById(R.id.account_password);
@@ -139,7 +137,6 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
 
             if (jid.length() < 3 || !jid.contains("@")) {
                 Toast.makeText(this, "Incorrect JID", Toast.LENGTH_LONG).show();
-                return;
             } else {
                 ContentValues values = new ContentValues();
                 values.put(AccountDbHelper.JID, jid);

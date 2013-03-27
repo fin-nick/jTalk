@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.adapter.MainPageAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
 
@@ -30,12 +31,10 @@ import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smackx.packet.VCard;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,14 +66,13 @@ public class SetVcardActivity extends SherlockActivity implements OnClickListene
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		setContentView(R.layout.paged_activity);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		setTitle("vCard");
 		
        	LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
-       	linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+       	linear.setBackgroundColor(Colors.BACKGROUND);
        	
        	account = getIntent().getStringExtra("account");
        	vcard = service.getVCard(account);

@@ -26,8 +26,6 @@ import net.ustyugov.jtalk.service.JTalkService;
 import org.jivesoftware.smack.packet.PrivacyItem;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,9 +60,6 @@ public class PrivacyRulesAdapter extends ArrayAdapter<PrivacyItem> {
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		PrivacyItem item = getItem(position);
-      
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        
         ViewHolder holder;
         if (convertView == null) {
             LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -72,7 +67,7 @@ public class PrivacyRulesAdapter extends ArrayAdapter<PrivacyItem> {
             
             holder = new ViewHolder();
             holder.name = (TextView) convertView.findViewById(R.id.item);
-            holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
+            holder.name.setTextColor(Colors.PRIMARY_TEXT);
             holder.icon = (ImageView) convertView.findViewById(R.id.status);
             convertView.setTag(holder);
         } else {

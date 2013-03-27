@@ -187,10 +187,9 @@
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/Interface">
-        <CheckBoxPreference
-                android:title="@string/DarkColors"
-                android:key="DarkColors"
-                android:defaultValue="false"/>
+        <ListPreference
+                android:key="ColorTheme"
+                android:title="@string/ColorTheme"/>
         <PreferenceScreen android:title="@string/Smiles">
             <CheckBoxPreference
                     android:key="ShowSmiles"

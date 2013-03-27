@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.text.style.ForegroundColorSpan;
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.listener.TextLinkClickListener;
 
 
@@ -35,6 +37,7 @@ public class MyTextView  extends TextView {
 
 		for (Hyperlink link : list) {
 			ssb.setSpan(link.span, link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new ForegroundColorSpan(Colors.LINK), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 
 		setText(ssb);
@@ -51,6 +54,7 @@ public class MyTextView  extends TextView {
 			spec.start = start;
 			spec.end = end;
 			ssb.setSpan(spec.span, spec.start, spec.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new ForegroundColorSpan(Colors.INBOX_MESSAGE), spec.start, spec.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 		
 		ArrayList<Hyperlink> list = new ArrayList<Hyperlink>();
@@ -58,6 +62,8 @@ public class MyTextView  extends TextView {
 
 		for (Hyperlink link : list) {
 			ssb.setSpan(link.span, link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new ForegroundColorSpan(Colors.LINK), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
 		}
 
 		setText(ssb);
@@ -76,14 +82,17 @@ public class MyTextView  extends TextView {
 			ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			ssb.setSpan(new StyleSpan(android.graphics.Typeface.SANS_SERIF.getStyle()), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			ssb.setSpan(link.span, link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new ForegroundColorSpan(Colors.INBOX_MESSAGE), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 		for (Hyperlink link : msgList) {
 			ssb.setSpan(new StyleSpan(android.graphics.Typeface.SANS_SERIF.getStyle()), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			ssb.setSpan(link.span, link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new ForegroundColorSpan(Colors.LINK), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 		for (Hyperlink link : linkList) {
 			ssb.setSpan(new StyleSpan(android.graphics.Typeface.SANS_SERIF.getStyle()), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			ssb.setSpan(link.span, link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ssb.setSpan(new ForegroundColorSpan(Colors.LINK), link.start, link.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 		setText(ssb);
 	}

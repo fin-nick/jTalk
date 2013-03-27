@@ -65,18 +65,12 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
 	private boolean showtime;
 	private Timer doubleClickTimer = new Timer();
 	
-	private int linkColor;
-	private int textColor;
-	private int inColor;
-	private int outColor;
-	
 	public ChatAdapter(Context context, Smiles smiles) {
         super(context, R.id.chat1);
         this.context = context;
         this.smiles  = smiles;
         this.prefs = PreferenceManager.getDefaultSharedPreferences(context);
         this.showtime = prefs.getBoolean("ShowTime", false);
-        applyColors();
     }
 	
 	public void update(String jid, List<MessageItem> list, String searchString) {
@@ -139,7 +133,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         	if (showtime) message = time + "  " + body;
         	else message = body;
         	ssb.append(message);
-        	ssb.setSpan(new ForegroundColorSpan(0xFF239923), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        	ssb.setSpan(new ForegroundColorSpan(Colors.STATUS_MESSAGE), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         } else {
         	int colorLength = name.length();
         	int boldLength = colorLength;
@@ -151,16 +145,16 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         	}
         	else message = name + ": " + body;
         	ssb.append(message);
-        	ssb.setSpan(new ForegroundColorSpan(textColor), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        	ssb.setSpan(new ForegroundColorSpan(Colors.PRIMARY_TEXT), 0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         	ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, boldLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             if (!nick.equals(context.getResources().getString(R.string.Me)))
-            	ssb.setSpan(new ForegroundColorSpan(inColor), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            	ssb.setSpan(new ForegroundColorSpan(Colors.INBOX_MESSAGE), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             else {
-            	if (received) ssb.setSpan(new ForegroundColorSpan(outColor), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            	else ssb.setSpan(new ForegroundColorSpan(textColor), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            	if (received) ssb.setSpan(new ForegroundColorSpan(Colors.OUTBOX_MESSAGE), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            	else ssb.setSpan(new ForegroundColorSpan(Colors.PRIMARY_TEXT), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
             
-            if (item.isEdited()) ssb.setSpan(new ForegroundColorSpan(inColor), colorLength + 1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if (item.isEdited()) ssb.setSpan(new ForegroundColorSpan(Colors.HIGHLIGHT_TEXT), colorLength + 1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
         // Search highlight
@@ -181,7 +175,6 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         final ImageView expand = (ImageView) convertView.findViewById(R.id.expand);
         final MyTextView textView = (MyTextView) convertView.findViewById(R.id.chat1);
         textView.setOnTextLinkClickListener(this);
-        textView.setLinkTextColor(linkColor);
         if (enableCollapse) {
         	textView.setOnTouchListener(new OnTouchListener() {
             	View oldView = null;
@@ -249,7 +242,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         
         textView.setTextSize(fontSize);
 
-        if (item.isSelected()) convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? Colors.SELECTED_MESSAGE_DARK : Colors.SELECTED_MESSAGE);
+        if (item.isSelected()) convertView.setBackgroundColor(Colors.SELECTED_MESSAGE);
         else convertView.setBackgroundColor(0X00000000);
         return convertView;
     }
@@ -274,21 +267,6 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
 		}
 	}
 	
-	private void applyColors() {
-		if (prefs.getBoolean("DarkColors", false)) {
-        	textColor = Colors.PRIMARY_TEXT_DARK;
-        	linkColor = Colors.LINK_DARK;
-        	inColor = Colors.INBOX_MESSAGE_DARK;
-        	outColor = Colors.OUTBOX_MESSAGE_DARK;
-        }
-		else {
-			textColor = Colors.PRIMARY_TEXT;
-			linkColor = Colors.LINK;
-		    inColor = Colors.INBOX_MESSAGE;
-		    outColor = Colors.OUTBOX_MESSAGE;
-		}
-	}
-
     private String createTimeString(String time) {
         Date d = new Date();
         java.text.DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");

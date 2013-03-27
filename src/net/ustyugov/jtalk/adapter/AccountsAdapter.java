@@ -18,6 +18,7 @@
 package net.ustyugov.jtalk.adapter;
 
 import net.ustyugov.jtalk.Account;
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.IconPicker;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
@@ -88,8 +89,8 @@ public class AccountsAdapter extends ArrayAdapter<Account> {
 		TextView label = (TextView) v.findViewById(R.id.item);
 		label.setText(jid);
 		label.setTextSize(fontSize);
-//		label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
-    
+        label.setTextColor(Colors.PRIMARY_TEXT);
+
 		ImageView icon = (ImageView)v.findViewById(R.id.status);
 		icon.setImageResource(R.drawable.icon_offline);
 		if (service != null && service.isAuthenticated(account.getJid())) {

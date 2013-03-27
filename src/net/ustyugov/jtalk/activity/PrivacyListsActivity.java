@@ -17,6 +17,7 @@
 
 package net.ustyugov.jtalk.activity;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.adapter.PrivacyListAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
 
@@ -25,10 +26,8 @@ import org.jivesoftware.smack.PrivacyListManager;
 import org.jivesoftware.smack.XMPPException;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.ContextMenu;
 import android.view.View;
 import android.widget.AdapterView;
@@ -62,19 +61,17 @@ public class PrivacyListsActivity extends SherlockActivity implements OnItemClic
 		super.onCreate(bundle);
 		account = getIntent().getStringExtra("account");
 		service = JTalkService.getInstance();
-		
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		setContentView(R.layout.list_activity);
 		setTitle("Lists of privacy");
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
-    	linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+    	linear.setBackgroundColor(Colors.BACKGROUND);
     	
     	progress = (ProgressBar) findViewById(R.id.progress);
         list = (ListView) findViewById(R.id.list);
-        list.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
         list.setOnItemClickListener(this);
         list.setDividerHeight(0);
         list.setCacheColorHint(0x00000000);

@@ -26,8 +26,6 @@ import org.jivesoftware.smack.PrivacyListManager;
 import org.jivesoftware.smack.XMPPException;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -75,8 +73,6 @@ public class PrivacyListAdapter extends ArrayAdapter<PrivacyList> {
 		IconPicker ip = service.getIconPicker();
 		PrivacyList list = getItem(position);
       
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        
         ViewHolder holder;
         if (convertView == null) {
             LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -84,7 +80,7 @@ public class PrivacyListAdapter extends ArrayAdapter<PrivacyList> {
             
             holder = new ViewHolder();
             holder.name = (TextView) convertView.findViewById(R.id.item);
-            holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
+            holder.name.setTextColor(Colors.PRIMARY_TEXT);
             holder.icon = (ImageView) convertView.findViewById(R.id.status);
             convertView.setTag(holder);
         } else {

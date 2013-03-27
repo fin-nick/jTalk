@@ -21,6 +21,7 @@ import java.util.Iterator;
 
 import android.view.ViewGroup;
 import com.actionbarsherlock.view.MenuItem;
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.adapter.OptionsSpinnerAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.view.MyEditText;
@@ -83,18 +84,16 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 	private Button cancelButton;
 	private BobExtension bob = null;
 	private RemoteCommand rc;
-	private SharedPreferences prefs;
-	
+
 	@Override
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
-		prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		setContentView(R.layout.data_form);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		
        	LinearLayout linear = (LinearLayout) findViewById(R.id.data_form);
-       	linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+       	linear.setBackgroundColor(Colors.BACKGROUND);
 		
        	account = getIntent().getStringExtra("account");
 		jid = getIntent().getStringExtra("jid");
@@ -314,7 +313,7 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 	
 	private TextView createTextView(String text) {
 		TextView tv = new TextView(this);
-		tv.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
+		tv.setTextColor(Colors.isLight ? 0xFF000000 : 0xFFFFFFFF);
 		tv.setText(text);
         return tv;
 	}
@@ -334,7 +333,7 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 	
 	private CheckBox createCheckBox(String label, String var, String value) {
 		CheckBox cb = new CheckBox(this);
-		cb.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
+		cb.setTextColor(Colors.isLight ? 0xFF000000 : 0xFFFFFFFF);
         cb.setText(label);
         cb.setTag(var);
         if (value.equals("0")) cb.setChecked(false); else cb.setChecked(true);

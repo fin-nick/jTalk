@@ -19,6 +19,7 @@ package net.ustyugov.jtalk.activity.muc;
 
 import java.util.ArrayList;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.adapter.BookmarksAdapter;
@@ -76,14 +77,13 @@ public class Bookmarks extends SherlockActivity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         service = JTalkService.getInstance();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		setTitle(R.string.Bookmarks);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		setContentView(R.layout.paged_activity);
         
        	LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
-       	linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+       	linear.setBackgroundColor(Colors.BACKGROUND);
         
         LayoutInflater inflater = LayoutInflater.from(this);
         MainPageAdapter adapter = new MainPageAdapter(mPages);
@@ -101,7 +101,6 @@ public class Bookmarks extends SherlockActivity {
 		        ListView list = (ListView) bookPage.findViewById(R.id.list);
 		        list.setDividerHeight(0);
 		        list.setCacheColorHint(0x00000000);
-		        list.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
 		        list.setOnItemClickListener(new OnItemClickListener() {
 					@Override
 					public void onItemClick(AdapterView<?> parent, View v, int position, long id) {

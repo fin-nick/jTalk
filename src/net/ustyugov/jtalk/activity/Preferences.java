@@ -48,6 +48,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 	private EditTextPreference priorityAway;
 	private EditTextPreference priorityXa;
 	private ListPreference smilespack;
+    private ListPreference colortheme;
 	private ListPreference iconspack;
 	private SharedPreferences  prefs;
 	
@@ -55,6 +56,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		CharSequence[] smiles;
+        CharSequence[] colors;
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		addPreferencesFromResource(R.xml.preferences);  // TODO!
 		
@@ -69,6 +71,19 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		}
 		else smiles = new CharSequence[1];
 		smiles[0] = "default";
+
+        File file_colors = new File(Constants.PATH_COLORS);
+        file_colors.mkdirs();
+        File[] files_colors = file_colors.listFiles();
+        if (files_colors != null) {
+            colors = new CharSequence[files_colors.length + 2];
+            for (int i = 0; i < files_colors.length; i++) {
+                colors[i+2] = files_colors[i].getName();
+            }
+        }
+        else colors = new CharSequence[2];
+        colors[0] = "Light";
+        colors[1] = "Dark";
 		
 		List<CharSequence> icons = new ArrayList<CharSequence>();
 		icons.add("default");
@@ -105,6 +120,11 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		smilespack.setEntries(smiles);
 		smilespack.setEntryValues(smiles);
 		if (smiles.length == 1) smilespack.setValue("default");
+
+        colortheme = (ListPreference) getPreferenceScreen().findPreference("ColorTheme");
+        colortheme.setEntries(colors);
+        colortheme.setEntryValues(colors);
+        if (colors.length == 1) colortheme.setValue("Light");
 		
 		iconspack = (ListPreference) getPreferenceScreen().findPreference("IconPack");
 		iconspack.setEntries(names.toArray(new CharSequence[1]));

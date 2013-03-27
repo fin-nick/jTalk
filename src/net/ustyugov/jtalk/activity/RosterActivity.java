@@ -25,6 +25,7 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.actionbarsherlock.widget.SearchView;
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.Notify;
 import net.ustyugov.jtalk.RosterItem;
@@ -79,15 +80,16 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        Colors.updateColors(this);
         startService(new Intent(this, JTalkService.class));
         service = JTalkService.getInstance();
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
         
 		setContentView(R.layout.roster);
         
         LinearLayout roster = (LinearLayout) findViewById(R.id.roster_linear);
-    	roster.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+    	roster.setBackgroundColor(Colors.BACKGROUND);
     	
     	getSupportActionBar().setHomeButtonEnabled(true);
         

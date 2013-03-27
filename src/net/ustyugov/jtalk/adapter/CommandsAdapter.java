@@ -25,8 +25,6 @@ import org.jivesoftware.smackx.packet.DiscoverItems;
 import org.jivesoftware.smackx.packet.DiscoverItems.Item;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,7 +58,6 @@ public class CommandsAdapter extends ArrayAdapter<Item> {
 	
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
         View v = convertView;
         Item item = getItem(position);
         String name = item.getName();
@@ -72,7 +69,7 @@ public class CommandsAdapter extends ArrayAdapter<Item> {
         }
         
         TextView label = (TextView) v.findViewById(R.id.item);
-        label.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
+        label.setTextColor(Colors.PRIMARY_TEXT);
         label.setText(name);
         
         ImageView icon = (ImageView)v.findViewById(R.id.status);

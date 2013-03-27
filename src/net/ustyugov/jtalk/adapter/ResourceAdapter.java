@@ -73,8 +73,8 @@ public class ResourceAdapter extends ArrayAdapter<String> {
         
        	TextView label = (TextView) v.findViewById(R.id.item);
        	if (Build.VERSION.SDK_INT >= 11) {
-        	label.setTextColor(prefs.getBoolean("DarkColors", false) ? 0xFFFFFFFF : 0xFF000000);
-        } else label.setTextColor(Colors.PRIMARY_TEXT);
+        	label.setTextColor(Colors.PRIMARY_TEXT);
+        } else label.setTextColor(0xFF000000);
         label.setText(resource);
         return v;
     }

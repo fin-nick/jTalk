@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import android.widget.*;
 import com.actionbarsherlock.view.MenuItem;
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Notify;
 import net.ustyugov.jtalk.service.JTalkService;
 
@@ -34,19 +36,12 @@ import org.jivesoftware.smackx.filetransfer.FileTransferManager;
 import org.jivesoftware.smackx.filetransfer.OutgoingFileTransfer;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.jtalk2.R;
@@ -66,11 +61,13 @@ public class SendFileActivity extends SherlockActivity implements OnClickListene
 	@Override
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		setContentView(R.layout.send_file);
 		setTitle(R.string.SendFile);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
+        linear.setBackgroundColor(Colors.BACKGROUND);
 		
 		service = JTalkService.getInstance();
         Intent intent = getIntent();

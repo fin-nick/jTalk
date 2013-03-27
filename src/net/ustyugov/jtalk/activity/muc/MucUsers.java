@@ -20,6 +20,7 @@ package net.ustyugov.jtalk.activity.muc;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.adapter.AffiliateAdapter;
 import net.ustyugov.jtalk.adapter.MainPageAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -76,15 +77,14 @@ public class MucUsers extends SherlockActivity {
 		String group = getIntent().getStringExtra("group");
 		account = getIntent().getStringExtra("account");
 		muc = JTalkService.getInstance().getConferencesHash(account).get(group);
-		
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		setContentView(R.layout.paged_activity);
 		setTitle(R.string.Users);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		
        	LinearLayout chat_linear = (LinearLayout) findViewById(R.id.linear);
-       	chat_linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+       	chat_linear.setBackgroundColor(Colors.BACKGROUND);
 		
        	account = getIntent().getExtras().getString("account");
        	

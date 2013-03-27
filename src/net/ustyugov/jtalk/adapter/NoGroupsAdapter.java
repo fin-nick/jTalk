@@ -167,10 +167,10 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
                 holder.messageIcon.setVisibility(View.INVISIBLE);
                 holder.text = (TextView) convertView.findViewById(R.id.name);
                 holder.text.setTextSize(fontSize);
-                holder.text.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
+                holder.text.setTextColor(Colors.PRIMARY_TEXT);
                 holder.state = (ImageView) convertView.findViewById(R.id.state);
                 convertView.setTag(holder);
-                convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? Colors.GROUP_BACKGROUND_DARK : Colors.GROUP_BACKGROUND);
+                convertView.setBackgroundColor(Colors.GROUP_BACKGROUND);
             } else {
                 holder = (GroupHolder) convertView.getTag();
             }
@@ -178,7 +178,7 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
             holder.messageIcon.setImageResource(R.drawable.icon_msg);
             holder.messageIcon.setVisibility(View.INVISIBLE);
             holder.state.setImageResource(item.isCollapsed() ? R.drawable.close : R.drawable.open);
-            convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? Colors.GROUP_BACKGROUND_DARK : Colors.GROUP_BACKGROUND);
+            convertView.setBackgroundColor(Colors.GROUP_BACKGROUND);
             return convertView;
         } else if (item.isAccount()) {
             Holders.AccountHolder holder;
@@ -190,13 +190,13 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
                 holder.avatar = (ImageView) convertView.findViewById(R.id.avatar);
                 holder.jid = (TextView) convertView.findViewById(R.id.jid);
                 holder.jid.setTextSize(fontSize);
-                holder.jid.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
+                holder.jid.setTextColor(Colors.PRIMARY_TEXT);
                 holder.status = (TextView) convertView.findViewById(R.id.status);
                 holder.status.setTextSize(statusSize);
-                holder.status.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.SECONDARY_TEXT_DARK : Colors.SECONDARY_TEXT);
+                holder.status.setTextColor(Colors.SECONDARY_TEXT);
                 holder.state = (ImageView) convertView.findViewById(R.id.state);
                 convertView.setTag(holder);
-                convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? Colors.ACCOUNT_BACKGROUND_DARK : Colors.ACCOUNT_BACKGROUND);
+                convertView.setBackgroundColor(Colors.ACCOUNT_BACKGROUND);
             } else {
                 holder = (Holders.AccountHolder) convertView.getTag();
             }
@@ -228,7 +228,7 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 				holder.name.setTextSize(fontSize);
 				holder.status = (TextView) convertView.findViewById(R.id.status);
 				holder.status.setTextSize(statusSize);
-				holder.status.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.SECONDARY_TEXT_DARK : Colors.SECONDARY_TEXT);
+				holder.status.setTextColor(Colors.SECONDARY_TEXT);
 				holder.counter = (TextView) convertView.findViewById(R.id.msg_counter);
 				holder.counter.setTextSize(fontSize);
 				holder.messageIcon = (ImageView) convertView.findViewById(R.id.msg);
@@ -244,7 +244,7 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 			ItemHolder holder = (ItemHolder) convertView.getTag();
 			holder.name.setText(name);
 			if (service.getComposeList().contains(jid)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
-			else holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
+			else holder.name.setTextColor(Colors.PRIMARY_TEXT);
 			
 			if (service.getActiveChats(account).contains(jid)) {
 				holder.name.setTypeface(Typeface.DEFAULT_BOLD);
@@ -272,7 +272,7 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 			}
 
             if (prefs.getBoolean("ColorLines", false)) {
-                if ((position % 2) != 0) convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? Colors.ENTRY_BACKGROUND_DARK : Colors.ENTRY_BACKGROUND);
+                if ((position % 2) != 0) convertView.setBackgroundColor(Colors.ENTRY_BACKGROUND);
                 else convertView.setBackgroundColor(0x00000000);
             }
 	        
@@ -291,7 +291,7 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 				holder.name.setTextSize(fontSize);
 				holder.status = (TextView) convertView.findViewById(R.id.status);
 				holder.status.setTextSize(statusSize);
-				holder.status.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.SECONDARY_TEXT_DARK : Colors.SECONDARY_TEXT);
+				holder.status.setTextColor(Colors.SECONDARY_TEXT);
 				holder.counter = (TextView) convertView.findViewById(R.id.msg_counter);
 				holder.counter.setTextSize(fontSize);
 				holder.messageIcon = (ImageView) convertView.findViewById(R.id.msg);
@@ -319,7 +319,7 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 			holder.name.setTypeface(Typeface.DEFAULT);
 			holder.name.setText(StringUtils.parseName(name));
 			if (service.isHighlight(account, name)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
-			else holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
+			else holder.name.setTextColor(Colors.PRIMARY_TEXT);
 			
 			holder.status.setText(subject);
 	        holder.status.setVisibility((prefs.getBoolean("ShowStatuses", false) && subject.length() > 0) ? View.VISIBLE : View.GONE);
@@ -337,7 +337,7 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 	        holder.avatar.setVisibility(View.GONE);
 
             if (prefs.getBoolean("ColorLines", false)) {
-                if ((position % 2) != 0) convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? Colors.ENTRY_BACKGROUND_DARK : Colors.ENTRY_BACKGROUND);
+                if ((position % 2) != 0) convertView.setBackgroundColor(Colors.ENTRY_BACKGROUND);
                 else convertView.setBackgroundColor(0x00000000);
             }
 

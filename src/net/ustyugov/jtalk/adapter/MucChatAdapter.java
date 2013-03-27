@@ -68,10 +68,6 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
     private Timer doubleClickTimer = new Timer();
 
     private SharedPreferences prefs;
-    private int linkColor;
-    private int textColor;
-    private int inColor;
-    private int outColor;
 
     public MucChatAdapter(Context context, Smiles smiles) {
         super(context, R.id.chat1);
@@ -79,7 +75,6 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
         this.smiles = smiles;
         this.prefs = PreferenceManager.getDefaultSharedPreferences(context);
         this.showtime = prefs.getBoolean("ShowTime", false);
-        applyColors();
     }
 
     public String getGroup() { return this.group; }
@@ -155,11 +150,11 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
             }
             if (n.equals(nick)) {
                 int idx = message.indexOf(n);
-                ssb.setSpan(new ForegroundColorSpan(outColor), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                ssb.setSpan(new ForegroundColorSpan(Colors.OUTBOX_MESSAGE), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), idx, idx + n.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
                 int idx = message.indexOf(n);
-                ssb.setSpan(new ForegroundColorSpan(inColor), idx, idx + n.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                ssb.setSpan(new ForegroundColorSpan(Colors.INBOX_MESSAGE), idx, idx + n.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), idx, idx + n.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
 
@@ -169,7 +164,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
                 Matcher nickMatcher = nickPattern.matcher(message);
                 while (nickMatcher.find(pos)) {
                     ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), nickMatcher.start(), nickMatcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    ssb.setSpan(new ForegroundColorSpan(outColor), nickMatcher.start(), nickMatcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    ssb.setSpan(new ForegroundColorSpan(Colors.HIGHLIGHT_TEXT), nickMatcher.start(), nickMatcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     pos = nickMatcher.end();
                 }
             }
@@ -199,8 +194,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
         final MyTextView t1 = (MyTextView) v.findViewById(R.id.chat1);
         t1.setTextSize(fontSize);
         t1.setOnTextLinkClickListener(this);
-        t1.setTextColor(textColor);
-        t1.setLinkTextColor(linkColor);
+        t1.setTextColor(Colors.PRIMARY_TEXT);
         t1.setTextWithLinks(ssb, n);
         if (enableCollapse) {
             t1.setOnTouchListener(new OnTouchListener() {
@@ -258,7 +252,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
             }
         }
 
-        if (item.isSelected()) v.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? Colors.SELECTED_MESSAGE_DARK : Colors.SELECTED_MESSAGE);
+        if (item.isSelected()) v.setBackgroundColor(Colors.SELECTED_MESSAGE);
         else v.setBackgroundColor(0X00000000);
         return v;
     }
@@ -281,21 +275,6 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
                 intent.putExtra("text", s + separator);
                 context.sendBroadcast(intent);
             }
-        }
-    }
-
-    private void applyColors() {
-        if (prefs.getBoolean("DarkColors", false)) {
-            textColor = Colors.PRIMARY_TEXT_DARK;
-            linkColor = Colors.LINK_DARK;
-            outColor = Colors.OUTBOX_MESSAGE_DARK;
-            inColor = Colors.INBOX_MESSAGE_DARK;
-        }
-        else {
-            textColor = Colors.PRIMARY_TEXT;
-            linkColor = Colors.LINK;
-            outColor = Colors.OUTBOX_MESSAGE;
-            inColor = Colors.INBOX_MESSAGE;
         }
     }
 

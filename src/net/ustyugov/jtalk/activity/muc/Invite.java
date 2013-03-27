@@ -18,16 +18,16 @@
 package net.ustyugov.jtalk.activity.muc;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.activity.RosterActivity;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -41,11 +41,13 @@ public class Invite extends SherlockActivity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
         setContentView(R.layout.invite);
         setTitle(R.string.Invite);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
+        linear.setBackgroundColor(Colors.BACKGROUND);
 
         account = getIntent().getStringExtra("account");
         room = getIntent().getStringExtra("room");

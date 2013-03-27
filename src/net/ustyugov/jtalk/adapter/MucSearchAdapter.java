@@ -74,11 +74,11 @@ public class MucSearchAdapter extends ArrayAdapter<HostedRoom>{
             ViewHolder holder = new ViewHolder();
 			holder.name = (TextView) convertView.findViewById(R.id.name);
 			holder.name.setTextSize(fontSize);
-			holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
+			holder.name.setTextColor(Colors.PRIMARY_TEXT);
 			holder.jid = (TextView) convertView.findViewById(R.id.status);
 			holder.jid.setVisibility(View.VISIBLE);
 			holder.jid.setTextSize(fontSize - 4);
-			holder.jid.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.SECONDARY_TEXT_DARK : Colors.SECONDARY_TEXT);
+			holder.jid.setTextColor(Colors.SECONDARY_TEXT);
             holder.icon = (ImageView) convertView.findViewById(R.id.status_icon);
     		holder.icon.setVisibility(View.VISIBLE);
     		holder.icon.setImageBitmap(ip.getMucBitmap());

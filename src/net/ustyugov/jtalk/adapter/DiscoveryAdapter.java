@@ -96,16 +96,9 @@ public class DiscoveryAdapter extends ArrayAdapter<DiscoItem>{
 		id.setTextSize(fontSize - 4);
 		id.setText(jid);
 		if (node != null) id.setText(id.getText() + " (" + node + ")");
-		
-		if (prefs.getBoolean("DarkColors", false)) {
-        	label.setTextColor(Colors.PRIMARY_TEXT_DARK);
-        	id.setTextColor(Colors.SECONDARY_TEXT_DARK);
-        }
-		else {
-			label.setTextColor(Colors.PRIMARY_TEXT);
-			id.setTextColor(Colors.SECONDARY_TEXT);
-		}
 
+        label.setTextColor(Colors.PRIMARY_TEXT);
+        id.setTextColor(Colors.SECONDARY_TEXT);
 		return v;
     }
 }

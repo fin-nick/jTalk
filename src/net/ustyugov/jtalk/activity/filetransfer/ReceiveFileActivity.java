@@ -18,16 +18,16 @@
 package net.ustyugov.jtalk.activity.filetransfer;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Notify;
 import net.ustyugov.jtalk.activity.RosterActivity;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -45,11 +45,13 @@ public class ReceiveFileActivity extends SherlockActivity implements View.OnClic
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
         setContentView(R.layout.receive_file);
         setTitle(R.string.AcceptFile);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
+        linear.setBackgroundColor(Colors.BACKGROUND);
 
         JTalkService service = JTalkService.getInstance();
         if (service != null && service.getIncomingRequests().size() > 0) {

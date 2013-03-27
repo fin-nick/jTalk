@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.DiscoItem;
 import net.ustyugov.jtalk.activity.vcard.VCardActivity;
 import net.ustyugov.jtalk.adapter.DiscoveryAdapter;
@@ -93,13 +94,13 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
         super.onCreate(bundle);
         service = JTalkService.getInstance();
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
         setContentView(R.layout.discovery);
         setTitle(R.string.ServiceDiscovery);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         LinearLayout linear = (LinearLayout) findViewById(R.id.discovery_linear);
-        linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+        linear.setBackgroundColor(Colors.BACKGROUND);
 
         List<String> accounts = new ArrayList<String>();
         for(XMPPConnection connection : service.getAllConnections()) {

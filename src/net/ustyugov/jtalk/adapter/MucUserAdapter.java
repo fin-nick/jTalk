@@ -319,11 +319,11 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 				holder.messageIcon = (ImageView) convertView.findViewById(R.id.msg);
 	            holder.text = (TextView) convertView.findViewById(R.id.name);
 	            holder.text.setTextSize(fontSize);
-	            holder.text.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
+	            holder.text.setTextColor(Colors.PRIMARY_TEXT);
 	            holder.state = (ImageView) convertView.findViewById(R.id.state);
 	            holder.state.setVisibility(View.GONE);
 	            convertView.setTag(holder);
-	            convertView.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? Colors.GROUP_BACKGROUND_DARK : Colors.GROUP_BACKGROUND);
+	            convertView.setBackgroundColor(Colors.GROUP_BACKGROUND);
 			} else {
 				holder = (GroupHolder) convertView.getTag();
 			}
@@ -380,7 +380,7 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 			ItemHolder holder = (ItemHolder) convertView.getTag();
 			holder.name.setText(name);
 			if (service.getComposeList().contains(jid)) holder.name.setTextColor(Colors.HIGHLIGHT_TEXT);
-			else holder.name.setTextColor(prefs.getBoolean("DarkColors", false) ? Colors.PRIMARY_TEXT_DARK : Colors.PRIMARY_TEXT);
+			else holder.name.setTextColor(Colors.PRIMARY_TEXT);
 			
 			if (service.getActiveChats(account).contains(jid)) {
 				holder.name.setTypeface(Typeface.DEFAULT_BOLD);

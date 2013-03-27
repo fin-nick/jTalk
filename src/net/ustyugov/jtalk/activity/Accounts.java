@@ -23,6 +23,7 @@ import android.content.*;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import net.ustyugov.jtalk.Account;
+import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.Notify;
 import net.ustyugov.jtalk.activity.vcard.SetVcardActivity;
@@ -31,7 +32,6 @@ import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
 
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.ContextMenu;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -57,19 +57,17 @@ public class Accounts extends SherlockActivity {
 	@Override
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
         setContentView(R.layout.accounts);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		setTitle(R.string.Accounts);
         
         LinearLayout linear = (LinearLayout) findViewById(R.id.accounts_linear);
-        linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+        linear.setBackgroundColor(Colors.BACKGROUND);
 
         adapter = new AccountsAdapter(this);
 		
 		list = (ListView) findViewById(R.id.accounts_List);
-        list.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
         list.setDividerHeight(0);
         list.setCacheColorHint(0x00000000);
         list.setAdapter(adapter);

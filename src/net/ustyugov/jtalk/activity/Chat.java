@@ -23,11 +23,7 @@ import java.util.List;
 
 import android.widget.*;
 import com.actionbarsherlock.widget.SearchView;
-import net.ustyugov.jtalk.Constants;
-import net.ustyugov.jtalk.MessageItem;
-import net.ustyugov.jtalk.Notify;
-import net.ustyugov.jtalk.RosterItem;
-import net.ustyugov.jtalk.Smiles;
+import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.filetransfer.SendFileActivity;
 import net.ustyugov.jtalk.activity.vcard.VCardActivity;
 import net.ustyugov.jtalk.adapter.*;
@@ -129,7 +125,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
             maxMucCount = Integer.parseInt(prefs.getString("MaxMucMessages", "0"));
         } catch (NumberFormatException ignored) {	}
 
-        setTheme(prefs.getBoolean("DarkColors", false) ? R.style.AppThemeDark : R.style.AppThemeLight);
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 
         chatsSpinnerAdapter = new ChatsSpinnerAdapter(this);
         ActionBar actionBar = getSupportActionBar();
@@ -160,7 +156,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         setContentView(R.layout.chat);
 
         LinearLayout linear = (LinearLayout) findViewById(R.id.chat_linear);
-        linear.setBackgroundColor(prefs.getBoolean("DarkColors", false) ? 0xFF000000 : 0xFFFFFFFF);
+        linear.setBackgroundColor(Colors.BACKGROUND);
 
         smiles = new Smiles(this);
 

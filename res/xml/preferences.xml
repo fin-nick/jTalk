@@ -149,6 +149,10 @@
                 android:numeric="integer"
                 android:title="@string/NumberOfCharacters"
                 android:defaultValue="64" />
+        <EditTextPreference
+                android:key="IgnoreJids"
+                android:title="Ignore users"
+                android:defaultValue="" />
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/Autostatus">

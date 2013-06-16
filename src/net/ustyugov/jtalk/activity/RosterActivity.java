@@ -221,6 +221,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
             menu.findItem(R.id.muc).setEnabled(service.isAuthenticated());
             menu.findItem(R.id.disco).setEnabled(service.isAuthenticated());
             menu.findItem(R.id.offline).setTitle(prefs.getBoolean("hideOffline", false) ? R.string.ShowOfflineContacts : R.string.HideOfflineContacts);
+            menu.findItem(R.id.notify).setTitle(prefs.getBoolean("soundDisabled", false) ? R.string.EnableSound : R.string.DisableSound);
 
             if (Build.VERSION.SDK_INT >= 8) {
                 MenuItem.OnActionExpandListener listener = new MenuItem.OnActionExpandListener() {
@@ -310,6 +311,11 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
   	    	case R.id.disco:
   	    		startActivity(new Intent(this, ServiceDiscovery.class));
   	    		break;
+            case R.id.notify:
+                if (prefs.getBoolean("soundDisabled", false)) service.setPreference("soundDisabled", false);
+                else service.setPreference("soundDisabled", true);
+                updateMenu();
+                break;
   	    	case R.id.exit:
   	    		if (prefs.getBoolean("DeleteHistory", false)) {
   	    			getContentResolver().delete(JTalkProvider.CONTENT_URI, null, null);
@@ -317,6 +323,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
   	    		Notify.cancelAll(this);
                 stopService(new Intent(this, JTalkService.class));
                 finish();
+                System.exit(0);
   	    		break;
   	    	default:
   	    		return false;

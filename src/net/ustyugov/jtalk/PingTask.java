@@ -53,14 +53,14 @@ public class PingTask extends AsyncTask<Void, Void, Void> {
             iq.setType(IQ.Type.GET);
             iq.setTo(service.getConnection(account).getServiceName());
 
-            Log.e("PING", iq.toXML());
+//            Log.e("PING", iq.toXML());
 
             PacketCollector collector = service.getConnection(account).createPacketCollector(new PacketIDFilter(iq.getPacketID()));
             service.getConnection(account).sendPacket(iq);
 
             IQ result = (IQ)collector.nextResult(timeout);
             if (result != null && result.getType() == IQ.Type.RESULT) {
-                Log.e("PONG", result.toXML());
+//                Log.e("PONG", result.toXML());
                 return null;
             } else {
                 service.reconnect(account);

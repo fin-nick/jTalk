@@ -182,10 +182,13 @@ public class Notify {
     }
     
     public static void messageNotify(String account, String from, Type type, String text) {
+        JTalkService service = JTalkService.getInstance();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
+        String ignored = prefs.getString("IgnoreJids","");
+        if (ignored.toLowerCase().contains(from.toLowerCase())) return;
+
     	newMessages = true;
-    	JTalkService service = JTalkService.getInstance();
     	String nick = from;
-    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
         String ticker = "";
     	boolean include = prefs.getBoolean("MessageInNotification", false);
     	if (include) {
@@ -196,24 +199,31 @@ public class Notify {
     	Vibrator vibrator = (Vibrator) service.getSystemService(Context.VIBRATOR_SERVICE);
     	boolean vibro = false;
     	boolean sound = true;
-    	String soundPath = "";
+        String soundPath = "";
 
     	if (type == Type.Conference) {
     		String currentJid = JTalkService.getInstance().getCurrentJid();
         	if (!currentJid.equals(from) || currentJid.equals("me")) {
-        		if (vibration.equals("1") || vibration.equals("4")) vibrator.vibrate(200);
-        		new SoundTask().execute("");
+                if (!prefs.getBoolean("soundDisabled", false)) {
+                    if (vibration.equals("1") || vibration.equals("4")) vibrator.vibrate(200);
+                    new SoundTask().execute("");
+                }
         	}
     		return;
     	} else if (type == Type.Direct) {
-    		if (vibration.equals("1") || vibration.equals("3") || vibration.equals("4")) vibro = true;
-    		soundPath = prefs.getString("ringtone_direct", "");
+            if (!prefs.getBoolean("soundDisabled", false)) {
+                if (vibration.equals("1") || vibration.equals("3") || vibration.equals("4")) vibro = true;
+                soundPath = prefs.getString("ringtone_direct", "");
+            }
     	} else {
-    		if (vibration.equals("1") || vibration.equals("2") || vibration.equals("3")) vibro = true;
-    		soundPath = prefs.getString("ringtone", "");
+            if (!prefs.getBoolean("soundDisabled", false)) {
+                if (vibration.equals("1") || vibration.equals("2") || vibration.equals("3")) vibro = true;
+                soundPath = prefs.getString("ringtone", "");
+            }
     	}
     	
     	if (soundPath.equals("")) sound = false;
+
     	
     	String currentJid = JTalkService.getInstance().getCurrentJid();
     	if (!currentJid.equals(from) || currentJid.equals("me")) {

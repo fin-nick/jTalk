@@ -174,6 +174,8 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
                             result.putString(AccountManager.KEY_ACCOUNT_TYPE, getString(R.string.app_name));
                             if (response != null) response.onResult(result);
                         }
+
+                        cursor.close();
                     } else {
                         Toast.makeText(this, "Account is already added!", Toast.LENGTH_LONG).show();
                         return;

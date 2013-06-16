@@ -20,12 +20,15 @@ package net.ustyugov.jtalk;
 public class Account {
 	private int id;
 	private String jid;
+    private boolean enabled = false;
 	
 	public Account(int id, String jid) {
 		this.id = id;
 		this.jid = jid;
 	}
-	
+
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    public boolean isEnabled() { return this.enabled; }
 	public int getId() { return this.id; }
 	public String getJid() { return this.jid; }
 }

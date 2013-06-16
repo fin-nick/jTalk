@@ -60,7 +60,7 @@ public class Presence extends Packet {
 
     private Type type = Type.available;
     private String status = null;
-    private int priority = Integer.MIN_VALUE;
+    private int priority = 0;
     private Mode mode = null;
     private String language;
 

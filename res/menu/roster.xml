@@ -28,6 +28,9 @@
     <item android:id="@+id/disco"
         android:showAsAction="never"
         android:title="@string/ServiceDiscovery"/>
+    <item android:id="@+id/notify"
+          android:showAsAction="never"
+          android:title="@string/DisableSound"/>
     <item android:id="@+id/prefs"
         android:showAsAction="never"
         android:title="@string/Settings"/>

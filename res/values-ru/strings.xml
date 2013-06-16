@@ -108,6 +108,8 @@
     <string name="NoMaxLines">Автовысота поля ввода</string>
     <string name="ColorLines">Чередующийся фон</string>
     <string name="ColorTheme">Цветовая схема</string>
+    <string name="DisableSound">Отключить звук</string>
+    <string name="EnableSound">Включить звук</string>
     
     <!--  Menus -->
     <string name="Update">Обновить</string>

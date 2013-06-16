@@ -4,6 +4,10 @@
         android:icon="@drawable/ic_menu_emoticons"
           android:title="@string/PasteSmile"
           android:showAsAction="ifRoom"/>
+    <item android:id="@+id/chats"
+          android:showAsAction="ifRoom"
+          android:icon="@drawable/ic_menu_cc"
+          android:title="@string/ActiveChats"/>
     <item android:id="@+id/sidebar"
         android:showAsAction="always"
         android:icon="@drawable/ic_menu_sidebar"

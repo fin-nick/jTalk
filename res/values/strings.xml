@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">jTalk</string>
     <string name="version">0.47.1</string>
-    <string name="build">383</string>
+    <string name="build">384</string>
     
     <string name="Connect">Connect</string>
     <string name="Disconnect">Disconnect</string>
@@ -116,6 +116,8 @@
     <string name="NoMaxLines">Automatic height of message input</string>
     <string name="ColorLines">Striped background</string>
     <string name="ColorTheme">Theme</string>
+    <string name="DisableSound">Disable sound</string>
+    <string name="EnableSound">Enable sound</string>
 
     <!--  Menus -->
     <string name="Update">Update</string>

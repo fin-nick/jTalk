@@ -17,9 +17,14 @@
 
 package net.ustyugov.jtalk.adapter;
 
+import android.app.AlertDialog;
+import android.content.ContentValues;
+import android.content.DialogInterface;
+import android.widget.*;
 import net.ustyugov.jtalk.Account;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.IconPicker;
+import net.ustyugov.jtalk.Notify;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -34,9 +39,6 @@ import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.jtalk2.R;
 
@@ -65,8 +67,10 @@ public class AccountsAdapter extends ArrayAdapter<Account> {
 			do {
 				int id = cursor.getInt(cursor.getColumnIndex(AccountDbHelper._ID));
 				String jid = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID));
+                String enabled = cursor.getString(cursor.getColumnIndex(AccountDbHelper.ENABLED));
 				
 				Account account = new Account(id, jid);
+                account.setEnabled(enabled.equals("1"));
 				add(account);
 			} while (cursor.moveToNext());
 			cursor.close();
@@ -77,8 +81,9 @@ public class AccountsAdapter extends ArrayAdapter<Account> {
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		IconPicker ip = service.getIconPicker();
 		View v = convertView;
-		Account account = getItem(position);
+		final Account account = getItem(position);
 		final String jid = account.getJid();
+        final int id = account.getId();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
     
 		if (v == null) {
@@ -90,6 +95,49 @@ public class AccountsAdapter extends ArrayAdapter<Account> {
 		label.setText(jid);
 		label.setTextSize(fontSize);
         label.setTextColor(Colors.PRIMARY_TEXT);
+
+        ToggleButton toggle = (ToggleButton) v.findViewById(R.id.toggle);
+        toggle.setChecked(account.isEnabled());
+        toggle.setVisibility(View.VISIBLE);
+        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+
+            }
+        });
+
+        toggle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ToggleButton toggle = (ToggleButton) view;
+                JTalkService service = JTalkService.getInstance();
+                ContentValues values = new ContentValues();
+                if (toggle.isChecked()) {
+                    values.put(AccountDbHelper.ENABLED, "1");
+                    AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                    builder.setMessage("Connect?");
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            JTalkService.getInstance().connect(jid);
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    builder.create().show();
+                } else {
+                    values.put(AccountDbHelper.ENABLED, "0");
+                    if (service.isAuthenticated(jid)) {
+                        service.disconnect(jid);
+                        if (service.isAuthenticated()) Notify.updateNotify();
+                        else Notify.offlineNotify(service.getGlobalState());
+                    }
+                }
+                activity.getContentResolver().update(JTalkProvider.ACCOUNT_URI, values, "_id = '" + id + "'", null);
+            }
+        });
 
 		ImageView icon = (ImageView)v.findViewById(R.id.status);
 		icon.setImageResource(R.drawable.icon_offline);

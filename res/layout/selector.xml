@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="fill_parent"
     android:paddingTop="3dip">
 	<ImageView
 		android:id="@+id/status" 
@@ -29,6 +29,14 @@
  			android:layout_marginRight="5dip" 
  			android:visibility="gone" 
  			android:id="@+id/msg" 
- 			android:layout_gravity="center"/> 
+ 			android:layout_gravity="center"/>
+        <ToggleButton
+                android:id="@+id/toggle"
+                android:focusable="false"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textOn="On"
+                android:textOff="Off"/>
 	</LinearLayout>
 </LinearLayout>

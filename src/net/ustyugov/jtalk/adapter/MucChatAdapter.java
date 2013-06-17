@@ -279,10 +279,12 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
     }
 
     private String createTimeString(String time) {
-        Date d = new Date();
-        java.text.DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-        String currentDate = df.format(d).substring(0,10);
-        if (currentDate.equals(time.substring(0,10))) return "(" + time.substring(11) + ")";
-        else return "(" + time + ")";
+        try {
+            Date d = new Date();
+            java.text.DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+            String currentDate = df.format(d).substring(0,10);
+            if (currentDate.equals(time.substring(0,10))) return "(" + time.substring(11) + ")";
+            else return "(" + time + ")";
+        } catch (Exception e) { return "( )"; }
     }
 }

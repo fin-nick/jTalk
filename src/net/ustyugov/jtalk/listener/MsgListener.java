@@ -17,7 +17,7 @@
 
 package net.ustyugov.jtalk.listener;
 
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -50,7 +50,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.text.format.DateFormat;
 
 import com.jtalk2.R;
 
@@ -138,13 +137,10 @@ public class MsgListener implements PacketListener {
                 String group = StringUtils.parseBareAddress(from);
 
 	        	Date date = new java.util.Date();
-				String time = DateFormat.getTimeFormat(context).format(date);
 				DelayInformation delayExt = (DelayInformation) msg.getExtension("jabber:x:delay");
-				if (delayExt != null) {
-                    if (service.getJoinedConferences().containsKey(group)) return;
-                    time = delayExt.getStamp().toLocaleString();
-                }
-		       
+				if (delayExt != null) date.setTime(delayExt.getStamp().getTime());
+                String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date);
+
 	        	String mynick = context.getResources().getString(R.string.Me);
 	        	if (service.getConferencesHash(account).containsKey(group)) mynick = service.getConferencesHash(account).get(group).getNickname();
 
@@ -187,8 +183,7 @@ public class MsgListener implements PacketListener {
 
 		        		if (name == null || name.length() <= 0) {
                             Date date = new java.util.Date();
-                            date.setTime(Long.parseLong(System.currentTimeMillis()+""));
-                            String time = DateFormat.getTimeFormat(context).format(date);
+                            String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date);
 
 		        			MessageItem mucMsg = new MessageItem(account, from);
 		    				mucMsg.setBody(body);
@@ -225,12 +220,11 @@ public class MsgListener implements PacketListener {
 		        	}
 		        	
 		            if (name == null || name.equals("")) name = user;
+
 		            Date date = new java.util.Date();
-		            date.setTime(Long.parseLong(System.currentTimeMillis()+""));
-		            String time = DateFormat.getTimeFormat(context).format(date);
-		            
 		            DelayInformation delayExt = (DelayInformation) msg.getExtension("jabber:x:delay");
-					if (delayExt != null) time = delayExt.getStamp().toLocaleString();
+					if (delayExt != null) date.setTime(delayExt.getStamp().getTime());
+                    String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date);
 					
 		            MessageItem item = new MessageItem(account, ofrom);
 		            item.setSubject(msg.getSubject());

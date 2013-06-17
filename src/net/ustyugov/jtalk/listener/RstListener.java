@@ -17,9 +17,8 @@
 
 package net.ustyugov.jtalk.listener;
 
+import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Date;
-import java.util.List;
 
 import android.preference.PreferenceManager;
 import net.ustyugov.jtalk.Avatars;
@@ -34,7 +33,6 @@ import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.util.StringUtils;
 
 import android.content.Intent;
-import android.text.format.DateFormat;
 
 import com.jtalk2.R;
 
@@ -77,9 +75,7 @@ public class RstListener implements RosterListener {
     	if (status != null && status.length() > 0) status = "(" + status + ")";
     	else status = "";
 
-      	Date date = new java.util.Date();
-        date.setTime(Long.parseLong(System.currentTimeMillis()+""));
-        String time = DateFormat.getTimeFormat(service).format(date);
+        String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new java.util.Date());
 
       	MessageItem item = new MessageItem(account, jid);
 		if (presence.isAvailable()) {

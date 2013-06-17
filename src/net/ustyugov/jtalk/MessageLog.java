@@ -17,8 +17,6 @@
 
 package net.ustyugov.jtalk;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.db.MessageDbHelper;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -37,7 +35,7 @@ public class MessageLog {
                 values.put(MessageDbHelper.TYPE, message.getType().name());
                 values.put(MessageDbHelper.JID, jid);
                 values.put(MessageDbHelper.ID, message.getId());
-                values.put(MessageDbHelper.STAMP, getStamp());
+                values.put(MessageDbHelper.STAMP, message.getTime());
                 values.put(MessageDbHelper.NICK, message.getName());
                 values.put(MessageDbHelper.BODY, message.getBody());
                 values.put(MessageDbHelper.COLLAPSED, message.isCollapsed() ? "true" : "false");
@@ -64,7 +62,7 @@ public class MessageLog {
             values.put(MessageDbHelper.TYPE, message.getType().name());
             values.put(MessageDbHelper.JID, group);
             values.put(MessageDbHelper.ID, message.getId());
-            values.put(MessageDbHelper.STAMP, getStamp());
+            values.put(MessageDbHelper.STAMP, message.getTime());
             values.put(MessageDbHelper.NICK, nick);
             values.put(MessageDbHelper.BODY, message.getBody());
             values.put(MessageDbHelper.COLLAPSED, message.isCollapsed() ? "true" : "false");
@@ -122,11 +120,5 @@ public class MessageLog {
 	            }
 			}
 		}.start();
-	}
-	
-	private static String getStamp() {
-		Date d = new Date();
- 	    java.text.DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
- 	    return df.format(d);
 	}
 }

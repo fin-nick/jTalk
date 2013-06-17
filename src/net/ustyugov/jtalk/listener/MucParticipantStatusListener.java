@@ -18,7 +18,7 @@
 package net.ustyugov.jtalk.listener;
 
 import java.io.File;
-import java.util.Date;
+import java.text.SimpleDateFormat;
 
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
@@ -29,9 +29,6 @@ import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.muc.ParticipantStatusListener;
 import org.jivesoftware.smackx.packet.MUCUser;
-
-import android.content.Intent;
-import android.text.format.DateFormat;
 
 import com.jtalk2.R;
 
@@ -58,9 +55,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 		if (status != null && status.length() > 0) status = "(" + status + ")";
 		else status = "";
 		
-    	Date date = new java.util.Date();
-        date.setTime(Long.parseLong(System.currentTimeMillis()+""));
-        String time = DateFormat.getTimeFormat(service).format(date);
+        String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new java.util.Date());
         
 		MessageItem item = new MessageItem(account, participant);
         item.setName(nick);
@@ -73,10 +68,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 	
 	public void nicknameChanged(String p, String newNick) {
 		String nick = StringUtils.parseResource(p);
-		
-    	Date date = new java.util.Date();
-        date.setTime(Long.parseLong(System.currentTimeMillis()+""));
-        String time = DateFormat.getTimeFormat(service).format(date);
+        String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new java.util.Date());
         
    		MessageItem item = new MessageItem(account, p);
 		item.setBody(service.getResources().getString(R.string.ChangedNicknameTo) + " " + newNick);
@@ -97,10 +89,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 
 	public void banned(String p, String actor, String reason) {
 		String nick = StringUtils.parseResource(p);
-		
-    	Date date = new java.util.Date();
-        date.setTime(Long.parseLong(System.currentTimeMillis()+""));
-        String time = DateFormat.getTimeFormat(service).format(date);
+        String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new java.util.Date());
         
     	MessageItem item = new MessageItem(account, p);
 		item.setBody("banned (" + reason + ")");
@@ -113,11 +102,8 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 	
 	public void kicked(String p, String actor, String reason) {
 		String nick = StringUtils.parseResource(p);
-		
-    	Date date = new java.util.Date();
-        date.setTime(Long.parseLong(System.currentTimeMillis()+""));
-        String time = DateFormat.getTimeFormat(service).format(date);
-        
+        String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new java.util.Date());
+
     	MessageItem item = new MessageItem(account, p);
 		item.setBody("kicked (" + reason + ")");
 		item.setReceived(false);
@@ -132,10 +118,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 		String nick = StringUtils.parseResource(participant);
         String jid = "";
         String stat = "";
-		
-    	Date date = new java.util.Date();
-        date.setTime(Long.parseLong(System.currentTimeMillis()+""));
-        String time = DateFormat.getTimeFormat(service).format(date);
+        String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new java.util.Date());
 
         Presence p = service.getConferencesHash(account).get(g).getOccupantPresence(participant);
         MUCUser mucUser = (MUCUser) p.getExtension("x", "http://jabber.org/protocol/muc#user");
@@ -159,10 +142,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 	
 	public void left(String participant) {
 		String nick = StringUtils.parseResource(participant);
-
-    	Date date = new java.util.Date();
-        date.setTime(Long.parseLong(System.currentTimeMillis()+""));
-        String time = DateFormat.getTimeFormat(service).format(date);
+        String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new java.util.Date());
 
     	MessageItem item = new MessageItem(account, participant);
 		item.setBody(service.getString(R.string.UserLeaved));
@@ -194,10 +174,8 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 		if (mucUser != null) {
 			role = mucUser.getItem().getRole();
 			affiliation = mucUser.getItem().getAffiliation();
-			
-			Date date = new java.util.Date();
-	        date.setTime(Long.parseLong(System.currentTimeMillis()+""));
-	        String time = DateFormat.getTimeFormat(service).format(date);
+
+            String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new java.util.Date());
 	        
 	        int id = service.getResources().getIdentifier(role, null, null);
 	        if (id > 0) role = service.getResources().getString(id);

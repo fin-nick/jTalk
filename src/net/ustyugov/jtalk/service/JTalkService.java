@@ -19,13 +19,13 @@ package net.ustyugov.jtalk.service;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.RosterActivity;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
-import net.ustyugov.jtalk.dialog.RosterDialogs;
 import net.ustyugov.jtalk.listener.ConListener;
 import net.ustyugov.jtalk.listener.IncomingFileListener;
 import net.ustyugov.jtalk.listener.InviteListener;
@@ -98,7 +98,6 @@ import org.xbill.DNS.Type;
 
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -114,7 +113,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
-import android.text.format.DateFormat;
 import android.util.Log;
 
 import com.jtalk2.R;
@@ -1016,8 +1014,7 @@ public class JTalkService extends Service {
   	  		msg.addExtension(receipt);
   	  		
   	  		Date date = new java.util.Date();
-  	        date.setTime(Long.parseLong(mil));
-  	        String time = DateFormat.getTimeFormat(this).format(date);
+            String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date);
   	        
   	  		MessageItem msgItem = new MessageItem(account, user);
   	  		msgItem.setTime(time);
@@ -1292,9 +1289,7 @@ public class JTalkService extends Service {
   	}
 
     private void writeMucMessage(String account, String group, String nick, String message) {
-        Date date = new java.util.Date();
-        date.setTime(Long.parseLong(System.currentTimeMillis()+""));
-        String time = DateFormat.getTimeFormat(getInstance()).format(date);
+        String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new java.util.Date());
 
         MessageItem item = new MessageItem(account, group + "/" + nick);
         item.setBody(message);

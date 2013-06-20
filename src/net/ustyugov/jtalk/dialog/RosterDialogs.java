@@ -24,6 +24,7 @@ import java.util.List;
 
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.IgnoreList;
+import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.activity.CommandsActivity;
 import net.ustyugov.jtalk.activity.PrivacyListsActivity;
@@ -466,6 +467,7 @@ public class RosterDialogs {
 	        	case 9:
 	        		service.setChatState(account, jid, ChatState.gone);
 		        	service.removeActiveChat(account, jid);
+                    service.setMessageList(account, jid, new ArrayList<MessageItem>());
 					if (service.getCurrentJid().equals(jid)) service.sendBroadcast(new Intent(Constants.FINISH));
 					else service.sendBroadcast(new Intent(Constants.UPDATE));
 		        	break;

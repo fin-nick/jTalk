@@ -63,7 +63,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         item.setType(MessageItem.Type.status);
         item.setBody(statusArray[getPosition(mode)] + " " + status);
         
-        MessageLog.writeMucMessage(g, nick, item);
+        MessageLog.writeMucMessage(account, g, nick, item);
 	}
 	
 	public void nicknameChanged(String p, String newNick) {
@@ -84,7 +84,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         	}
         } catch (Exception ignored) { }
 
-        MessageLog.writeMucMessage(g, nick, item);
+        MessageLog.writeMucMessage(account, g, nick, item);
 	}
 
 	public void banned(String p, String actor, String reason) {
@@ -97,7 +97,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         item.setName(nick);
         item.setTime(time);
         
-        MessageLog.writeMucMessage(g, nick, item);
+        MessageLog.writeMucMessage(account, g, nick, item);
 	}
 	
 	public void kicked(String p, String actor, String reason) {
@@ -111,7 +111,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         item.setTime(time);
         item.setType(MessageItem.Type.status);
         
-        MessageLog.writeMucMessage(g, nick, item);
+        MessageLog.writeMucMessage(account, g, nick, item);
 	}
 	
 	public void joined(String participant) { 
@@ -137,7 +137,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         item.setName(nick);
         item.setTime(time);
         
-        MessageLog.writeMucMessage(g, nick, item);
+        MessageLog.writeMucMessage(account, g, nick, item);
 	}
 	
 	public void left(String participant) {
@@ -150,7 +150,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
         item.setName(nick);
         item.setTime(time);
         
-        MessageLog.writeMucMessage(g, nick, item);
+        MessageLog.writeMucMessage(account, g, nick, item);
 	}
 	
 	public void adminGranted(String participant) { stateChanged(participant); }
@@ -188,7 +188,7 @@ public class MucParticipantStatusListener implements ParticipantStatusListener {
 	        item.setName(nick);
 	        item.setTime(time);
 	        
-	        MessageLog.writeMucMessage(g, nick, item);
+	        MessageLog.writeMucMessage(account, g, nick, item);
 		}
 	}
 	

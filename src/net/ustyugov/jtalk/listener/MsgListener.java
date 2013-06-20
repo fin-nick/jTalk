@@ -125,7 +125,18 @@ public class MsgListener implements PacketListener {
                     values.put(MessageDbHelper.FORM, "NULL");
                     values.put(MessageDbHelper.BOB, "NULL");
                     service.getContentResolver().update(JTalkProvider.CONTENT_URI, values, MessageDbHelper.ID + " = '" + id + "'", null);
-                    context.sendBroadcast(new Intent(Constants.RECEIVED));
+
+                    List<MessageItem> list = service.getMessageList(account, user);
+                    if (!list.isEmpty()) {
+                        for(MessageItem item : list) {
+                            if (item.getId().equals(id)) {
+                                item.setReceived(true);
+                                service.setMessageList(account, user, list);
+                                context.sendBroadcast(new Intent(Constants.RECEIVED));
+                                return;
+                            }
+                        }
+                    }
                     return;
                 }
 			}
@@ -165,13 +176,14 @@ public class MsgListener implements PacketListener {
                         }
                     } else Notify.messageNotify(account, group, Notify.Type.Conference, body);
 
-                    MessageLog.writeMucMessage(group, nick, item);
+                    MessageLog.writeMucMessage(account, group, nick, item);
 	            }
 	        } else if (type.equals("chat") || type.equals("normal") || type.equals("headline")) {
 	        	ReplaceExtension replace = (ReplaceExtension) msg.getExtension("urn:xmpp:message-correct:0");
 	    		if (replace != null) {
 	    			String rid = replace.getId();
 	    			MessageLog.editMessage(account, user, rid, body);
+                    Notify.messageNotify(account, user, Notify.Type.Chat, body);
 	    		} else {
 		        	String name = null;
 		        	String group = null;

@@ -158,7 +158,25 @@ public class JTalkService extends Service {
 
     private IconPicker iconPicker;
 
+    private Hashtable<String, Hashtable<String, List<MessageItem>>> messages = new Hashtable<String, Hashtable<String, List<MessageItem>>>();
+
     public static JTalkService getInstance() { return js; }
+
+    public List<MessageItem> getMessageList(String account, String jid) {
+        Hashtable<String, List<MessageItem>> hash = new Hashtable<String, List<MessageItem>>();
+        if (messages.containsKey(account)) hash = messages.get(account);
+
+        if (!hash.containsKey(jid)) return new ArrayList<MessageItem>();
+        else return hash.get(jid);
+    }
+
+    public void setMessageList(String account, String jid, List<MessageItem> list) {
+        Hashtable<String, List<MessageItem>> hash = new Hashtable<String, List<MessageItem>>();
+        if (messages.containsKey(account)) hash = messages.get(account);
+
+        hash.put(jid, list);
+        messages.put(account, hash);
+    }
     
     private void removeConnectionListener(String account) {
     	if (conListeners.containsKey(account)) {
@@ -247,21 +265,6 @@ public class JTalkService extends Service {
             }
         }
 //    	updateWidget();
-    }
-
-    public void setMsgCounter(String jid, int count) {
-        msgCounter.put(jid, count);
-    }
-
-    public int getMsgCount(String jid) {
-        if (msgCounter.containsKey(jid)) return msgCounter.get(jid);
-        else return 0;
-    }
-
-    public void addMsgCounter(String jid) {
-        int count = 0;
-        if (msgCounter.containsKey(jid)) count = msgCounter.get(jid);
-        msgCounter.put(jid, count+1);
     }
 
     public void addDataForm(String id, DataForm form) {
@@ -930,6 +933,7 @@ public class JTalkService extends Service {
                 }
 			} catch (IllegalStateException ignored) { }
 			getConferencesHash(account).remove(group);
+            setMessageList(account, group, new ArrayList<MessageItem>());
 	    }
 	    if (joinedConferences.containsKey(group)) joinedConferences.remove(group);
 	    Intent updateIntent = new Intent(Constants.PRESENCE_CHANGED);
@@ -1297,7 +1301,7 @@ public class JTalkService extends Service {
         item.setName(StringUtils.parseName(group));
         item.setTime(time);
 
-        MessageLog.writeMucMessage(group, nick, item);
+        MessageLog.writeMucMessage(account, group, nick, item);
     }
 
   	private void clearAll() {

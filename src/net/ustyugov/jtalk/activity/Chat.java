@@ -401,6 +401,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         }
 
         updateList();
+        if (msgList.isEmpty()) loadStory(false);
 
         int unreadMessages = service.getMessagesCount(account, jid);
         int lastPosition = service.getLastPosition(jid);
@@ -443,7 +444,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         if (msgList.isEmpty()) {
             if (!isMuc) service.setChatState(account, jid, ChatState.gone);
         }
-        msgList.clear();
+//        msgList.clear();
         jid = null;
         account = null;
     }
@@ -613,12 +614,12 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 MucDialogs.inviteDialog(this, account, jid);
                 break;
             case R.id.history:
-                loadStory();
-                updateList();
+                loadStory(true);
                 break;
             case R.id.delete_history:
                 getContentResolver().delete(JTalkProvider.CONTENT_URI, "jid = '" + jid + "'", null);
                 msgList.clear();
+                service.setMessageList(account, jid, msgList);
                 updateList();
                 break;
             case R.id.chats:
@@ -705,9 +706,17 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
                     case 0:
+                        List<MessageItem> list = service.getMessageList(account, jid);
                         String baseId = message.getBaseId();
+
                         if (selectedMessages.contains(baseId)) selectedMessages.remove(baseId);
                         else selectedMessages.add(baseId);
+
+                        for (MessageItem item : list) {
+                            if (item.getBaseId().equals(baseId)) {
+                                item.select(!item.isSelected());
+                            }
+                        }
                         updateList();
                         break;
                     case 1:
@@ -758,62 +767,21 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     }
 
     private void updateMessage(String id, String body) {
-        for (MessageItem item : msgList) {
-            if (item.getType() == MessageItem.Type.message) {
-                if (id.equals(item.getId())) {
-                    item.setBody(body);
-                    item.setEdited(true);
-                    listAdapter.notifyDataSetChanged();
-                }
-            }
-        }
+//        for (MessageItem item : msgList) {
+//            if (item.getType() == MessageItem.Type.message) {
+//                if (id.equals(item.getId())) {
+//                    item.setBody(body);
+//                    item.setEdited(true);
+//                    listAdapter.notifyDataSetChanged();
+//                }
+//            }
+//        }
     }
 
     private void updateList() {
         boolean scroll = listView.isScroll();
-        int count = service.getMsgCount(jid);
-        if (isMuc) {
-            if (maxMucCount > 0) count = maxMucCount;
-        } else {
-            if (maxCount > 0) count = maxCount;
-        }
 
-        msgList.clear();
-        Cursor cursor;
-        if (showStatuses) {
-            cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "'", null, MessageDbHelper._ID);
-        } else {
-            cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "' AND type = 'message'", null, MessageDbHelper._ID);
-        }
-
-        if (cursor != null && cursor.getCount() > 0 && count > 0) {
-            if (cursor.getCount() > count) {
-                cursor.moveToPosition(cursor.getCount()-count);
-            } else cursor.moveToFirst();
-
-            do {
-                String baseId = cursor.getString(cursor.getColumnIndex(MessageDbHelper._ID));
-                String id = cursor.getString(cursor.getColumnIndex(MessageDbHelper.ID));
-                String nick = cursor.getString(cursor.getColumnIndex(MessageDbHelper.NICK));
-                String type = cursor.getString(cursor.getColumnIndex(MessageDbHelper.TYPE));
-                String stamp = cursor.getString(cursor.getColumnIndex(MessageDbHelper.STAMP));
-                String body = cursor.getString(cursor.getColumnIndex(MessageDbHelper.BODY));
-                boolean received = Boolean.valueOf(cursor.getString(cursor.getColumnIndex(MessageDbHelper.RECEIVED)));
-
-                MessageItem item = new MessageItem(account, jid);
-                item.setBaseId(baseId);
-                item.setId(id);
-                item.setName(nick);
-                item.setType(MessageItem.Type.valueOf(type));
-                item.setTime(stamp);
-                item.setBody(body);
-                item.setReceived(received);
-                item.select(selectedMessages.contains(baseId));
-
-                msgList.add(item);
-            } while (cursor.moveToNext());
-            cursor.close();
-        }
+        msgList = service.getMessageList(account, jid);
 
         if (isMuc) {
             listMucAdapter.update(jid, muc.getNickname(), msgList, searchString);
@@ -902,15 +870,8 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
             public void onReceive(Context context, Intent intent) {
                 String user = intent.getExtras().getString("jid");
                 boolean clear = intent.getBooleanExtra("clear", false);
-                boolean edit = intent.getBooleanExtra("edit", false);
                 if (user.equals(jid)) {
-                    if (edit) {
-                        String id = intent.getStringExtra("id");
-                        String body = intent.getStringExtra("body");
-                        if (id != null && body != null) updateMessage(id, body);
-                    } else {
-                        updateList();
-                    }
+                    updateList();
                 } else {
                     updateUsers();
                     updateChats();
@@ -1000,21 +961,57 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         else listView.setScroll(false);
     }
 
-    private void loadStory() {
+    private void loadStory(boolean all) {
+        if (isMuc) return;
+        int count = setLastMessagesCounter();
+
+        if (isMuc) {
+            if (maxMucCount > 0) count = maxMucCount;
+        } else {
+            if (maxCount > 0) count = maxCount;
+        }
+
         Cursor cursor;
         if (showStatuses) {
             cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "'", null, MessageDbHelper._ID);
         } else {
             cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "' AND type = 'message'", null, MessageDbHelper._ID);
         }
-        if (cursor != null && cursor.getCount() > 0) {
-            service.setMsgCounter(jid, cursor.getCount());
+
+        if (cursor != null && cursor.getCount() > 0 && count > 0) {
+            if (cursor.getCount() > count && !all) {
+                cursor.moveToPosition(cursor.getCount()-count);
+            } else cursor.moveToFirst();
+
+            List<MessageItem> list = new ArrayList<MessageItem>();
+            do {
+                String baseId = cursor.getString(cursor.getColumnIndex(MessageDbHelper._ID));
+                String id = cursor.getString(cursor.getColumnIndex(MessageDbHelper.ID));
+                String nick = cursor.getString(cursor.getColumnIndex(MessageDbHelper.NICK));
+                String type = cursor.getString(cursor.getColumnIndex(MessageDbHelper.TYPE));
+                String stamp = cursor.getString(cursor.getColumnIndex(MessageDbHelper.STAMP));
+                String body = cursor.getString(cursor.getColumnIndex(MessageDbHelper.BODY));
+                boolean received = Boolean.valueOf(cursor.getString(cursor.getColumnIndex(MessageDbHelper.RECEIVED)));
+
+                MessageItem item = new MessageItem(account, jid);
+                item.setBaseId(baseId);
+                item.setId(id);
+                item.setName(nick);
+                item.setType(MessageItem.Type.valueOf(type));
+                item.setTime(stamp);
+                item.setBody(body);
+                item.setReceived(received);
+                item.select(selectedMessages.contains(baseId));
+
+                list.add(item);
+            } while (cursor.moveToNext());
+            service.setMessageList(account, jid, list);
             cursor.close();
         }
         updateList();
     }
 
-    private void setLastMessagesCounter() {
+    private int setLastMessagesCounter() {
         int index = 5;
         int i = 0;
         Cursor cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "'", null, MessageDbHelper._ID);
@@ -1028,27 +1025,26 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                     else i++;
                     if (i == 5) {
                         cursor.close();
-                        service.setMsgCounter(jid, index);
-                        return;
+                        return index;
                     }
                 } while (cursor.moveToPrevious());
                 cursor.close();
             } else {
                 cursor.close();
-                service.setMsgCounter(jid, cursor.getCount());
+                return cursor.getCount();
             }
         }
+        return index;
     }
 
     private void clearChat() {
-        service.setMsgCounter(jid, 0);
-//        if (service.getMucMessagesHash(account).containsKey(jid)) {
-//            service.getMucMessagesHash(account).remove(jid);
-//        }
+        msgList.clear();
+        service.setMessageList(account, jid, msgList);
         updateList();
     }
 
     private void closeChat() {
+        clearChat();
         service.removeActiveChat(account, jid);
         finish();
     }

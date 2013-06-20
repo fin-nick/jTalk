@@ -174,6 +174,28 @@ public class Notify {
         NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
         mng.notify(NOTIFICATION, mBuilder.build());
     }
+
+    public static void connecingNotify(String account) {
+        newMessages = false;
+        JTalkService service = JTalkService.getInstance();
+        Intent i = new Intent(service, RosterActivity.class);
+        i.setAction(Intent.ACTION_MAIN);
+        i.addCategory(Intent.CATEGORY_LAUNCHER);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+        mBuilder.setLargeIcon(BitmapFactory.decodeResource(service.getResources(), R.drawable.ic_launcher));
+        mBuilder.setSmallIcon(R.drawable.stat_offline);
+        mBuilder.setContentTitle(service.getString(R.string.Connecting));
+        mBuilder.setContentText(account);
+        mBuilder.setContentIntent(contentIntent);
+        mBuilder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
+        mBuilder.setProgress(0, 0, true);
+
+        NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
+        mng.notify(NOTIFICATION, mBuilder.build());
+    }
     
     public static void cancelAll(Context context) {
     	newMessages = false;

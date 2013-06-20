@@ -1413,13 +1413,6 @@ public class JTalkService extends Service {
         Intent intent = new Intent(Constants.UPDATE);
 
         @Override
-        protected void onPreExecute() {
-            //  			state = getString(R.string.Connecting) + "...";
-            //            sendBroadcast(intent);
-            //            Notify.offlineNotify(getString(R.string.Connecting));
-        }
-
-        @Override
         protected String doInBackground(String... args) {
             String username = args[0];
             String password = args[1];
@@ -1437,6 +1430,8 @@ public class JTalkService extends Service {
                 sendBroadcast(intent);
                 return null;
             } else {
+                Notify.connecingNotify(username);
+
                 setState(username, getString(R.string.Connecting));
                 sendBroadcast(new Intent(Constants.UPDATE));
 

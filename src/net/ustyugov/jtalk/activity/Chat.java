@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import android.content.*;
 import android.widget.*;
 import com.actionbarsherlock.widget.SearchView;
 import net.ustyugov.jtalk.*;
@@ -30,6 +31,7 @@ import net.ustyugov.jtalk.adapter.*;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.db.MessageDbHelper;
 import net.ustyugov.jtalk.dialog.*;
+import net.ustyugov.jtalk.listener.DragAndDropListener;
 import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.view.MyListView;
 
@@ -40,12 +42,6 @@ import org.jivesoftware.smackx.ChatState;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
@@ -72,6 +68,7 @@ import com.jtalk2.R;
 public class Chat extends SherlockActivity implements View.OnClickListener, OnScrollListener, OnItemLongClickListener {
     public static final int REQUEST_TEMPLATES = 1;
 
+    private boolean isDrag = false;
     private boolean isMuc = false;
     private boolean isPrivate = false;
     private boolean showStatuses = false;
@@ -113,6 +110,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     private Smiles smiles;
 
     private RosterItem rosterItem;
+    private DragAndDropListener dragListener;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -282,6 +280,8 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 return true;
             }
         });
+
+        dragListener = new DragAndDropListener(this);
     }
 
     @Override
@@ -469,9 +469,14 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         if (menu != null) {
             menu.clear();
             final MenuInflater inflater = getSupportMenuInflater();
-            if (isMuc) {
-                inflater.inflate(R.menu.muc_chat, menu);
-            } else {
+
+            if (isDrag) {
+                inflater.inflate(R.menu.drag_chat, menu);
+                super.onCreateOptionsMenu(menu);
+                return;
+            }
+            else if (isMuc) inflater.inflate(R.menu.muc_chat, menu);
+            else {
                 inflater.inflate(R.menu.chat, menu);
                 if (isPrivate) menu.findItem(R.id.resource).setVisible(false);
                 else menu.findItem(R.id.resource).setVisible(true);
@@ -522,6 +527,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
             }
 
             if (!prefs.getBoolean("ShowSmiles", true)) menu.removeItem(R.id.smile);
+            menu.findItem(R.id.drag).setVisible(Build.VERSION.SDK_INT >= 11);
             super.onCreateOptionsMenu(menu);
         }
     }
@@ -640,6 +646,17 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                     menu.removeItem(R.id.sidebar);
                     menu.removeItem(R.id.smile);
                     item.expandActionView();
+                }
+                break;
+            case R.id.drag:
+                if (!isDrag) {
+                    isDrag = true;
+                    listView.setOnItemLongClickListener(dragListener);
+                    createOptionMenu();
+                } else {
+                    isDrag = false;
+                    listView.setOnItemLongClickListener(this);
+                    createOptionMenu();
                 }
                 break;
             default:

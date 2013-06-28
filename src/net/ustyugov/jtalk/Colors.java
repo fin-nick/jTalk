@@ -18,7 +18,7 @@ public class Colors {
     public static int ENTRY_BACKGROUND = 0xEEEFEFEF;
     public static int PRIMARY_TEXT = 0xFF000000;
     public static int SECONDARY_TEXT = 0xFF555555;
-    public static int HIGHLIGHT_TEXT = 0xFFAA2323;
+    public static int HIGHLIGHT_TEXT = 0xFFFFa900;
     public static int SEARCH_BACKGROUND = 0xFFAAAA66;
     public static int LINK = 0xFF2323AA;
     public static int INBOX_MESSAGE = 0xFF2323AA;
@@ -44,7 +44,7 @@ public class Colors {
             ENTRY_BACKGROUND = 0xEEEFEFEF;
             PRIMARY_TEXT = 0xFF000000;
             SECONDARY_TEXT = 0xFF555555;
-            HIGHLIGHT_TEXT = 0xFFAA2323;
+            HIGHLIGHT_TEXT = 0xFFFFa900;
             SEARCH_BACKGROUND = 0xFFAAAA66;
             LINK = 0xFF2323AA;
             INBOX_MESSAGE = 0xFF2323AA;
@@ -66,7 +66,7 @@ public class Colors {
             ENTRY_BACKGROUND = 0x55222222;
             PRIMARY_TEXT = 0xFFFFFFFF;
             SECONDARY_TEXT = 0xFFBBBBBB;
-            HIGHLIGHT_TEXT = 0xFF5180b7;
+            HIGHLIGHT_TEXT = 0xFFFFa900;
             SEARCH_BACKGROUND = 0xFFAAAA66;
             LINK = 0xFF5180b7;
             INBOX_MESSAGE = 0xFF5180b7;

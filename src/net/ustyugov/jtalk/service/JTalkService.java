@@ -22,17 +22,12 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.google.android.gms.location.LocationClient;
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.RosterActivity;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
-import net.ustyugov.jtalk.listener.ConListener;
-import net.ustyugov.jtalk.listener.IncomingFileListener;
-import net.ustyugov.jtalk.listener.InviteListener;
-import net.ustyugov.jtalk.listener.LocationChangedListener;
-import net.ustyugov.jtalk.listener.MsgListener;
-import net.ustyugov.jtalk.listener.MucParticipantStatusListener;
-import net.ustyugov.jtalk.listener.RstListener;
+import net.ustyugov.jtalk.listener.*;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
@@ -61,34 +56,8 @@ import org.jivesoftware.smackx.filetransfer.FileTransferManager;
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
 import org.jivesoftware.smackx.muc.DiscussionHistory;
 import org.jivesoftware.smackx.muc.MultiUserChat;
-import org.jivesoftware.smackx.packet.BobExtension;
-import org.jivesoftware.smackx.packet.CapsExtension;
-import org.jivesoftware.smackx.packet.CaptchaExtension;
-import org.jivesoftware.smackx.packet.ChatStateExtension;
-import org.jivesoftware.smackx.packet.DataForm;
-import org.jivesoftware.smackx.packet.LastActivity;
-import org.jivesoftware.smackx.packet.MultipleAddresses;
-import org.jivesoftware.smackx.packet.OfflineMessageInfo;
-import org.jivesoftware.smackx.packet.OfflineMessageRequest;
-import org.jivesoftware.smackx.packet.ReceiptExtension;
-import org.jivesoftware.smackx.packet.ReplaceExtension;
-import org.jivesoftware.smackx.packet.SharedGroupsInfo;
-import org.jivesoftware.smackx.packet.VCard;
-import org.jivesoftware.smackx.provider.AdHocCommandDataProvider;
-import org.jivesoftware.smackx.provider.BytestreamsProvider;
-import org.jivesoftware.smackx.provider.CapsExtensionProvider;
-import org.jivesoftware.smackx.provider.DataFormProvider;
-import org.jivesoftware.smackx.provider.DelayInformationProvider;
-import org.jivesoftware.smackx.provider.DiscoverInfoProvider;
-import org.jivesoftware.smackx.provider.DiscoverItemsProvider;
-import org.jivesoftware.smackx.provider.IBBProviders;
-import org.jivesoftware.smackx.provider.MUCAdminProvider;
-import org.jivesoftware.smackx.provider.MUCOwnerProvider;
-import org.jivesoftware.smackx.provider.MUCUserProvider;
-import org.jivesoftware.smackx.provider.RosterExchangeProvider;
-import org.jivesoftware.smackx.provider.StreamInitiationProvider;
-import org.jivesoftware.smackx.provider.VCardProvider;
-import org.jivesoftware.smackx.provider.VersionProvider;
+import org.jivesoftware.smackx.packet.*;
+import org.jivesoftware.smackx.provider.*;
 import org.jivesoftware.smackx.search.UserSearch;
 import org.xbill.DNS.Credibility;
 import org.xbill.DNS.Lookup;
@@ -104,12 +73,9 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.location.Location;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -139,6 +105,8 @@ public class JTalkService extends Service {
     private Hashtable<String, VCard> vcards = new Hashtable<String, VCard>();
     private Hashtable<String, ConListener> conListeners = new Hashtable<String, ConListener>();
     private Hashtable<String, ConnectionTask> connectionTasks = new Hashtable<String, ConnectionTask>();
+    private Hashtable<String, LocationExtension> locations = new Hashtable<String, LocationExtension>();
+    private Hashtable<String, TunesExtension> tunes = new Hashtable<String, TunesExtension>();
     private String currentJid = "me";
     private String sidebarMode = "users";
     private String globalState = "";
@@ -153,14 +121,38 @@ public class JTalkService extends Service {
 
     private WifiManager.WifiLock wifiLock;
     
-    private LocationManager locationManager;
-    private LocationChangedListener locationListener = new LocationChangedListener();
+    private LocationClient locationClient;
+    private Location location;
 
     private IconPicker iconPicker;
 
     private Hashtable<String, Hashtable<String, List<MessageItem>>> messages = new Hashtable<String, Hashtable<String, List<MessageItem>>>();
 
     public static JTalkService getInstance() { return js; }
+
+    public void addLocation(String jid, LocationExtension geoloc) {
+        if (geoloc != null) locations.put(jid, geoloc);
+    }
+
+    public LocationExtension getLocation(String jid) {
+        if (locations.containsKey(jid)) return locations.get(jid);
+        else return null;
+    }
+
+    public LocationClient getLocationClient() {
+        return locationClient;
+    }
+
+    public void addTunes(String jid, TunesExtension tune) {
+        if (tune != null) {
+            tunes.put(jid, tune);
+        }
+    }
+
+    public TunesExtension getTunes(String jid) {
+        if (tunes.containsKey(jid)) return tunes.get(jid);
+        else return null;
+    }
 
     public List<MessageItem> getMessageList(String account, String jid) {
         Hashtable<String, List<MessageItem>> hash = new Hashtable<String, List<MessageItem>>();
@@ -624,8 +616,6 @@ public class JTalkService extends Service {
     	return null;
     }
     
-    public LocationChangedListener getLocationListener() { return locationListener; }
-    
     public void resetTimer() {
     	if (prefs != null) {
     		autoStatusTimer.purge();
@@ -676,9 +666,10 @@ public class JTalkService extends Service {
     	js = this;
     	prefs = PreferenceManager.getDefaultSharedPreferences(this);
         iconPicker = new IconPicker(this);
-        
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        
+
+        location = new Location();
+        locationClient = new LocationClient(this, location, location);
+
 //        updateReceiver = new BroadcastReceiver() {
 //			@Override
 //			public void onReceive(Context arg0, Intent arg1) {
@@ -737,7 +728,7 @@ public class JTalkService extends Service {
     public void disconnect() {
         if (!started) return;
         if (wifiLock != null && wifiLock.isHeld()) wifiLock.release();
-    	if (locationManager != null && locationListener != null) locationManager.removeUpdates(locationListener);
+    	if (locationClient.isConnected()) locationClient.disconnect();
     	Collection<XMPPConnection> con = getAllConnections();
 		for (XMPPConnection connection: con) {
 			String account = StringUtils.parseBareAddress(connection.getUser());
@@ -1231,42 +1222,91 @@ public class JTalkService extends Service {
   	  		}.start();
   		}
   	}
-  	
-  	public void sendLocation(final Location location) {
-  		for (final XMPPConnection connection : connections.values()) {
-  			if (connection.isAuthenticated()) {
-  				IQ iq = new IQ() {
-  					public String getChildElementXML() {
-  						StringBuilder sb = new StringBuilder();
-  						sb.append("<pubsub xmlns='http://jabber.org/protocol/pubsub'>");
-  						sb.append("<publish node='http://jabber.org/protocol/geoloc'>");
-  						sb.append("<item><geoloc xmlns='http://jabber.org/protocol/geoloc'>");
-  						if (location != null) {
-  							final float accuracy = location.getAccuracy();
-  							final double lat = location.getLatitude();
-  							final double lon = location.getLongitude();
-  							
-  							Bundle extras = location.getExtras();
-  							for (String s : extras.keySet()) {
-  								Log.i("Location", s);
-  							}
 
-  							sb.append("<accuracy>").append(accuracy).append("</accuracy>");
-  							sb.append("<lat>").append(lat).append("</lat>");
-  							sb.append("<lon>").append(lon).append("</lon>");
-  						}
-  						sb.append("</geoloc></item></publish></pubsub>");
-  		   				return sb.toString();
-  		            }
-  				};
-  				iq.setPacketID(System.currentTimeMillis()+"");
-  				iq.setType(IQ.Type.SET);
-  				connection.sendPacket(iq);
-  			}
-  		}
-	}
+    public void sendLocation() {
+        sendLocation(locationClient.getLastLocation());
+    }
 
-  	public int getPosition(String mode) {
+    public void sendLocation(final android.location.Location location) {
+        if (location != null) {
+            Collection<XMPPConnection> collection = connections.values();
+            for (XMPPConnection connection : collection) {
+                if (connection.isAuthenticated()) {
+                    IQ iq = new IQ() {
+                        public String getChildElementXML() {
+                            double lat = location.getLatitude();
+                            double lon = location.getLongitude();
+
+                            StringBuilder sb = new StringBuilder();
+                            sb.append("<pubsub xmlns='http://jabber.org/protocol/pubsub'>");
+                            sb.append("<publish node='http://jabber.org/protocol/geoloc'>");
+                            sb.append("<item><geoloc xmlns='http://jabber.org/protocol/geoloc'>");
+                            sb.append("<lat>" + lat + "</lat>");
+                            sb.append("<lon>" + lon + "</lon>");
+                            sb.append("</geoloc></item></publish></pubsub>");
+                            return sb.toString();
+                        }
+                    };
+
+                    iq.setPacketID(System.currentTimeMillis()+"");
+                    iq.setType(IQ.Type.SET);
+                    iq.setTo(connection.getHost());
+                    connection.sendPacket(iq);
+                }
+            }
+        }
+    }
+
+    public void sendEmptyLocation() {
+        Collection<XMPPConnection> collection = connections.values();
+        for (XMPPConnection connection : collection) {
+            if (connection.isAuthenticated()) {
+                IQ iq = new IQ() {
+                    public String getChildElementXML() {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("<pubsub xmlns='http://jabber.org/protocol/pubsub'>");
+                        sb.append("<publish node='http://jabber.org/protocol/geoloc'>");
+                        sb.append("<item><geoloc xmlns='http://jabber.org/protocol/geoloc'>");
+                        sb.append("</geoloc></item></publish></pubsub>");
+                        return sb.toString();
+                    }
+                };
+
+                iq.setPacketID(System.currentTimeMillis()+"");
+                iq.setType(IQ.Type.SET);
+                iq.setTo(connection.getHost());
+                connection.sendPacket(iq);
+            }
+        }
+    }
+
+    public void sendTunes(final String artist, final String title, final String source) {
+        Collection<XMPPConnection> collection = connections.values();
+        for (XMPPConnection connection : collection) {
+            if (connection.isAuthenticated()) {
+                IQ iq = new IQ() {
+                    public String getChildElementXML() {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("<pubsub xmlns='http://jabber.org/protocol/pubsub'>");
+                        sb.append("<publish node='http://jabber.org/protocol/tune'>");
+                        sb.append("<item><tune xmlns='http://jabber.org/protocol/tune'>");
+                        if (artist != null) sb.append("<artist>" + StringUtils.escapeForXML(artist) + "</artist>");
+                        if (title != null) sb.append("<title>" + StringUtils.escapeForXML(title) + "</title>");
+                        if (source != null) sb.append("<source>" + StringUtils.escapeForXML(source) + "</source>");
+                        sb.append("</tune></item></publish></pubsub>");
+                        return sb.toString();
+                    }
+                };
+
+                iq.setPacketID(System.currentTimeMillis()+"");
+                iq.setType(IQ.Type.SET);
+                iq.setTo(connection.getHost());
+                connection.sendPacket(iq);
+            }
+        }
+    }
+
+    public int getPosition(String mode) {
   		int pos;
   		if (mode.equals("available"))
   			pos = 0;
@@ -1318,96 +1358,102 @@ public class JTalkService extends Service {
         textHash.clear();
         messagesCount.clear();
   	}
-  	
-  	public void configure() {
-  		ProviderManager pm = ProviderManager.getInstance();
-  		
-  		pm.addIQProvider("query","jabber:iq:private", new PrivateDataManager.PrivateDataIQProvider());
-  		pm.addIQProvider("query", "jabber:iq:version", new VersionProvider());
-        
-         //  Roster Exchange
-         pm.addExtensionProvider("x","jabber:x:roster", new RosterExchangeProvider());
-  
-         //  Caps
-         pm.addExtensionProvider("c", CapsExtension.XMLNS, new CapsExtensionProvider());
-         
-         // Messages Receipts
-   		 pm.addExtensionProvider("request","urn:xmpp:receipts", new ReceiptExtension.Provider());
-   		 pm.addExtensionProvider("received","urn:xmpp:receipts", new ReceiptExtension.Provider());
-   		 
-   		 // Last Message Correction
-   		 pm.addExtensionProvider("replace", "urn:xmpp:message-correct:0", new ReplaceExtension.Provider());
-   		
-   		 // Captcha
-   		 pm.addExtensionProvider("captcha", "urn:xmpp:captcha", new CaptchaExtension.Provider());
-   		 pm.addExtensionProvider("data", "urn:xmpp:bob", new BobExtension.Provider());
-   		 
-         //  Chat State
-         pm.addExtensionProvider("active","http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
-         pm.addExtensionProvider("composing","http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
-         pm.addExtensionProvider("paused","http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
-         pm.addExtensionProvider("inactive","http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
-         pm.addExtensionProvider("gone","http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
-  
-         //  Group Chat Invitations
-         pm.addExtensionProvider("x","jabber:x:conference", new GroupChatInvitation.Provider());
-  
-         //  Service Discovery # Items    
-         pm.addIQProvider("query","http://jabber.org/protocol/disco#items", new DiscoverItemsProvider());
-         pm.addIQProvider("query","http://jabber.org/protocol/disco#info", new DiscoverInfoProvider());
-  
-         //  Data Forms
-         pm.addExtensionProvider("x","jabber:x:data", new DataFormProvider());
-  
-         //  MUC User
-         pm.addExtensionProvider("x","http://jabber.org/protocol/muc#user", new MUCUserProvider());
-  
-         //  MUC Admin    
-         pm.addIQProvider("query","http://jabber.org/protocol/muc#admin", new MUCAdminProvider());
-  
-         //  MUC Owner    
-         pm.addIQProvider("query","http://jabber.org/protocol/muc#owner", new MUCOwnerProvider());
-  
-         //  Delayed Delivery
-         pm.addExtensionProvider("x","jabber:x:delay", new DelayInformationProvider());
-  
-         //  VCard
-         pm.addIQProvider("vCard","vcard-temp", new VCardProvider());
-  
-         //  Offline Message Requests
-         pm.addIQProvider("offline","http://jabber.org/protocol/offline", new OfflineMessageRequest.Provider());
-  
-         //  Offline Message Indicator
-         pm.addExtensionProvider("offline","http://jabber.org/protocol/offline", new OfflineMessageInfo.Provider());
-  
-         //  Last Activity
-         pm.addIQProvider("query","jabber:iq:last", new LastActivity.Provider());
-  
-         //  User Search
-         pm.addIQProvider("query","jabber:iq:search", new UserSearch.Provider());
-  
-         //  SharedGroupsInfo
-         pm.addIQProvider("sharedgroup","http://www.jivesoftware.org/protocol/sharedgroup", new SharedGroupsInfo.Provider());
-  
-         //  JEP-33: Extended Stanza Addressing
-         pm.addExtensionProvider("addresses","http://jabber.org/protocol/address", new MultipleAddresses.Provider());
-  
-         //   FileTransfer
-         pm.addIQProvider("si","http://jabber.org/protocol/si", new StreamInitiationProvider());
-         pm.addIQProvider("query","http://jabber.org/protocol/bytestreams", new BytestreamsProvider());
-         pm.addIQProvider("open","http://jabber.org/protocol/ibb", new IBBProviders.Open());
-         pm.addIQProvider("close","http://jabber.org/protocol/ibb", new IBBProviders.Close());
-         pm.addExtensionProvider("data","http://jabber.org/protocol/ibb", new IBBProviders.Data());
-  
-         //  Privacy
-         pm.addIQProvider("query","jabber:iq:privacy", new PrivacyProvider());
-         pm.addIQProvider("command", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider());
-         pm.addExtensionProvider("malformed-action", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.MalformedActionError());
-         pm.addExtensionProvider("bad-locale", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.BadLocaleError());
-         pm.addExtensionProvider("bad-payload", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.BadPayloadError());
-         pm.addExtensionProvider("bad-sessionid", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.BadSessionIDError());
-         pm.addExtensionProvider("session-expired", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.SessionExpiredError());
-  	}
+
+    public void configure() {
+        ProviderManager pm = ProviderManager.getInstance();
+
+        // PEP
+        PEPProvider pep = new PEPProvider();
+        pep.registerPEPParserExtension("http://jabber.org/protocol/tune", new TunesProvider());
+        pep.registerPEPParserExtension("http://jabber.org/protocol/geoloc", new LocationProvider());
+        pm.addExtensionProvider("event", "http://jabber.org/protocol/pubsub#event", pep);
+
+        pm.addIQProvider("query","jabber:iq:private", new PrivateDataManager.PrivateDataIQProvider());
+        pm.addIQProvider("query", "jabber:iq:version", new VersionProvider());
+
+        //  Roster Exchange
+        pm.addExtensionProvider("x","jabber:x:roster", new RosterExchangeProvider());
+
+        //  Caps
+        pm.addExtensionProvider("c", CapsExtension.XMLNS, new CapsExtensionProvider());
+
+        // Messages Receipts
+        pm.addExtensionProvider("request","urn:xmpp:receipts", new ReceiptExtension.Provider());
+        pm.addExtensionProvider("received","urn:xmpp:receipts", new ReceiptExtension.Provider());
+
+        // Last Message Correction
+        pm.addExtensionProvider("replace", "urn:xmpp:message-correct:0", new ReplaceExtension.Provider());
+
+        // Captcha
+        pm.addExtensionProvider("captcha", "urn:xmpp:captcha", new CaptchaExtension.Provider());
+        pm.addExtensionProvider("data", "urn:xmpp:bob", new BobExtension.Provider());
+
+        //  Chat State
+        pm.addExtensionProvider("active","http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
+        pm.addExtensionProvider("composing","http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
+        pm.addExtensionProvider("paused","http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
+        pm.addExtensionProvider("inactive","http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
+        pm.addExtensionProvider("gone","http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
+
+        //  Group Chat Invitations
+        pm.addExtensionProvider("x","jabber:x:conference", new GroupChatInvitation.Provider());
+
+        //  Service Discovery # Items
+        pm.addIQProvider("query","http://jabber.org/protocol/disco#items", new DiscoverItemsProvider());
+        pm.addIQProvider("query","http://jabber.org/protocol/disco#info", new DiscoverInfoProvider());
+
+        //  Data Forms
+        pm.addExtensionProvider("x","jabber:x:data", new DataFormProvider());
+
+        //  MUC User
+        pm.addExtensionProvider("x","http://jabber.org/protocol/muc#user", new MUCUserProvider());
+
+        //  MUC Admin
+        pm.addIQProvider("query","http://jabber.org/protocol/muc#admin", new MUCAdminProvider());
+
+        //  MUC Owner
+        pm.addIQProvider("query","http://jabber.org/protocol/muc#owner", new MUCOwnerProvider());
+
+        //  Delayed Delivery
+        pm.addExtensionProvider("x","jabber:x:delay", new DelayInformationProvider());
+
+        //  VCard
+        pm.addIQProvider("vCard","vcard-temp", new VCardProvider());
+
+        //  Offline Message Requests
+        pm.addIQProvider("offline","http://jabber.org/protocol/offline", new OfflineMessageRequest.Provider());
+
+        //  Offline Message Indicator
+        pm.addExtensionProvider("offline","http://jabber.org/protocol/offline", new OfflineMessageInfo.Provider());
+
+        //  Last Activity
+        pm.addIQProvider("query","jabber:iq:last", new LastActivity.Provider());
+
+        //  User Search
+        pm.addIQProvider("query","jabber:iq:search", new UserSearch.Provider());
+
+        //  SharedGroupsInfo
+        pm.addIQProvider("sharedgroup","http://www.jivesoftware.org/protocol/sharedgroup", new SharedGroupsInfo.Provider());
+
+        //  JEP-33: Extended Stanza Addressing
+        pm.addExtensionProvider("addresses","http://jabber.org/protocol/address", new MultipleAddresses.Provider());
+
+        //   FileTransfer
+        pm.addIQProvider("si","http://jabber.org/protocol/si", new StreamInitiationProvider());
+        pm.addIQProvider("query","http://jabber.org/protocol/bytestreams", new BytestreamsProvider());
+        pm.addIQProvider("open","http://jabber.org/protocol/ibb", new IBBProviders.Open());
+        pm.addIQProvider("close","http://jabber.org/protocol/ibb", new IBBProviders.Close());
+        pm.addExtensionProvider("data","http://jabber.org/protocol/ibb", new IBBProviders.Data());
+
+        //  Privacy
+        pm.addIQProvider("query","jabber:iq:privacy", new PrivacyProvider());
+        pm.addIQProvider("command", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider());
+        pm.addExtensionProvider("malformed-action", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.MalformedActionError());
+        pm.addExtensionProvider("bad-locale", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.BadLocaleError());
+        pm.addExtensionProvider("bad-payload", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.BadPayloadError());
+        pm.addExtensionProvider("bad-sessionid", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.BadSessionIDError());
+        pm.addExtensionProvider("session-expired", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.SessionExpiredError());
+    }
 
     public class ConnectionTask extends AsyncTask<String, Integer, String> {
         Intent intent = new Intent(Constants.UPDATE);
@@ -1479,6 +1525,9 @@ public class JTalkService extends Service {
                 connection.addFeature("http://jabber.org/protocol/chatstates");
                 connection.addFeature("http://jabber.org/protocol/bytestreams");
                 connection.addFeature("http://jabber.org/protocol/chatstates");
+                connection.addFeature("http://jabber.org/protocol/geoloc");
+                connection.addFeature("http://jabber.org/protocol/tune");
+                connection.addFeature("http://jabber.org/protocol/pubsub#event");
                 connection.addFeature("jabber:iq:version");
                 connection.addFeature("urn:xmpp:receipts");
                 connection.addFeature("urn:xmpp:time");
@@ -1528,6 +1577,7 @@ public class JTalkService extends Service {
                 String status  = prefs.getString("currentStatus", "");
                 String mode  = prefs.getString("currentMode", "available");
                 sendPresence(username, status, mode, priority);
+                setState(username, status);
 
                 new PrivacyListManager(connection);
                 new ServiceDiscoveryManager(connection);
@@ -1564,14 +1614,11 @@ public class JTalkService extends Service {
                 }
 
                 if (prefs.getBoolean("Locations", false)) {
-                    try {
-                        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, Constants.LOCATION_MIN_TIME, Constants.LOCATION_MIN_DIST, locationListener);
-                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, Constants.LOCATION_MIN_TIME, Constants.LOCATION_MIN_DIST, locationListener);
-                    } catch (Exception e) {
-                        Log.e("LOCATION", e.getLocalizedMessage());
+                    if (!locationClient.isConnected() && !locationClient.isConnecting()) {
+                        locationClient.connect();
                     }
                 } else {
-                    sendLocation(null);
+                    sendEmptyLocation();
                 }
 
                 if (prefs.getBoolean("Ping", false)) {
@@ -1593,7 +1640,6 @@ public class JTalkService extends Service {
                     omm.deleteMessages();
                 } catch (Exception ignored) {	}
 
-                setState(username, status);
                 Notify.updateNotify();
                 new IgnoreList(connection).createIgnoreList();
                 resetTimer();

@@ -29,7 +29,8 @@ public class Time extends IQ {
      */
     public Time(Calendar cal) {
         TimeZone timeZone = cal.getTimeZone();
-        tzo = timeZone.getDisplayName(false, TimeZone.SHORT).substring(3);
+        String z = new SimpleDateFormat("Z").format(new Date());
+        tzo = z.substring(0,3) + ":" + z.substring(3);
         utc = utcFormat.format(new Date(cal.getTimeInMillis() - timeZone.getOffset(cal.getTimeInMillis())));
     }
 

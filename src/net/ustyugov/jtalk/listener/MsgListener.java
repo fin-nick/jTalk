@@ -22,6 +22,8 @@ import java.util.Date;
 import java.util.List;
 
 import android.database.Cursor;
+import android.location.Location;
+import android.util.Log;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.MessageLog;
@@ -39,11 +41,7 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ChatState;
-import org.jivesoftware.smackx.packet.BobExtension;
-import org.jivesoftware.smackx.packet.CaptchaExtension;
-import org.jivesoftware.smackx.packet.DelayInformation;
-import org.jivesoftware.smackx.packet.MultipleAddresses;
-import org.jivesoftware.smackx.packet.ReplaceExtension;
+import org.jivesoftware.smackx.packet.*;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -141,7 +139,19 @@ public class MsgListener implements PacketListener {
                 }
 			}
 		}
-		
+
+        // Locations
+        LocationExtension geoloc = (LocationExtension) msg.getExtension("http://jabber.org/protocol/geoloc");
+        if (geoloc != null) {
+            service.addLocation(from, geoloc);
+        }
+
+        // Tunes
+        TunesExtension tunes = (TunesExtension) msg.getExtension("http://jabber.org/protocol/tune");
+        if (tunes != null) {
+            service.addTunes(from, tunes);
+        }
+
 		if (body != null && body.length() > 0) {
 	        if (type.equals("groupchat")) { // Group Chat Message
                 String nick  = StringUtils.parseResource(from);

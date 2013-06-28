@@ -19,13 +19,13 @@ package net.ustyugov.jtalk.activity.vcard;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Iterator;
+import java.util.*;
 
+import android.content.Intent;
+import com.actionbarsherlock.app.SherlockActivity;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
+import net.ustyugov.jtalk.activity.MapActivity;
 import net.ustyugov.jtalk.adapter.MainPageAdapter;
 import net.ustyugov.jtalk.adapter.VCardAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -36,18 +36,14 @@ import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.util.StringUtils;
-import org.jivesoftware.smackx.packet.MUCUser;
-import org.jivesoftware.smackx.packet.VCard;
-import org.jivesoftware.smackx.packet.Version;
+import org.jivesoftware.smackx.packet.*;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -59,7 +55,6 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
@@ -70,6 +65,8 @@ public class VCardActivity extends SherlockActivity {
 	private JTalkService service;
 	private String account;
 	private String jid;
+    private String lat;
+    private String lon;
 	
 	private TextView nick, first, last, middle, bday, url, about, ctry, locality, street, emailHome, phoneHome, org, unit, role, emailWork, phoneWork;
 	private ProgressBar aboutProgress, homeProgress, workProgress, avatarProgress, statusProgress;
@@ -109,7 +106,7 @@ public class VCardActivity extends SherlockActivity {
 		View workPage = inflater.inflate(R.layout.vcard_work, null);
 		View avatarPage = inflater.inflate(R.layout.vcard_avatar, null);
 		View statusPage = inflater.inflate(R.layout.list_activity, null);
-		
+
 		first = (TextView) aboutPage.findViewById(R.id.firstname);
 		middle = (TextView) aboutPage.findViewById(R.id.middlename);
 		last = (TextView) aboutPage.findViewById(R.id.lastname);
@@ -152,14 +149,14 @@ public class VCardActivity extends SherlockActivity {
 		workPage.setTag(getString(R.string.Work));
 		avatarPage.setTag(getString(R.string.Photo));
 		statusPage.setTag(getString(R.string.Status));
-		
+
 		ArrayList<View> mPages = new ArrayList<View>();
 	    mPages.add(aboutPage);
 	    mPages.add(homePage);
 	    mPages.add(workPage);
 	    mPages.add(avatarPage);
 	    mPages.add(statusPage);
-	        
+
 	    MainPageAdapter adapter = new MainPageAdapter(mPages);
 	    ViewPager mPager = (ViewPager) findViewById(R.id.pager);
 	    mPager.setAdapter(adapter);
@@ -181,6 +178,15 @@ public class VCardActivity extends SherlockActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getSupportMenuInflater();
         inflater.inflate(R.menu.view_vcard, menu);
+
+        LocationExtension geoloc = service.getLocation(jid);
+        if (geoloc != null) {
+            lat = geoloc.getLat();
+            lon = geoloc.getLon();
+            if (lat != null && lon != null) {
+                menu.findItem(R.id.map).setVisible(true);
+            }
+        }
         return super.onCreateOptionsMenu(menu);
     }
 	
@@ -193,6 +199,13 @@ public class VCardActivity extends SherlockActivity {
 			case R.id.refresh:
 				onResume();
 				break;
+            case R.id.map:
+                Intent intent = new Intent(VCardActivity.this, MapActivity.class);
+                intent.putExtra("jid", jid);
+                intent.putExtra("lat", lat);
+                intent.putExtra("lon", lon);
+                startActivity(intent);
+                break;
 		}
 		return true;
 	}
@@ -405,7 +418,7 @@ public class VCardActivity extends SherlockActivity {
 	    			}
 					
 					if (bitmap != null) av.setImageBitmap(bitmap);
-					
+
 					if (re != null) {
 	    				LinearLayout linear = (LinearLayout) ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.vcard_item, null);
 						
@@ -428,7 +441,19 @@ public class VCardActivity extends SherlockActivity {
 						t2.setText(strings.get(key));
 						adapter.add(linear);
 					}
-					
+
+                    TunesExtension tunes = service.getTunes(jid);
+                    if (tunes != null) {
+                        LinearLayout linear = (LinearLayout) ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.vcard_item, null);
+
+                        TextView resource = (TextView) linear.findViewById(R.id.resource);
+                        resource.setText("Tunes:");
+
+                        TextView value = (TextView) linear.findViewById(R.id.value);
+                        value.setText(tunes.getArtist() + " - " + tunes.getTitle() + " (" + tunes.getSource() + ")");
+                        adapter.add(linear);
+                    }
+
 					list.refreshDrawableState();
 				    list.setAdapter(adapter);
 				    list.setVisibility(View.VISIBLE);

@@ -8,8 +8,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Colors {
     public static boolean isLight = true;
@@ -23,8 +21,8 @@ public class Colors {
     public static int HIGHLIGHT_TEXT = 0xFFAA2323;
     public static int SEARCH_BACKGROUND = 0xFFAAAA66;
     public static int LINK = 0xFF2323AA;
-    public static int INBOX_MESSAGE = 0xFFAA2323;
-    public static int OUTBOX_MESSAGE = 0xFF2323AA;
+    public static int INBOX_MESSAGE = 0xFF2323AA;
+    public static int OUTBOX_MESSAGE = 0xFFAA2323;
     public static int SELECTED_MESSAGE = 0xFFCCCCCC;
     public static int STATUS_MESSAGE = 0xFF239923;
     public static int STATUS_AWAY = 0xFF22bcef;
@@ -49,8 +47,8 @@ public class Colors {
             HIGHLIGHT_TEXT = 0xFFAA2323;
             SEARCH_BACKGROUND = 0xFFAAAA66;
             LINK = 0xFF2323AA;
-            INBOX_MESSAGE = 0xFFAA2323;
-            OUTBOX_MESSAGE = 0xFF2323AA;
+            INBOX_MESSAGE = 0xFF2323AA;
+            OUTBOX_MESSAGE = 0xFFAA2323;
             SELECTED_MESSAGE = 0xFFCCCCCC;
             STATUS_MESSAGE = 0xFF239923;
             STATUS_AWAY = 0xFF22bcef;
@@ -68,11 +66,11 @@ public class Colors {
             ENTRY_BACKGROUND = 0x55222222;
             PRIMARY_TEXT = 0xFFFFFFFF;
             SECONDARY_TEXT = 0xFFBBBBBB;
-            HIGHLIGHT_TEXT = 0xFFAA2323;
+            HIGHLIGHT_TEXT = 0xFF5180b7;
             SEARCH_BACKGROUND = 0xFFAAAA66;
             LINK = 0xFF5180b7;
-            INBOX_MESSAGE = 0xFFAA2323;
-            OUTBOX_MESSAGE = 0xFF5180b7;
+            INBOX_MESSAGE = 0xFF5180b7;
+            OUTBOX_MESSAGE = 0xFFAA2323;
             SELECTED_MESSAGE = 0xFF444444;
             STATUS_MESSAGE = 0xFF239923;
             STATUS_AWAY = 0xFF22bcef;

@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/map"
+          android:visible="false"
+          android:icon="@android:drawable/ic_menu_compass"
+          android:title="Map"
+          android:showAsAction="always"/>
+
     <item android:id="@+id/refresh"
         android:icon="@drawable/ic_action_refresh"
         android:title="Refresh"

@@ -25,6 +25,7 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.actionbarsherlock.widget.SearchView;
+import com.google.android.gms.location.LocationClient;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.Notify;
@@ -188,18 +189,13 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
                 Intent intent = getIntent();
                 finish();
                 startActivity(intent);
-                
-                LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+                LocationClient locationClient = service.getLocationClient();
                 if (prefs.getBoolean("Locations", false)) {
-                	Location gps = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                	if (gps == null) service.sendLocation(lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
-                	else service.sendLocation(gps);
-                	
-                	lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, Constants.LOCATION_MIN_TIME, Constants.LOCATION_MIN_DIST, service.getLocationListener());
-      	    		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, Constants.LOCATION_MIN_TIME, Constants.LOCATION_MIN_DIST, service.getLocationListener());
+                    if (!locationClient.isConnected()) locationClient.connect();
                 } else {
-                	lm.removeUpdates(service.getLocationListener());
-                	service.sendLocation(null);
+                	if (locationClient.isConnected()) locationClient.disconnect();
+                    service.sendEmptyLocation();
                 }
             }
         }

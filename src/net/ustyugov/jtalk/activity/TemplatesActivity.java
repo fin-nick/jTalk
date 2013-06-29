@@ -27,10 +27,8 @@ import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -98,7 +96,7 @@ public class TemplatesActivity extends SherlockActivity implements OnItemClickLi
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		Template item = (Template) parent.getItemAtPosition(position);
-		setResult(RESULT_OK, new Intent(this, Chat.class).putExtra("text", item.getText()));
+		setResult(RESULT_OK, new Intent().putExtra("text", item.getText()));
 		finish();
 	}
 	

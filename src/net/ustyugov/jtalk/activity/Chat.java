@@ -68,10 +68,8 @@ import com.jtalk2.R;
 public class Chat extends SherlockActivity implements View.OnClickListener, OnScrollListener, OnItemLongClickListener {
     public static final int REQUEST_TEMPLATES = 1;
 
-    private boolean isDrag = false;
     private boolean isMuc = false;
     private boolean isPrivate = false;
-    private boolean showStatuses = false;
     private MultiUserChat muc;
 
     private SharedPreferences prefs;
@@ -110,14 +108,12 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     private Smiles smiles;
 
     private RosterItem rosterItem;
-    private DragAndDropListener dragListener;
 
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         service = JTalkService.getInstance();
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        showStatuses = prefs.getBoolean("ShowStatus", false);
         try {
             maxCount = Integer.parseInt(prefs.getString("MaxLogMessages", "0"));
             maxMucCount = Integer.parseInt(prefs.getString("MaxMucMessages", "0"));
@@ -216,6 +212,8 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         listView.setOnScrollListener(this);
         listView.setDividerHeight(0);
         listView.setAdapter(listAdapter);
+        if (Build.VERSION.SDK_INT >= 11) listView.setOnItemLongClickListener(new DragAndDropListener(this));
+        else listView.setOnItemLongClickListener(this);
 
         nickList = (ListView) findViewById(R.id.muc_user_list);
         nickList.setCacheColorHint(0x00000000);
@@ -280,8 +278,6 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 return true;
             }
         });
-
-        dragListener = new DragAndDropListener(this);
     }
 
     @Override
@@ -331,7 +327,6 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
             }
 
             if (!service.getActiveChats(account).contains(jid)) {
-                setLastMessagesCounter();
                 service.addActiveChat(account, jid);
             }
         }
@@ -339,8 +334,6 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         service.setCurrentJid(jid);
         service.removeUnreadMesage(account, jid);
         service.removeHighlight(account, jid);
-
-        listView.setOnItemLongClickListener(this);
 
         usersAdapter = new MucUserAdapter(this, account, jid);
         nickList.setAdapter(usersAdapter);
@@ -470,12 +463,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
             menu.clear();
             final MenuInflater inflater = getSupportMenuInflater();
 
-            if (isDrag) {
-                inflater.inflate(R.menu.drag_chat, menu);
-                super.onCreateOptionsMenu(menu);
-                return;
-            }
-            else if (isMuc) inflater.inflate(R.menu.muc_chat, menu);
+            if (isMuc) inflater.inflate(R.menu.muc_chat, menu);
             else {
                 inflater.inflate(R.menu.chat, menu);
                 if (isPrivate) menu.findItem(R.id.resource).setVisible(false);
@@ -527,7 +515,6 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
             }
 
             if (!prefs.getBoolean("ShowSmiles", true)) menu.removeItem(R.id.smile);
-            menu.findItem(R.id.drag).setVisible(Build.VERSION.SDK_INT >= 11);
             super.onCreateOptionsMenu(menu);
         }
     }
@@ -648,17 +635,6 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                     item.expandActionView();
                 }
                 break;
-            case R.id.drag:
-                if (!isDrag) {
-                    isDrag = true;
-                    listView.setOnItemLongClickListener(dragListener);
-                    createOptionMenu();
-                } else {
-                    isDrag = false;
-                    listView.setOnItemLongClickListener(this);
-                    createOptionMenu();
-                }
-                break;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -670,8 +646,8 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         if (resultCode == RESULT_OK && requestCode == REQUEST_TEMPLATES) {
             String text = data.getStringExtra("text");
             String oldtext = service.getText(jid);
-            messageInput.setText(oldtext + text);
-            messageInput.setSelection(messageInput.getText().length());
+            if (oldtext.length() > 0) text = oldtext + " " + text;
+            service.setText(jid, text);
         }
     }
 
@@ -980,7 +956,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
 
     private void loadStory(boolean all) {
         if (isMuc) return;
-        int count = setLastMessagesCounter();
+        int count = 5;
 
         if (isMuc) {
             if (maxMucCount > 0) count = maxMucCount;
@@ -988,15 +964,9 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
             if (maxCount > 0) count = maxCount;
         }
 
-        Cursor cursor;
-        if (showStatuses) {
-            cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "'", null, MessageDbHelper._ID);
-        } else {
-            cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "' AND type = 'message'", null, MessageDbHelper._ID);
-        }
-
-        if (cursor != null && cursor.getCount() > 0 && count > 0) {
-            if (cursor.getCount() > count && !all) {
+        Cursor cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "' AND type = 'message'", null, MessageDbHelper._ID);;
+        if (cursor != null && cursor.getCount() > 0) {
+            if (cursor.getCount() > count) {
                 cursor.moveToPosition(cursor.getCount()-count);
             } else cursor.moveToFirst();
 
@@ -1028,31 +998,31 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         updateList();
     }
 
-    private int setLastMessagesCounter() {
-        int index = 5;
-        int i = 0;
-        Cursor cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "'", null, MessageDbHelper._ID);
-        if (cursor != null) {
-            if (cursor.getCount() > 5) {
-                cursor.moveToLast();
-
-                do {
-                    String type = cursor.getString(cursor.getColumnIndex(MessageDbHelper.TYPE));
-                    if (MessageItem.Type.valueOf(type) == MessageItem.Type.status) index++;
-                    else i++;
-                    if (i == 5) {
-                        cursor.close();
-                        return index;
-                    }
-                } while (cursor.moveToPrevious());
-                cursor.close();
-            } else {
-                cursor.close();
-                return cursor.getCount();
-            }
-        }
-        return index;
-    }
+//    private int setLastMessagesCounter() {
+//        int index = 5;
+//        int i = 0;
+//        Cursor cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "'", null, MessageDbHelper._ID);
+//        if (cursor != null) {
+//            if (cursor.getCount() > 5) {
+//                cursor.moveToLast();
+//
+//                do {
+//                    String type = cursor.getString(cursor.getColumnIndex(MessageDbHelper.TYPE));
+//                    if (MessageItem.Type.valueOf(type) == MessageItem.Type.status) index++;
+//                    else i++;
+//                    if (i == 5) {
+//                        cursor.close();
+//                        return index;
+//                    }
+//                } while (cursor.moveToPrevious());
+//                cursor.close();
+//            } else {
+//                cursor.close();
+//                return cursor.getCount();
+//            }
+//        }
+//        return index;
+//    }
 
     private void clearChat() {
         msgList.clear();

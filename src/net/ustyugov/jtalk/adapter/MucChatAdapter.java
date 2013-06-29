@@ -85,11 +85,12 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
         this.searchString = searchString;
         clear();
 
+        boolean showStatuses = prefs.getBoolean("ShowStatus", false);
         for (MessageItem item : messages) {
+            MessageItem.Type type = item.getType();
             if (searchString.length() > 0) {
                 String name = item.getName();
                 String body = item.getBody();
-                MessageItem.Type type = item.getType();
                 String time = createTimeString(item.getTime());
                 if (type == MessageItem.Type.status) {
                     if (showtime) body = time + "  " + body;
@@ -99,9 +100,11 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
                 }
 
                 if (body.toLowerCase().contains(searchString.toLowerCase())) {
-                    add(item);
+                    if (showStatuses || (!showStatuses && type != MessageItem.Type.status)) add(item);
                 }
-            } else add(item);
+            } else {
+                if (showStatuses || (!showStatuses && type != MessageItem.Type.status)) add(item);
+            }
         }
     }
 
@@ -150,7 +153,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
             }
             if (n.equals(nick)) {
                 int idx = message.indexOf(n);
-                ssb.setSpan(new ForegroundColorSpan(Colors.OUTBOX_MESSAGE), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                ssb.setSpan(new ForegroundColorSpan(Colors.SECONDARY_TEXT), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), idx, idx + n.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
                 int idx = message.indexOf(n);

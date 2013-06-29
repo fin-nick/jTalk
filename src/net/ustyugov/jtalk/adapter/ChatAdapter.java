@@ -78,11 +78,12 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         this.searchString = searchString;
 		clear();
 
+        boolean showStatuses = prefs.getBoolean("ShowStatus", false);
         for (MessageItem item : list) {
+            MessageItem.Type type = item.getType();
             if (searchString.length() > 0) {
                 String name = item.getName();
                 String body = item.getBody();
-                MessageItem.Type type = item.getType();
                 String time = createTimeString(item.getTime());
 
                 if (type == MessageItem.Type.status) {
@@ -95,7 +96,9 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
                 if (body.toLowerCase().contains(searchString.toLowerCase())) {
                     add(item);
                 }
-            } else add(item);
+            } else {
+                if (showStatuses || (!showStatuses && type != MessageItem.Type.status)) add(item);
+            }
         }
 	}
 	

@@ -12,10 +12,6 @@
         android:showAsAction="always"
         android:icon="@drawable/ic_menu_sidebar"
         android:title="@string/HideSidebar"/>
-    <item android:id="@+id/drag"
-          android:title="Drag and Drop mode"
-          android:visible="false"
-          android:showAsAction="never"/>
     <item android:id="@+id/templates"
           android:title="@string/Templates"
           android:showAsAction="never"/>

@@ -231,6 +231,11 @@
                     android:title="@string/OnlyInMUC"
                     android:defaultValue="false" />
         </PreferenceScreen>
+
+        <CheckBoxPreference
+                android:key="showSound"
+                android:title="Show sound icon on ActionBar"
+                android:defaultValue="false" />
     </PreferenceScreen>
 
     <PreferenceScreen android:title="Ignore-List">

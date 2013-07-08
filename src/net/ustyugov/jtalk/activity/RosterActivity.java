@@ -45,8 +45,6 @@ import net.ustyugov.jtalk.service.JTalkService;
 import org.jivesoftware.smack.RosterEntry;
 
 import android.database.Cursor;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
@@ -217,7 +215,17 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
             menu.findItem(R.id.muc).setEnabled(service.isAuthenticated());
             menu.findItem(R.id.disco).setEnabled(service.isAuthenticated());
             menu.findItem(R.id.offline).setTitle(prefs.getBoolean("hideOffline", false) ? R.string.ShowOfflineContacts : R.string.HideOfflineContacts);
-            menu.findItem(R.id.notify).setTitle(prefs.getBoolean("soundDisabled", false) ? R.string.EnableSound : R.string.DisableSound);
+
+            MenuItem sound = menu.findItem(R.id.notify);
+            sound.setShowAsActionFlags(prefs.getBoolean("showSound", false) ? MenuItem.SHOW_AS_ACTION_ALWAYS : MenuItem.SHOW_AS_ACTION_NEVER);
+            if (prefs.getBoolean("soundDisabled", false)) {
+                sound.setTitle(R.string.EnableSound);
+                sound.setIcon(R.drawable.ic_menu_sound_off);
+
+            } else {
+                sound.setTitle(R.string.DisableSound);
+                sound.setIcon(R.drawable.ic_menu_sound_on);
+            }
 
             if (Build.VERSION.SDK_INT >= 8) {
                 MenuItem.OnActionExpandListener listener = new MenuItem.OnActionExpandListener() {

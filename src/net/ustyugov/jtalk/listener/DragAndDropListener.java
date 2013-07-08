@@ -18,6 +18,7 @@
 package net.ustyugov.jtalk.listener;
 
 import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.*;
@@ -26,6 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Toast;
 import net.ustyugov.jtalk.MessageItem;
 
 public class DragAndDropListener implements AdapterView.OnItemLongClickListener {
@@ -55,6 +57,10 @@ public class DragAndDropListener implements AdapterView.OnItemLongClickListener 
         ClipData dragData = new ClipData(text, mimes, item);
         View.DragShadowBuilder myShadow = new MyDragShadowBuilder(view);
         view.startDrag(dragData, myShadow, null, 0);
+
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        clipboard.setPrimaryClip(dragData);
+        Toast.makeText(context, "Message is copied", Toast.LENGTH_SHORT).show();
         return true;
     }
 

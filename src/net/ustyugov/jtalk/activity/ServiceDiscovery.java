@@ -25,6 +25,7 @@ import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.DiscoItem;
 import net.ustyugov.jtalk.activity.vcard.VCardActivity;
 import net.ustyugov.jtalk.adapter.DiscoveryAdapter;
+import net.ustyugov.jtalk.dialog.BookmarksDialogs;
 import net.ustyugov.jtalk.dialog.MucDialogs;
 import net.ustyugov.jtalk.dialog.RosterDialogs;
 import net.ustyugov.jtalk.dialog.TextDialog;
@@ -197,10 +198,12 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
         AdapterContextMenuInfo cm = (AdapterContextMenuInfo) menu.getMenuInfo();
         DiscoItem item = (DiscoItem) list.getItemAtPosition(cm.position);
         String jid = item.getJid();
+        String name = item.getName();
 
         switch(menu.getItemId()) {
             case CONTEXT_ADD:
-                RosterDialogs.addDialog(this, jid);
+                if (item.isMUC()) BookmarksDialogs.AddDialog(this, account, jid, name);
+                else RosterDialogs.addDialog(this, jid);
                 break;
             case CONTEXT_REG:
                 if (discoItem != null && discoItem.isRegister()) {

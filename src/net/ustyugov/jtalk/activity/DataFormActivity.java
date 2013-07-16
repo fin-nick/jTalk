@@ -44,12 +44,10 @@ import org.jivesoftware.smackx.packet.BobExtension;
 import org.jivesoftware.smackx.packet.CaptchaExtension;
 import org.jivesoftware.smackx.packet.DataForm;
 
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -322,10 +320,13 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 		Bitmap b = BitmapFactory.decodeByteArray(data, 0, data.length);
 		ImageView image = new ImageView(this);
         image.setLayoutParams(new ViewGroup.LayoutParams(-1, -1));
+        image.setAdjustViewBounds(true);
 		image.setTag("cid:" + cid);
 		if (b != null) {
-			image.getLayoutParams().height = b.getHeight();
-			image.getLayoutParams().width = b.getWidth();
+            int h = (int) (b.getHeight() * getResources().getDisplayMetrics().density);
+            ViewGroup.LayoutParams lp = image.getLayoutParams();
+            lp.height = h;
+			image.setLayoutParams(lp);
 			image.setImageBitmap(b);
 		}
 		return image;
@@ -372,7 +373,7 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 				DataFormActivity.this.runOnUiThread(new Runnable() {
 					public void run() {
 						if (form != null) {
-							setTitle(form.getTitle());
+                            setTitle(form.getTitle());
 							
 							Iterator<String> instructions = form.getInstructions();
 							while(instructions.hasNext()) {

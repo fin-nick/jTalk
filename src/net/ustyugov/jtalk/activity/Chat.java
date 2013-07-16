@@ -957,16 +957,11 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     private void loadStory(boolean all) {
         if (isMuc) return;
         int count = 5;
-
-        if (isMuc) {
-            if (maxMucCount > 0) count = maxMucCount;
-        } else {
-            if (maxCount > 0) count = maxCount;
-        }
+        if (maxCount > 0) count = maxCount;
 
         Cursor cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "' AND type = 'message'", null, MessageDbHelper._ID);;
         if (cursor != null && cursor.getCount() > 0) {
-            if (cursor.getCount() > count) {
+            if (cursor.getCount() > count && !all) {
                 cursor.moveToPosition(cursor.getCount()-count);
             } else cursor.moveToFirst();
 
@@ -997,32 +992,6 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         }
         updateList();
     }
-
-//    private int setLastMessagesCounter() {
-//        int index = 5;
-//        int i = 0;
-//        Cursor cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "'", null, MessageDbHelper._ID);
-//        if (cursor != null) {
-//            if (cursor.getCount() > 5) {
-//                cursor.moveToLast();
-//
-//                do {
-//                    String type = cursor.getString(cursor.getColumnIndex(MessageDbHelper.TYPE));
-//                    if (MessageItem.Type.valueOf(type) == MessageItem.Type.status) index++;
-//                    else i++;
-//                    if (i == 5) {
-//                        cursor.close();
-//                        return index;
-//                    }
-//                } while (cursor.moveToPrevious());
-//                cursor.close();
-//            } else {
-//                cursor.close();
-//                return cursor.getCount();
-//            }
-//        }
-//        return index;
-//    }
 
     private void clearChat() {
         msgList.clear();

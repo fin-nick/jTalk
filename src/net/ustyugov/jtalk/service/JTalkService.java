@@ -1585,11 +1585,14 @@ public class JTalkService extends Service {
                 fileTransferManager = new FileTransferManager(connection);
                 fileTransferManager.addFileTransferListener(new IncomingFileListener());
 
-                VCard vCard = new VCard();
-                try {
-                    vCard.load(connection, username);
-                } catch (XMPPException ignored) { }
-                setVCard(username, vCard);
+                File file = new File(Constants.PATH + "/" + username);
+                if (!file.exists()) {
+                    VCard vCard = new VCard();
+                    try {
+                        vCard.load(connection, username);
+                    } catch (XMPPException ignored) { }
+                    setVCard(username, vCard);
+                }
 
                 try {
                     MultiUserChat.addInvitationListener(connection, new InviteListener(username));

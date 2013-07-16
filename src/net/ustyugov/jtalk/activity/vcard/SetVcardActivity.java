@@ -138,6 +138,13 @@ public class SetVcardActivity extends SherlockActivity implements OnClickListene
 			   public void run() {
 				   SetVcardActivity.this.runOnUiThread(new Runnable() {
 					  public void run() {
+                          if (vcard == null) {
+                              vcard = new VCard();
+                              try {
+                                  vcard.load(service.getConnection(account), account);
+                              } catch (XMPPException ignored) { }
+                          }
+
 						  if (vcard != null) {
 							  first.setText(vcard.getFirstName());
 							  middle.setText(vcard.getMiddleName());

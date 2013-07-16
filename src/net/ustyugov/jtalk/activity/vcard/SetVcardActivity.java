@@ -17,12 +17,11 @@
 
 package net.ustyugov.jtalk.activity.vcard;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 import net.ustyugov.jtalk.Colors;
+import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.adapter.MainPageAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
 
@@ -166,7 +165,15 @@ public class SetVcardActivity extends SherlockActivity implements OnClickListene
 							  
 							  bytes = vcard.getAvatar();
 							  if (bytes != null) {
-									av.setImageBitmap(Bitmap.createScaledBitmap(BitmapFactory.decodeByteArray(bytes, 0, bytes.length), 240, 240, true));
+                                  av.setImageBitmap(Bitmap.createScaledBitmap(BitmapFactory.decodeByteArray(bytes, 0, bytes.length), 240, 240, true));
+
+                                  try {
+                                      File f = new File(Constants.PATH);
+                                      f.mkdirs();
+                                      FileOutputStream fos = new FileOutputStream(Constants.PATH + "/" + account);
+                                      fos.write(bytes);
+                                      fos.close();
+                                  } catch (Exception ignored) { }
 							  }
 						  }
 					  }

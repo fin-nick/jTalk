@@ -21,6 +21,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import net.ustyugov.jtalk.listener.ConListener;
 import net.ustyugov.jtalk.service.JTalkService;
 import org.jivesoftware.smack.PacketCollector;
 import org.jivesoftware.smack.filter.PacketIDFilter;
@@ -53,17 +54,16 @@ public class PingTask extends AsyncTask<Void, Void, Void> {
             iq.setType(IQ.Type.GET);
             iq.setTo(service.getConnection(account).getServiceName());
 
-//            Log.e("PING", iq.toXML());
-
             PacketCollector collector = service.getConnection(account).createPacketCollector(new PacketIDFilter(iq.getPacketID()));
             service.getConnection(account).sendPacket(iq);
 
             IQ result = (IQ)collector.nextResult(timeout);
             if (result != null && result.getType() == IQ.Type.RESULT) {
-//                Log.e("PONG", result.toXML());
                 return null;
             } else {
-                service.reconnect(account);
+                Log.e("PingTask", "Pong not received");
+                ConListener listener = service.getConnectionListener(account);
+                if (listener != null) listener.connectionClosedOnError(null);
             }
         }
         return null;

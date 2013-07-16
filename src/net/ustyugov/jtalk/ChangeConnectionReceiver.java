@@ -17,7 +17,12 @@
 
 package net.ustyugov.jtalk;
 
+import android.database.Cursor;
 import android.net.NetworkInfo;
+import android.util.Log;
+import net.ustyugov.jtalk.db.AccountDbHelper;
+import net.ustyugov.jtalk.db.JTalkProvider;
+import net.ustyugov.jtalk.listener.ConListener;
 import net.ustyugov.jtalk.service.JTalkService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,15 +33,20 @@ public class ChangeConnectionReceiver extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
+        Log.e("ChangeConnectionReceiver", "Connection changed");
 		JTalkService service = JTalkService.getInstance();
-        boolean nocon = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
-        if (nocon) {
-            service.disconnect();
-        } else {
-            ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-            if (activeNetwork.isConnected()) {
-                service.connect();
+        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        if (activeNetwork != null && activeNetwork.isConnected()) {
+            Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
+            if (cursor != null && cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                do {
+                    String account = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
+                    ConListener listener = service.getConnectionListener(account);
+                    if (listener != null) listener.connectionClosedOnError(null);
+                } while(cursor.moveToNext());
+                cursor.close();
             }
         }
 	}

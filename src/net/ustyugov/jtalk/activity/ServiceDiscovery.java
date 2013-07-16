@@ -187,7 +187,7 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
         menu.setHeaderTitle(R.string.Actions);
         if (item.isRegister()) menu.add(Menu.NONE, CONTEXT_REG, Menu.NONE, R.string.Registration);
         if (item.isMUC()) menu.add(Menu.NONE, CONTEXT_JOIN, Menu.NONE, R.string.Join);
-        menu.add(Menu.NONE, CONTEXT_ADD, Menu.NONE, R.string.AddInRoster);
+        menu.add(Menu.NONE, CONTEXT_ADD, Menu.NONE, R.string.Add);
         if (item.isVCard()) menu.add(Menu.NONE, CONTEXT_INFO, Menu.NONE, R.string.Info);
 
         super.onCreateContextMenu(menu, v, info);

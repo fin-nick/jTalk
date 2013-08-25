@@ -32,7 +32,7 @@ public class MessageLog {
 	public static void writeMessage(String account, String jid, MessageItem message) {
         JTalkService service = JTalkService.getInstance();
         List<MessageItem> list = service.getMessageList(account, jid);
-        if (service.getActiveChats(account).contains(jid)) list.add(message);
+        list.add(message);
         service.setMessageList(account, jid, list);
 
         try {

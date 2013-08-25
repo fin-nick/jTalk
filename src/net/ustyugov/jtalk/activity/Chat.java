@@ -959,7 +959,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         int count = 5;
         if (maxCount > 0) count = maxCount;
 
-        Cursor cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "' AND type = 'message'", null, MessageDbHelper._ID);;
+        Cursor cursor = getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + jid + "' AND type = 'message'", null, MessageDbHelper._ID);
         if (cursor != null && cursor.getCount() > 0) {
             if (cursor.getCount() > count && !all) {
                 cursor.moveToPosition(cursor.getCount()-count);

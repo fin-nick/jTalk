@@ -22,8 +22,6 @@ import java.util.Date;
 import java.util.List;
 
 import android.database.Cursor;
-import android.location.Location;
-import android.util.Log;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.MessageLog;

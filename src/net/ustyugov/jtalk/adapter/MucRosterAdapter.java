@@ -87,6 +87,7 @@ public class MucRosterAdapter extends ArrayAdapter<RosterItem> {
 
                     List<String> users = new ArrayList<String>();
                     Roster roster = service.getRoster(account);
+                    XMPPConnection connection = service.getConnection(account);
                     Iterator<Presence> it = roster.getPresences(group);
                     while (it.hasNext()) {
                         Presence p = it.next();
@@ -97,7 +98,8 @@ public class MucRosterAdapter extends ArrayAdapter<RosterItem> {
                     else Collections.sort(users, new SortList.StringComparator());
 
                     for (String user: users) {
-                        RosterItem item = new RosterItem(account, RosterItem.Type.entry, group + "/" + user);
+                        RosterEntry entry = new RosterEntry(group + "/" + user, user, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+                        RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
                         item.setName(user);
                         add(item);
                     }
@@ -134,8 +136,9 @@ public class MucRosterAdapter extends ArrayAdapter<RosterItem> {
             convertView.setBackgroundColor(Colors.GROUP_BACKGROUND);
             return convertView;
         } else if (item.isEntry()) {
-            String jid = item.getJid();
-            String name = item.getName();
+            RosterEntry re = item.getEntry();
+            String jid = re.getUser();
+            String name = re.getName();
             String role = "";
             if (name == null || name.length() <= 0 ) name = jid;
 

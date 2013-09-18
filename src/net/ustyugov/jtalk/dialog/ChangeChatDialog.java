@@ -44,7 +44,7 @@ public class ChangeChatDialog {
 				RosterItem item = adapter.getItem(which);
 				String jid;
 				if (item.isMuc()) jid = item.getName();
-				else jid = item.getJid();
+				else jid = item.getEntry().getUser();
 				Intent intent = new Intent(activity, Chat.class);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra("jid", jid);

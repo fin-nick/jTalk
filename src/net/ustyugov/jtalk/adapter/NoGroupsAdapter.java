@@ -27,7 +27,6 @@ import net.ustyugov.jtalk.Holders.GroupHolder;
 import net.ustyugov.jtalk.Holders.ItemHolder;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
-import net.ustyugov.jtalk.db.RosterDbHelper;
 import net.ustyugov.jtalk.service.JTalkService;
 
 import org.jivesoftware.smack.Roster;
@@ -81,20 +80,21 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 			cursor.moveToFirst();
 			do {
 				String account = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
-                RosterItem item = new RosterItem(account, RosterItem.Type.account, account);
+				XMPPConnection connection = service.getConnection(account);
+
+                RosterItem item = new RosterItem(account, RosterItem.Type.account, null);
+                item.setName(account);
                 if (cursor.getCount() > 1) add(item);
                 else while (service.getCollapsedGroups().contains(account)) service.getCollapsedGroups().remove(account);
 
-                if (!service.getCollapsedGroups().contains(account)) {
-                    Roster roster = service.getRoster(account);
-
+                Roster roster = service.getRoster(account);
+                if (roster != null && connection != null && connection.isAuthenticated() && !service.getCollapsedGroups().contains(account)) {
                     // add self contact
-                    if (prefs.getBoolean("SelfContact", true) && roster != null) {
-                        Iterator<Presence> it = roster.getPresences(account);
-                        if (it.hasNext() && it.next().isAvailable()) {
-                            RosterItem self = new RosterItem(account, RosterItem.Type.self, account);
-                            add(self);
-                        }
+                    Iterator<Presence> it = roster.getPresences(account);
+                    if (prefs.getBoolean("SelfContact", true) && it.hasNext() && it.next().isAvailable()) {
+                        RosterEntry entry = new RosterEntry(account, account, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+                        RosterItem self = new RosterItem(account, RosterItem.Type.self, entry);
+                        add(self);
                     }
 
                     // add conferences and privates
@@ -111,66 +111,41 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
                         if (!service.getCollapsedGroups().contains(service.getString(R.string.MUC))) {
                             Enumeration<String> groupEnum = service.getConferencesHash(account).keys();
                             while(groupEnum.hasMoreElements()) {
-                                RosterItem muc = new RosterItem(account, RosterItem.Type.muc, groupEnum.nextElement());
+                                RosterItem muc = new RosterItem(account, RosterItem.Type.muc, null);
+                                muc.setName(groupEnum.nextElement());
                                 add(muc);
                             }
 
                             List<String> privates = service.getPrivateMessages(account);
                             for (String jid : privates) {
-                                String name = jid.substring(jid.indexOf("/"), jid.length());
-                                RosterItem i = new RosterItem(account, RosterItem.Type.entry, jid);
-                                i.setName(name);
+                                RosterEntry e = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+                                RosterItem i = new RosterItem(account, RosterItem.Type.entry, e);
                                 add(i);
                             }
                         }
                     }
 
-                    // add users
-                    Cursor c = service.getContentResolver().query(JTalkProvider.ROSTER_URI, null, RosterDbHelper.ACCOUNT + " = '" + account + "'", null, null);;
-//                    if (hideOffline) c = service.getContentResolver().query(JTalkProvider.ROSTER_URI, null, RosterDbHelper.ACCOUNT + " = '" + account + "' AND state != '5'", null, null);
-//                    else c = service.getContentResolver().query(JTalkProvider.ROSTER_URI, null, RosterDbHelper.ACCOUNT + " = '" + account + "'", null, null);
+                    List<String> list = new ArrayList<String>();
 
-                    if (c != null && c.getCount() > 0) {
-                        c.moveToFirst();
-                        do {
-                            String jid = c.getString(c.getColumnIndex(RosterDbHelper.JID));
-                            String name = c.getString(c.getColumnIndex(RosterDbHelper.NAME));
-                            String state = c.getString(c.getColumnIndex(RosterDbHelper.STATE));
-                            String status = c.getString(c.getColumnIndex(RosterDbHelper.STATUS));
-
-                            RosterItem i = new RosterItem(account, RosterItem.Type.entry, jid);
-                            i.setName(name);
-                            i.setStatus(status);
-                            i.setState(state);
-                            add(i);
-                        } while (c.moveToNext());
-                        c.close();
+                    for (RosterEntry rosterEntry : roster.getEntries()) {
+                        String jid = rosterEntry.getUser();
+                        String name = rosterEntry.getName();
+                        if (name == null) name = jid;
+                        Presence.Type presenceType = service.getType(account, jid);
+                        if (hideOffline) {
+                            if (presenceType != Presence.Type.unavailable) list.add(jid);
+                        } else {
+                            list.add(jid);
+                        }
                     }
 
-//                    List<String> list = new ArrayList<String>();
-//                    for (RosterEntry rosterEntry : roster.getEntries()) {
-//                        String jid = rosterEntry.getUser();
-//                        Presence.Type presenceType = service.getType(account, jid);
-//                        if (hideOffline) {
-//                            if (presenceType != Presence.Type.unavailable) list.add(jid);
-//                        } else {
-//                            list.add(jid);
-//                        }
-//                    }
-//
-//                    if (prefs.getBoolean("SortByStatuses", true)) list = SortList.sortSimpleContacts(account, list);
-//
-//                    for (String jid: list) {
-//                        RosterEntry re = roster.getEntry(jid);
-//                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, jid);
-//                        i.setName(re.getName());
-//                        Presence p = roster.getPresence(jid);
-//                        if (p.isAvailable()) {
-//                            i.setState(service.getIntMode(p.getMode()));
-//                            i.setStatus(p.getStatus());
-//                        } else i.setState(5);
-//                        add(i);
-//                    }
+                    if (prefs.getBoolean("SortByStatuses", true)) list = SortList.sortSimpleContacts(account, list);
+
+                    for (String jid: list) {
+                        RosterEntry re = roster.getEntry(jid);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, re);
+                        add(i);
+                    }
                 } else item.setCollapsed(true);
 			} while (cursor.moveToNext());
 			cursor.close();
@@ -181,7 +156,6 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		RosterItem item = getItem(position);
         String account = item.getAccount();
-        boolean connected = service.isAuthenticated(account);
         if (item.isGroup()) {
             GroupHolder holder;
             if (convertView == null || convertView.findViewById(R.id.group_layout) == null) {
@@ -235,12 +209,14 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
             Avatars.loadAvatar(activity, account, holder.avatar);
             return convertView;
 		} else if (item.isEntry() || item.isSelf()) {
-			String jid = item.getJid();
-            String state = item.getState();
-            String status = item.getStatus();
-            String name = item.getName();
+			String name = item.getName();
+			String jid = item.getEntry().getUser();
+			if (name == null || name.length() <= 0 ) name = jid;
 			if (item.isSelf()) name += " (self)";
-
+			
+			Presence presence = service.getPresence(item.getAccount(), jid);
+			String status = service.getStatus(account, jid);
+			
 			int count = service.getMessagesCount(account, jid);
 			
 			if(convertView == null || convertView.findViewById(R.id.entry_layout) == null) {
@@ -286,12 +262,12 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
 				holder.counter.setVisibility(View.GONE);
 			}
 	        
-	        if (prefs.getBoolean("ShowCaps", false) && connected) {
+	        if (prefs.getBoolean("ShowCaps", false)) {
 				String node = service.getNode(account, jid);
 				ClientIcons.loadClientIcon(activity, holder.caps, node);
 			}
 	        
-	        if (prefs.getBoolean("LoadAvatar", false) && connected) {
+	        if (prefs.getBoolean("LoadAvatar", false)) {
 				Avatars.loadAvatar(activity, jid, holder.avatar);
 			}
 
@@ -300,7 +276,7 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
                 else convertView.setBackgroundColor(0x00000000);
             }
 	        
-			if (iconPicker != null) holder.statusIcon.setImageBitmap(iconPicker.getIconByMode(state));
+			if (iconPicker != null) holder.statusIcon.setImageBitmap(iconPicker.getIconByPresence(presence));
 			return convertView;
 		} else if (item.isMuc()) {
 			String name = item.getName();

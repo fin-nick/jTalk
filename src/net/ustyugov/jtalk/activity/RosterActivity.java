@@ -42,6 +42,8 @@ import net.ustyugov.jtalk.dialog.MucDialogs;
 import net.ustyugov.jtalk.dialog.RosterDialogs;
 import net.ustyugov.jtalk.service.JTalkService;
 
+import org.jivesoftware.smack.RosterEntry;
+
 import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -388,7 +390,8 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
 			}
 			updateList();
 		} else if (item.isEntry() || item.isSelf()) {
-			String jid = item.getJid();
+			RosterEntry re = item.getEntry();
+			String jid = re.getUser();
 			Intent i = new Intent(this, Chat.class);
 			i.putExtra("account", account);
 	        i.putExtra("jid", jid);
@@ -410,7 +413,7 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
 		} else if (item.isAccount()) {
 			RosterDialogs.AccountMenuDialog(this, item);
 		} else if (item.isEntry()) {
-            String j = item.getJid();
+            String j = item.getEntry().getUser();
 			if (!service.getPrivateMessages(item.getAccount()).contains(j)) RosterDialogs.ContactMenuDialog(this, item);
             else RosterDialogs.PrivateMenuDialog(this, item);
 		} else if (item.isSelf()) {

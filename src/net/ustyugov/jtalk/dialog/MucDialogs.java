@@ -301,7 +301,8 @@ public class MucDialogs {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				JTalkService service = JTalkService.getInstance();
-
+				final RosterEntry entry = adapter.getItem(which).getEntry();
+				
 				if (service.getConferencesHash(account).containsKey(group)) {
 					final MultiUserChat muc = service.getConferencesHash(account).get(group);
 					
@@ -316,7 +317,7 @@ public class MucDialogs {
 					builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
 							String reason = et.getText().toString();
-							muc.invite(adapter.getItem(which).getJid(), reason);
+							muc.invite(entry.getUser(), reason);
 						}
 					});
 					builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

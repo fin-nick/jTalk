@@ -546,7 +546,7 @@ public class JTalkService extends Service {
     	}
     	return Presence.Mode.available;
     }
-
+    
     public String getStatus(String account, String user) {
     	if (connections.containsKey(account)) {
     		if (StringUtils.parseResource(user).length() > 0) {

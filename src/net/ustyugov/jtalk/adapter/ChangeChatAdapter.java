@@ -58,9 +58,15 @@ public class ChangeChatAdapter extends ArrayAdapter<RosterItem> {
 			cursor.moveToFirst();
 			do {
 				String account = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
+				XMPPConnection connection = service.getConnection(account);
+
                 for (String jid : service.getActiveChats(account)) {
                     if (!service.getConferencesHash(account).containsKey(jid)) {
-                        RosterItem item = new RosterItem(account, RosterItem.Type.entry, jid);
+                        RosterEntry entry = null;
+                        Roster roster = service.getRoster(account);
+                        if (roster != null) entry = roster.getEntry(jid);
+                        if (entry == null) entry = new RosterEntry(jid, jid, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
+                        RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
                         add(item);
                     }
                 }
@@ -85,7 +91,7 @@ public class ChangeChatAdapter extends ArrayAdapter<RosterItem> {
         
         String jid = "";
         if (item.isMuc()) jid = item.getName();
-        else if (item.isEntry()) jid = item.getJid();
+        else if (item.isEntry()) jid = item.getEntry().getUser();
         String name = item.getName();
         
         IconPicker ip = service.getIconPicker();

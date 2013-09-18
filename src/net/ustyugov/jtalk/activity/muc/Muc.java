@@ -111,7 +111,8 @@ public class Muc extends SherlockActivity implements OnKeyListener {
                             }
                             updateList();
                         } else if (item.isEntry()) {
-                            String jid = item.getJid();
+                            RosterEntry re = item.getEntry();
+                            String jid = re.getUser();
                             Intent i = new Intent(Muc.this, Chat.class);
                             i.putExtra("account", account);
                             i.putExtra("jid", jid);
@@ -132,7 +133,7 @@ public class Muc extends SherlockActivity implements OnKeyListener {
                         if (item.isGroup()) {
                             //
                         } else if (item.isEntry()) {
-                            String j = item.getJid();
+                            String j = item.getEntry().getUser();
                             String group = StringUtils.parseBareAddress(j);
                             String nick = StringUtils.parseResource(j);
                             MucDialogs.userMenu(Muc.this, item.getAccount(), group, nick);

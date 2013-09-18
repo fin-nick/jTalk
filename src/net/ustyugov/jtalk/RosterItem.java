@@ -17,11 +17,11 @@
 
 package net.ustyugov.jtalk;
 
+import org.jivesoftware.smack.RosterEntry;
+
 public class RosterItem {
 	private String name;
-    private String jid;
-    private String state = "unavailable";
-    private String status = "";
+	private RosterEntry entry;
 	private String account;
 	private Type type;
 	private boolean isCollapsed = false;
@@ -29,49 +29,32 @@ public class RosterItem {
 	
 	public enum Type {account, group, entry, self, muc}
 
-    public RosterItem(String account, Type type, String jid, String state, String status) {
+    public RosterItem(String account, Type type, RosterEntry entry) {
 		this.account = account; 
 		this.type = type;
-        this.jid = jid;
-        this.state = state;
-        this.status = status;
+		this.entry = entry;
 	}
-
-    public RosterItem(String account, Type type, String jid) {
-        this.account = account;
-        this.type = type;
-        this.name = jid;
-        this.jid = jid;
-    }
 
 	public boolean isGroup() {return type == Type.group;}
 	public boolean isAccount() {return type == Type.account;}
 	public boolean isEntry() {return type == Type.entry;}
 	public boolean isSelf() {return type == Type.self;}
 	public boolean isMuc() {return type == Type.muc;}
-
-    public boolean isCollapsed() {return this.isCollapsed;}
+	
+	public boolean isCollapsed() {return this.isCollapsed;}
+	
 	public void setCollapsed(boolean isExpanded) {this.isCollapsed= isExpanded;}
+	
+	public RosterEntry getEntry() {return this.entry;}
+	
+	public void setName(String name) { this.name = name; }
+	public String getName() { 
+		if (entry == null) return name;
+		if (entry.getName() != null && entry.getName().length() > 0) return entry.getName();
+		else return entry.getUser();
+	}
 
-    public void setName(String name) {
-        if (name != null && name.length() > 0) this.name = name;
-    }
-	public String getName() { return name; }
-
-    public String getAccount() { return this.account; }
-
-    public void setJid(String jid) { this.jid = jid; }
-    public String getJid() { return jid; }
-
-    public void setState(String state) { this.state = state; }
-    public String getState() { return state; }
-
-    public void setStatus(String status) {
-        if (status != null && status.length() > 0) this.status = status;
-    }
-    public String getStatus() {return status; }
-
-
-	public void setObject(Object object) { this.object = object; }
-    public Object getObject() { return object; }
+	public String getAccount() { return this.account; }
+	public Object getObject() { return object; }
+	public void setObject(Object object) { this.object = object; } 
 }

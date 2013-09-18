@@ -20,21 +20,14 @@ package net.ustyugov.jtalk.listener;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 
-import android.content.ContentValues;
-import android.database.Cursor;
 import android.preference.PreferenceManager;
 import net.ustyugov.jtalk.Avatars;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.MessageLog;
-import net.ustyugov.jtalk.db.AccountDbHelper;
-import net.ustyugov.jtalk.db.JTalkProvider;
-import net.ustyugov.jtalk.db.RosterDbHelper;
 import net.ustyugov.jtalk.service.JTalkService;
 
 import net.ustyugov.jtalk.Constants;
 
-import org.jivesoftware.smack.Roster;
-import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.util.StringUtils;
@@ -60,7 +53,6 @@ public class RstListener implements RosterListener {
 
     @Override
     public void entriesDeleted(Collection<String> addresses) {
-
     	Intent intent = new Intent(Constants.UPDATE);
        	service.sendBroadcast(intent);
     }
@@ -74,40 +66,16 @@ public class RstListener implements RosterListener {
     @Override
     public void presenceChanged(Presence presence) {
     	String[] statusArray = service.getResources().getStringArray(R.array.statusArray);
-    	String jid = StringUtils.parseBareAddress(presence.getFrom());
+    	String jid  = StringUtils.parseBareAddress(presence.getFrom());
 
     	Presence.Mode mode = presence.getMode();
     	if (mode == null) mode = Presence.Mode.available;
 
     	String status = presence.getStatus();
-
-        Roster roster = service.getRoster(account);
-        String name = roster.getEntry(jid).getName();
-
-        String group = service.getResources().getString(R.string.Nogroup);
-        Collection<RosterGroup> groups = roster.getGroups();
-        for (RosterGroup g : groups) {
-            if (g.contains(jid)) group = g.getName();
-        }
-
-        ContentValues values = new ContentValues();
-        values.put(RosterDbHelper.ACCOUNT, account);
-        values.put(RosterDbHelper.JID, jid);
-        values.put(RosterDbHelper.NAME, name);
-        values.put(RosterDbHelper.STATE, mode.name());
-        values.put(RosterDbHelper.STATUS, status);
-        values.put(RosterDbHelper.GROUP, group);
-
-        String sel = "account = '" + account + "' AND jid = '" + jid + "'";
-        Cursor cursor = service.getContentResolver().query(JTalkProvider.ROSTER_URI, null, sel, null, AccountDbHelper._ID);
-        if (cursor != null && cursor.getCount() > 0) {
-            cursor.close();
-            service.getContentResolver().update(JTalkProvider.ROSTER_URI, values, sel, null);
-        } else service.getContentResolver().insert(JTalkProvider.ROSTER_URI, values);
+    	if (status != null && status.length() > 0) status = "(" + status + ")";
+    	else status = "";
 
         String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new java.util.Date());
-        if (status != null && status.length() > 0) status = "(" + status + ")";
-        else status = "";
 
       	MessageItem item = new MessageItem(account, jid);
 		if (presence.isAvailable()) {
@@ -129,13 +97,13 @@ public class RstListener implements RosterListener {
         service.sendBroadcast(new Intent(Constants.PRESENCE_CHANGED).putExtra("jid", jid));
         service.sendBroadcast(new Intent(Constants.UPDATE));
     }
-
+    
     private int getPosition(Presence.Mode m) {
-        if (m == Presence.Mode.available) return 0;
-        else if (m == Presence.Mode.chat) return 4;
-        else if (m == Presence.Mode.away) return 1;
-        else if (m == Presence.Mode.xa)   return 2;
-        else if (m == Presence.Mode.dnd)  return 3;
-        else return 5;
+    	if (m == Presence.Mode.available) return 0;
+    	else if (m == Presence.Mode.chat) return 4;
+    	else if (m == Presence.Mode.away) return 1;
+    	else if (m == Presence.Mode.xa)   return 2;
+    	else if (m == Presence.Mode.dnd)  return 3;
+    	else return 5;
     }
 }

@@ -35,12 +35,10 @@ public class JTalkProvider  extends ContentProvider {
 	public static final Uri CONTENT_URI = Uri.parse("content://com.jtalk2/message");
 	public static final Uri TEMPLATES_URI = Uri.parse("content://com.jtalk2/template");
 	public static final Uri WIDGET_URI = Uri.parse("content://com.jtalk2/widget");
-    public static final Uri ROSTER_URI = Uri.parse("content://com.jtalk2/roster");
 	
 	private SQLiteDatabase msg_db;
 	private SQLiteDatabase wdg_db;
 	private SQLiteDatabase acc_db;
-    private SQLiteDatabase roster_db;
 	private SQLiteDatabase tmp_db;
 	
 	@Override
@@ -70,7 +68,6 @@ public class JTalkProvider  extends ContentProvider {
 		msg_db = new MessageDbHelper(getContext(), path).getWritableDatabase();
 		wdg_db = new WidgetDbHelper(getContext()).getWritableDatabase();
 		acc_db = new AccountDbHelper(getContext()).getWritableDatabase();
-        roster_db = new RosterDbHelper(getContext()).getWritableDatabase();
 		tmp_db = new TemplatesDbHelper(getContext()).getWritableDatabase();
 		return (msg_db != null);
 	}
@@ -82,7 +79,6 @@ public class JTalkProvider  extends ContentProvider {
 		else if (uri.equals(WIDGET_URI)) c = wdg_db.query(WidgetDbHelper.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
 		else if (uri.equals(ACCOUNT_URI)) c = acc_db.query(AccountDbHelper.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
 		else if (uri.equals(TEMPLATES_URI)) c = tmp_db.query(TemplatesDbHelper.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
-        else if (uri.equals(ROSTER_URI)) c = roster_db.query(RosterDbHelper.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
 		c.setNotificationUri(getContext().getContentResolver(), uri);
 		return c;
 	}
@@ -129,16 +125,6 @@ public class JTalkProvider  extends ContentProvider {
 			} else {
 				throw new SQLException("Failed to insert row into " + url);
 			}
-        } else if (url.equals(ROSTER_URI)) {
-            long rowId = roster_db.insert(RosterDbHelper.TABLE_NAME, RosterDbHelper.ACCOUNT, values);
-
-            if (rowId > 0) {
-                Uri uri = ContentUris.withAppendedId(ROSTER_URI, rowId);
-                getContext().getContentResolver().notifyChange(uri, null);
-                return uri;
-            } else {
-                throw new SQLException("Failed to insert row into " + url);
-            }
 		} else return null;
 	}
 
@@ -149,7 +135,6 @@ public class JTalkProvider  extends ContentProvider {
 		else if (uri.equals(WIDGET_URI)) retVal = wdg_db.update(WidgetDbHelper.TABLE_NAME, values, selection, selectionArgs);
 		else if (uri.equals(ACCOUNT_URI)) retVal = acc_db.update(AccountDbHelper.TABLE_NAME, values, selection, selectionArgs);
 		else if (uri.equals(TEMPLATES_URI)) retVal = tmp_db.update(TemplatesDbHelper.TABLE_NAME, values, selection, selectionArgs);
-        else if (uri.equals(ROSTER_URI)) retVal = roster_db.update(RosterDbHelper.TABLE_NAME, values, selection, selectionArgs);
 		getContext().getContentResolver().notifyChange(uri, null);
 		return retVal;
 	}
@@ -161,7 +146,6 @@ public class JTalkProvider  extends ContentProvider {
 		else if (uri.equals(WIDGET_URI)) retVal = wdg_db.delete(WidgetDbHelper.TABLE_NAME, selection, selectionArgs);
 		else if (uri.equals(ACCOUNT_URI)) retVal = acc_db.delete(AccountDbHelper.TABLE_NAME, selection, selectionArgs);
 		else if (uri.equals(TEMPLATES_URI)) retVal = tmp_db.delete(TemplatesDbHelper.TABLE_NAME, selection, selectionArgs);
-        else if (uri.equals(ROSTER_URI)) retVal = roster_db.delete(RosterDbHelper.TABLE_NAME, selection, selectionArgs);
 		getContext().getContentResolver().notifyChange(uri, null);
 		return retVal;
 	}

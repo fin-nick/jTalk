@@ -19,11 +19,10 @@ package net.ustyugov.jtalk.activity.muc;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.*;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
@@ -31,11 +30,13 @@ import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.activity.RosterActivity;
 import net.ustyugov.jtalk.service.JTalkService;
-import org.jivesoftware.smack.util.StringUtils;
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smackx.bookmark.BookmarkManager;
 
 public class Invite extends SherlockActivity implements View.OnClickListener {
     private Button ok, cancel;
     private EditText nickEd;
+    private CheckBox add;
     private String account, room, password;
 
     @Override
@@ -67,13 +68,33 @@ public class Invite extends SherlockActivity implements View.OnClickListener {
         TextView reasonTV = (TextView) findViewById(R.id.reason);
         reasonTV.setText(reason);
 
-        nickEd = (EditText) findViewById(R.id.nick);
+        add = (CheckBox) findViewById(R.id.add);
+        add.setChecked(false);
 
         ok = (Button) findViewById(R.id.ok);
+        ok.setEnabled(false);
         ok.setOnClickListener(this);
 
         cancel = (Button) findViewById(R.id.cancel);
         cancel.setOnClickListener(this);
+
+        nickEd = (EditText) findViewById(R.id.nick);
+        nickEd.addTextChangedListener(new TextWatcher() {
+            public void afterTextChanged(Editable s) {
+                int length = s.length();
+                if (length > 0) {
+                    ok.setEnabled(true);
+                } else {
+                    ok.setEnabled(false);
+                }
+            }
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+        });
     }
 
     @Override
@@ -95,10 +116,17 @@ public class Invite extends SherlockActivity implements View.OnClickListener {
             JTalkService service = JTalkService.getInstance();
             if (service != null && service.isAuthenticated(account)) {
                 String nick = nickEd.getText().toString();
-                if (nick == null && nick.length() < 1) nick = StringUtils.parseName(account);
-                service.joinRoom(account, room, nick, password);
-                sendBroadcast(new Intent(Constants.PRESENCE_CHANGED));
-                finish();
+                if (nick != null && nick.length() > 0) {
+                    if (add.isChecked()) {
+                        try {
+                            BookmarkManager bm = BookmarkManager.getBookmarkManager(service.getConnection(account));
+                            bm.addBookmarkedConference(room, room, false, nick, password);
+                        } catch (XMPPException ignored) {}
+                    }
+                    service.joinRoom(account, room, nick, password);
+                    sendBroadcast(new Intent(Constants.PRESENCE_CHANGED));
+                    finish();
+                }
             }
         } else if (view == cancel) {
             finish();

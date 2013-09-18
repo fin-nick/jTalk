@@ -187,6 +187,10 @@ public class MsgListener implements PacketListener {
                     MessageLog.writeMucMessage(account, group, nick, item);
 	            }
 	        } else if (type.equals("chat") || type.equals("normal") || type.equals("headline")) {
+                // If invite to room
+                PacketExtension extension = msg.getExtension("jabber:x:conference");
+                if (extension != null) return;
+
 	        	ReplaceExtension replace = (ReplaceExtension) msg.getExtension("urn:xmpp:message-correct:0");
 	    		if (replace != null) {
 	    			String rid = replace.getId();

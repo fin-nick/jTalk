@@ -10,4 +10,8 @@
         android:icon="@drawable/ic_action_refresh"
         android:title="Refresh"
         android:showAsAction="always"/>
+
+    <item android:id="@+id/copy"
+          android:title="Copy JID"
+          android:showAsAction="ifRoom|withText"/>
 </menu>

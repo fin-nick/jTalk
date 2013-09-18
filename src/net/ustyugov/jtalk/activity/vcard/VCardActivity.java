@@ -18,10 +18,14 @@
 package net.ustyugov.jtalk.activity.vcard;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.*;
 
 import android.content.Intent;
+import android.os.Environment;
+import android.text.ClipboardManager;
+import android.widget.*;
 import com.actionbarsherlock.app.SherlockActivity;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
@@ -48,12 +52,6 @@ import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.ScrollView;
-import android.widget.TextView;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -128,6 +126,31 @@ public class VCardActivity extends SherlockActivity {
 		phoneWork = (TextView) workPage.findViewById(R.id.workphone);
 		
 		av = (ImageView) avatarPage.findViewById(R.id.av);
+        av.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                String fname = Constants.PATH + "/" + jid.replaceAll("/", "%");
+                String saveto = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Pictures/Avatars/";
+
+                File folder = new File(saveto);
+                folder.mkdirs();
+
+                try {
+                    FileInputStream fis = new FileInputStream(fname);
+                    byte[] buffer = new byte[fis.available()];
+                    fis.read(buffer);
+                    fis.close();
+
+                    FileOutputStream fos = new FileOutputStream(saveto + "/" + jid.replaceAll("/", "%") + ".png");
+                    fos.write(buffer);
+                    fos.close();
+                    Toast.makeText(VCardActivity.this, "Copied to " + saveto, Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    Toast.makeText(VCardActivity.this, "Failed to copy", Toast.LENGTH_LONG).show();
+                }
+                return true;
+            }
+        });
 		
 		statusProgress = (ProgressBar) statusPage.findViewById(R.id.progress);
 		aboutProgress = (ProgressBar) aboutPage.findViewById(R.id.progress);
@@ -206,6 +229,10 @@ public class VCardActivity extends SherlockActivity {
                 intent.putExtra("lon", lon);
                 startActivity(intent);
                 break;
+            case R.id.copy:
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                clipboard.setText(jid);
+
 		}
 		return true;
 	}

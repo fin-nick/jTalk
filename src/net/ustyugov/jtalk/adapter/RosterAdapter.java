@@ -107,8 +107,8 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                             for (Presence presence : selfPresences) {
                                 if (presence.isAvailable()) {
                                     String from = presence.getFrom();
-                                    RosterEntry entry = new RosterEntry(from, StringUtils.parseResource(from), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                                    RosterItem self = new RosterItem(account, RosterItem.Type.self, entry);
+                                    RosterItem self = new RosterItem(account, RosterItem.Type.self, from);
+                                    self.setName(StringUtils.parseResource(from));
                                     add(self);
                                 }
                             }
@@ -127,10 +127,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                         if (!service.getCollapsedGroups().contains(service.getString(R.string.ActiveChats))) {
                             for (String jid: activeChats) {
                                 if (!service.getConferencesHash(account).containsKey(jid)) {
-                                    RosterEntry entry = roster.getEntry(jid);
-                                    if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                                    if (entry == null) entry = new RosterEntry(jid, jid, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                                    RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
+                                    RosterItem item = new RosterItem(account, RosterItem.Type.entry, jid);
                                     add(item);
                                 }
                             }
@@ -163,8 +160,8 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 
                             if (!service.getCollapsedGroups().contains(service.getString(R.string.Privates))) {
                                 for (String jid : privates) {
-                                    RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                                    RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
+                                    RosterItem item = new RosterItem(account, RosterItem.Type.entry, jid);
+                                    item.setName(StringUtils.parseResource(jid));
                                     add(item);
                                 }
                             } else group.setCollapsed(true);
@@ -212,7 +209,13 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                                 if (prefs.getBoolean("SortByStatuses", true)) list = SortList.sortSimpleContacts(account, list);
                                 for (String jid: list) {
                                     RosterEntry re = roster.getEntry(jid);
-                                    RosterItem i = new RosterItem(account, RosterItem.Type.entry, re);
+                                    RosterItem i = new RosterItem(account, RosterItem.Type.entry, jid);
+                                    i.setName(re.getName());
+                                    Presence p = roster.getPresence(jid);
+                                    if (p.isAvailable()) {
+                                        i.setState(p.getMode().name());
+                                        i.setStatus(p.getStatus());
+                                    } else i.setState("unavailable");
                                     add(i);
                                 }
                             }
@@ -259,7 +262,13 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                             if (prefs.getBoolean("SortByStatuses", true)) list = SortList.sortSimpleContacts(account, list);
                             for (String jid: list) {
                                 RosterEntry re = roster.getEntry(jid);
-                                RosterItem i = new RosterItem(account, RosterItem.Type.entry, re);
+                                RosterItem i = new RosterItem(account, RosterItem.Type.entry, jid);
+                                i.setName(re.getName());
+                                Presence p = roster.getPresence(jid);
+                                if (p.isAvailable()) {
+                                    i.setState(p.getMode().name());
+                                    i.setStatus(p.getStatus());
+                                } else i.setState("unavailable");
                                 add(i);
                             }
                         }
@@ -327,11 +336,8 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
             Avatars.loadAvatar(activity, account, holder.avatar);
             return convertView;
 		} else if (ri.isEntry() || ri.isSelf()) {
-			RosterEntry re = ri.getEntry();
-			String jid = re.getUser();
-			String name = re.getName();
-			if (name == null || name.length() <= 0 ) name = jid;
-			
+			String jid = ri.getJid();
+			String name = ri.getName();
 			Presence presence = service.getPresence(ri.getAccount(), jid);
 			String status = service.getStatus(account, jid);
 			if (service.getComposeList().contains(jid)) status = service.getString(R.string.Composes);

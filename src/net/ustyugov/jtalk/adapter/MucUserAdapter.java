@@ -166,34 +166,28 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
                     Collections.sort(moderators, new SortList.StringComparator());
 
                     for (String jid : moderators) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                 } else {
                     for (String jid : mChat) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                     for (String jid : mOnline) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                     for (String jid : mAway) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                     for (String jid : mXa) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                     for (String jid : mDnd) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                 }
@@ -214,34 +208,28 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
                     Collections.sort(participants, new SortList.StringComparator());
 
                     for (String jid : participants) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                 } else {
                     for (String jid : pChat) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                     for (String jid : pOnline) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                     for (String jid : pAway) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                     for (String jid : pXa) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                     for (String jid : pDnd) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                 }
@@ -262,34 +250,28 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
                     Collections.sort(visitors, new SortList.StringComparator());
 
                     for (String jid : visitors) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                 } else {
                     for (String jid : vChat) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                     for (String jid : vOnline) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                     for (String jid : vAway) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                     for (String jid : vXa) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                     for (String jid : vDnd) {
-                        RosterEntry entry = new RosterEntry(jid, StringUtils.parseResource(jid), RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, StringUtils.parseResource(jid));
                         add(i);
                     }
                 }
@@ -345,7 +327,7 @@ public class MucUserAdapter extends ArrayAdapter<RosterItem> {
 		} else if (item.isEntry()) {
 			boolean color = prefs.getBoolean("ColoredBar", true);
 			String name = item.getName();
-			String jid = item.getEntry().getUser();
+			String jid = item.getJid();
 			if (name == null || name.length() <= 0 ) name = jid;
 			
 			Presence presence = service.getPresence(item.getAccount(), jid);

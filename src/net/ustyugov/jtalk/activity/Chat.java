@@ -134,7 +134,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 String j = jid;
                 if (rosterItem != null && item != rosterItem) {
                     rosterItem = item;
-                    if (item.isEntry() || item.isSelf()) j = item.getEntry().getUser();
+                    if (item.isEntry() || item.isSelf()) j = item.getJid();
                     else if (item.isMuc()) j = item.getName();
                     Intent intent = new Intent();
                     intent.putExtra("jid", j);
@@ -165,7 +165,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 if (position > 0) {
                     RosterItem item = (RosterItem) parent.getItemAtPosition(position);
                     String j = null;
-                    if (item.isEntry()) j = item.getEntry().getUser();
+                    if (item.isEntry()) j = item.getJid();
                     else if (item.isMuc()) j = item.getName();
                     if (j != null && !j.equals(jid)) {
                         Intent intent = new Intent();
@@ -187,15 +187,12 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 if (position > 0) {
                     RosterItem item = (RosterItem) parent.getItemAtPosition(position);
                     if (item.isEntry()) {
-                        RosterEntry entry = item.getEntry();
-                        if (entry != null) {
-                            String j = entry.getUser();
-                            if (service.getConferencesHash(item.getAccount()).containsKey(j)) {
-                                String group = StringUtils.parseBareAddress(j);
-                                String nick = StringUtils.parseResource(j);
-                                MucDialogs.userMenu(Chat.this, item.getAccount(), group, nick);
-                            } else RosterDialogs.ContactMenuDialog(Chat.this, item);
-                        }
+                        String j = item.getJid();
+                        if (service.getConferencesHash(item.getAccount()).containsKey(j)) {
+                            String group = StringUtils.parseBareAddress(j);
+                            String nick = StringUtils.parseResource(j);
+                            MucDialogs.userMenu(Chat.this, item.getAccount(), group, nick);
+                        } else RosterDialogs.ContactMenuDialog(Chat.this, item);
                     } else if (item.isMuc()) {
                         MucDialogs.roomMenu(Chat.this, item.getAccount(), item.getName());
                     }

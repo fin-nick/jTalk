@@ -68,15 +68,9 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 			cursor.moveToFirst();
 			do {
 				String account = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
-				XMPPConnection connection = service.getConnection(account);
-
                 for (String jid : service.getActiveChats(account)) {
                     if (!service.getConferencesHash(account).containsKey(jid)) {
-                        RosterEntry entry = null;
-                        Roster roster = service.getRoster(account);
-                        if (roster != null) entry = roster.getEntry(jid);
-                        if (entry == null) entry = new RosterEntry(jid, jid, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem item = new RosterItem(account, RosterItem.Type.entry, jid);
                         add(item);
                     }
                 }
@@ -97,7 +91,7 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 		for (int i = 0; i < getCount(); i++) {
 			RosterItem item = getItem(i);
 			if (item.isEntry()) {
-				if (item.getAccount().equals(account) && item.getEntry().getUser().equals(jid)) return i;
+				if (item.getAccount().equals(account) && item.getJid().equals(jid)) return i;
 			} else if (item.isMuc()) {
 				if (item.getAccount().equals(account) && item.getName().equals(jid)) return i;
 			}
@@ -123,9 +117,7 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
         } else if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {
         	name = StringUtils.parseResource(jid);
         } else {
-        	RosterEntry re = item.getEntry();
-            if (re != null) name = re.getName();
-            if (name == null || name.equals("")) name = jid;
+        	name = item.getName();
         }
         
         TextView label = (TextView) v.findViewById(android.R.id.text1);
@@ -175,7 +167,7 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 		}
 		
 		if (item.isEntry()) {
-			String jid = item.getEntry().getUser();
+			String jid = item.getJid();
 			String status = "";
 			String name = jid;
 			
@@ -185,9 +177,7 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 			if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {
 	        	name = StringUtils.parseResource(jid);
 	        } else {
-	        	RosterEntry re = item.getEntry();
-	            if (re != null) name = re.getName();
-	            if (name == null || name.equals("")) name = jid;
+	        	name = item.getName();
 	        }
 			
 			Presence presence = service.getPresence(account, jid);

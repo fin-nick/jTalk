@@ -26,11 +26,8 @@ import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
 
-import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
-import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smack.packet.RosterPacket;
 import org.jivesoftware.smack.util.StringUtils;
 
 import com.jtalk2.R;
@@ -67,14 +64,9 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 			cursor.moveToFirst();
 			do {
 				String account = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
-				XMPPConnection connection = service.getConnection(account);
-
                 for(String jid : service.getActiveChats(account)) {
                     if (!service.getConferencesHash(account).containsKey(jid)) {
-                        Roster roster = service.getRoster(account);
-                        RosterEntry entry = roster.getEntry(jid);
-                        if (entry == null) entry = new RosterEntry(jid, jid, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                        RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
+                        RosterItem item = new RosterItem(account, RosterItem.Type.entry, jid);
                         add(item);
                     }
                 }
@@ -132,7 +124,7 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
         	RosterItem ri = getItem(position);
             String account = ri.getAccount();
             String jid = "";
-            if (ri.isEntry() || ri.isSelf()) jid = ri.getEntry().getUser();
+            if (ri.isEntry() || ri.isSelf()) jid = ri.getJid();
             else if (ri.isMuc()) jid = ri.getName();
             String name = ri.getName();
             
@@ -141,9 +133,7 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
             } else if (service.getJoinedConferences().containsKey(StringUtils.parseBareAddress(jid))) {
             	name = StringUtils.parseResource(jid);
             } else {
-            	RosterEntry re = ri.getEntry();
-                if (re != null) name = re.getName();
-                if (name == null || name.equals("")) name = jid;
+            	name = ri.getName();
             }
             
             TextView label = (TextView) v.findViewById(R.id.name);

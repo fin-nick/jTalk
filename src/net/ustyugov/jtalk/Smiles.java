@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.*;
 
+import android.util.DisplayMetrics;
 import net.ustyugov.jtalk.adapter.SmilesDialogAdapter;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -63,12 +64,16 @@ public class Smiles implements DialogInterface.OnClickListener {
 	private int columns = 3;
     private int size = 18;
 
+    private DisplayMetrics metrics = new DisplayMetrics();
+
 	public Smiles(Activity activity) {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
 		String pack = prefs.getString("SmilesPack", "default");
 		table = new Hashtable<String, List<String>>();
 		path = Constants.PATH_SMILES + pack;
 		this.activity = activity;
+
+        activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
 		try {
 		    columns = Integer.parseInt(prefs.getString("SmilesColumns", 3+""));
@@ -179,7 +184,9 @@ public class Smiles implements DialogInterface.OnClickListener {
                 double k = (double)h/(double)size;
                 int ws = (int) (w/k);
 
-                smiles.put(key, Bitmap.createScaledBitmap(smile, ws, size, true));
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(smile, ws, size, true);
+                scaledBitmap.setDensity(metrics.densityDpi);
+                smiles.put(key, scaledBitmap);
             }
         } catch(Exception e) { createBuiltInSmiles(); }
     }
@@ -230,7 +237,9 @@ public class Smiles implements DialogInterface.OnClickListener {
                 double k = (double)h/(double)size;
                 int ws = (int) (w/k);
 
-                smiles.put(key, Bitmap.createScaledBitmap(smile, ws, size, true));
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(smile, ws, size, true);
+                scaledBitmap.setDensity(metrics.densityDpi);
+                smiles.put(key, scaledBitmap);
             }
         } catch(Exception e) { createBuiltInSmiles(); }
     }

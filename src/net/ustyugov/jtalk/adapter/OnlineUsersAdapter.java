@@ -59,8 +59,9 @@ public class OnlineUsersAdapter extends ArrayAdapter<RosterItem> {
 				if (roster != null) {
 					Collection<RosterEntry> users = roster.getEntries();
 					for (RosterEntry entry : users) {
-						if (roster.getPresence(entry.getUser()).isAvailable()) {
-							RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
+                        String jid = entry.getUser();
+						if (roster.getPresence(jid).isAvailable()) {
+							RosterItem item = new RosterItem(account, RosterItem.Type.entry, jid);
 							add(item);
 						}
 					}
@@ -74,11 +75,8 @@ public class OnlineUsersAdapter extends ArrayAdapter<RosterItem> {
 		IconPicker ip = service.getIconPicker();
         View v = convertView;
         RosterItem item = getItem(position);
-        RosterEntry entry = item.getEntry();
-        
-        String name = entry.getName();
-        if (name == null || name.length() < 1) name = entry.getUser();
-        
+        String name = item.getName();
+
         if (v == null) {
             LayoutInflater vi = (LayoutInflater) service.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             v = vi.inflate(R.layout.selector, null);
@@ -90,7 +88,7 @@ public class OnlineUsersAdapter extends ArrayAdapter<RosterItem> {
         	label.setTextColor(Colors.PRIMARY_TEXT);
         } else label.setTextColor(0xFF232323);
         
-		Presence presence = service.getRoster(item.getAccount()).getPresence(entry.getUser());
+		Presence presence = service.getRoster(item.getAccount()).getPresence(item.getJid());
       	ImageView icon = (ImageView)v.findViewById(R.id.status);
        	icon.setImageBitmap(ip.getIconByPresence(presence));
         return v;

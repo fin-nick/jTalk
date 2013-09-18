@@ -104,8 +104,8 @@ public class SearchAdapter extends ArrayAdapter<RosterItem> {
                         for (String jid : privates) {
                             String nick = StringUtils.parseResource(jid);
                             if (nick.toLowerCase().contains(search)) {
-                                RosterEntry e = new RosterEntry(jid, nick, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
-                                RosterItem i = new RosterItem(account, RosterItem.Type.entry, e);
+                                RosterItem i = new RosterItem(account, RosterItem.Type.entry, jid);
+                                i.setName(nick);
                                 add(i);
                             }
                         }
@@ -126,7 +126,13 @@ public class SearchAdapter extends ArrayAdapter<RosterItem> {
 
                     for (String jid: list) {
                         RosterEntry re = roster.getEntry(jid);
-                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, re);
+                        RosterItem i = new RosterItem(account, RosterItem.Type.entry, jid);
+                        i.setName(re.getName());
+                        Presence p = roster.getPresence(jid);
+                        if (p.isAvailable()) {
+                            i.setState(p.getMode().name());
+                            i.setStatus(p.getStatus());
+                        } else i.setState("unavailable");
                         add(i);
                     }
                 } else item.setCollapsed(true);
@@ -192,7 +198,7 @@ public class SearchAdapter extends ArrayAdapter<RosterItem> {
             return convertView;
 		} else if (item.isEntry() || item.isSelf()) {
 			String name = item.getName();
-			String jid = item.getEntry().getUser();
+			String jid = item.getJid();
 			if (name == null || name.length() <= 0 ) name = jid;
 			if (item.isSelf()) name += " (self)";
 			

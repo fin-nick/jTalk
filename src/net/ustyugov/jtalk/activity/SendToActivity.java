@@ -32,7 +32,6 @@ import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.activity.filetransfer.SendFileActivity;
 import net.ustyugov.jtalk.adapter.SearchAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
-import org.jivesoftware.smack.RosterEntry;
 
 public class SendToActivity extends SherlockActivity {
     private JTalkService service;
@@ -81,8 +80,7 @@ public class SendToActivity extends SherlockActivity {
                     }
                     updateList(et.getText().toString());
                 } else if (item.isEntry()) {
-                    RosterEntry re = item.getEntry();
-                    String jid = re.getUser();
+                    String jid = item.getJid();
 
                     Intent intent = getIntent();
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

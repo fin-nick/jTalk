@@ -395,10 +395,11 @@ public class RosterDialogs {
 	public static void ContactMenuDialog(final Activity activity, final RosterItem item) {
     	final JTalkService service = JTalkService.getInstance();
     	final String account = item.getAccount();
-    	final RosterEntry entry = item.getEntry();
-    	
+        final String jid = item.getJid();
+        final String name = item.getName();
+
     	CharSequence[] items;
-    	if (service.getActiveChats(account).contains(entry.getUser())) {
+    	if (service.getActiveChats(account).contains(jid)) {
     		items = new CharSequence[10];
     		items[9] = activity.getString(R.string.Close);
     	}
@@ -414,12 +415,11 @@ public class RosterDialogs {
         items[8] = activity.getString(R.string.Remove);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(entry.getUser());
+        builder.setTitle(jid);
         builder.setItems(items, new OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				String jid = entry.getUser();
-		    	String name = entry.getName();
+                RosterEntry entry = service.getRoster(account).getEntry(jid);
 		    	String group = activity.getResources().getString(R.string.Nogroup);
 		    	if (!entry.getGroups().isEmpty()) {
 		    		Iterator<RosterGroup> it = entry.getGroups().iterator();
@@ -480,10 +480,11 @@ public class RosterDialogs {
     public static void PrivateMenuDialog(final Activity activity, final RosterItem item) {
         final JTalkService service = JTalkService.getInstance();
         final String account = item.getAccount();
-        final RosterEntry entry = item.getEntry();
+        final String jid = item.getJid();
+        final String name = item.getName();
 
         CharSequence[] items;
-        if (service.getActiveChats(account).contains(entry.getUser())) {
+        if (service.getActiveChats(account).contains(jid)) {
             items = new CharSequence[6];
             items[5] = activity.getString(R.string.Close);
         }
@@ -495,12 +496,10 @@ public class RosterDialogs {
         items[4] = activity.getString(R.string.DeleteHistory);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(entry.getUser());
+        builder.setTitle(jid);
         builder.setItems(items, new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                String jid = entry.getUser();
-                String name = entry.getName();
 
                 switch (which) {
                     case 0:
@@ -578,10 +577,11 @@ public class RosterDialogs {
 	public static void SelfContactMenuDialog(final Activity activity, final RosterItem item) {
     	final JTalkService service = JTalkService.getInstance();
     	final String account = item.getAccount();
-    	final RosterEntry entry = item.getEntry();
+        final String jid = item.getJid();
+        final String name = item.getName();
     	
     	CharSequence[] items;
-    	if (service.getActiveChats(account).contains(entry.getUser())) {
+    	if (service.getActiveChats(account).contains(jid)) {
     		items = new CharSequence[5];
     		items[4] = activity.getString(R.string.Close);
     	}
@@ -592,11 +592,10 @@ public class RosterDialogs {
         items[3] = activity.getString(R.string.DeleteHistory);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(entry.getUser());
+        builder.setTitle(jid);
         builder.setItems(items, new OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				String jid = entry.getUser();
 		    	switch (which) {
 	        	case 0:
 	        		Intent infoIntent = new Intent(activity, VCardActivity.class);

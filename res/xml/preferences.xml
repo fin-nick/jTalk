@@ -109,6 +109,11 @@
                 android:defaultValue="0"
                 android:numeric="integer"/>
         <EditTextPreference
+                android:key="MucHistorySize"
+                android:title="@string/MucHistorySize"
+                android:defaultValue="10"
+                android:numeric="integer"/>
+        <EditTextPreference
                 android:key="nickSeparator"
                 android:title="@string/AddAfterNick"
                 android:defaultValue=", " />

@@ -118,6 +118,7 @@
     <string name="ColorTheme">Theme</string>
     <string name="DisableSound">Disable sound</string>
     <string name="EnableSound">Enable sound</string>
+    <string name="MucHistorySize">History size</string>
 
     <!--  Menus -->
     <string name="Update">Update</string>

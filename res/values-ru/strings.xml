@@ -110,6 +110,7 @@
     <string name="ColorTheme">Цветовая схема</string>
     <string name="DisableSound">Отключить звук</string>
     <string name="EnableSound">Включить звук</string>
+    <string name="MucHistorySize">Размер истории</string>
     
     <!--  Menus -->
     <string name="Update">Обновить</string>

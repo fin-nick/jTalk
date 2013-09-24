@@ -891,11 +891,16 @@ public class JTalkService extends Service {
                     presence.setStatus(prefs.getString("currentStatus", ""));
                     presence.setMode(Presence.Mode.valueOf(prefs.getString("currentMode", "available")));
 
+                    DiscussionHistory h = new DiscussionHistory();
+                    try {
+                        h.setMaxStanzas(Integer.parseInt(prefs.getString("MucHistorySize", "10")));
+                    } catch (NumberFormatException nfe) {
+                        h.setMaxStanzas(10);
+                    }
+
                     try {
                         writeMucMessage(account, group, nick, getString(R.string.YouJoin));
 
-                        DiscussionHistory h = new DiscussionHistory();
-                        h.setMaxStanzas(10);
                         muc.addParticipantListener(new PacketListener() {
                             @Override
                             public void processPacket(Packet packet) {
@@ -945,7 +950,7 @@ public class JTalkService extends Service {
 			getConferencesHash(account).remove(group);
             setMessageList(account, group, new ArrayList<MessageItem>());
 	    }
-	    if (joinedConferences.containsKey(group)) joinedConferences.remove(group);
+	    while (joinedConferences.containsKey(group)) joinedConferences.remove(group);
 	    Intent updateIntent = new Intent(Constants.PRESENCE_CHANGED);
 		sendBroadcast(updateIntent);
 	}

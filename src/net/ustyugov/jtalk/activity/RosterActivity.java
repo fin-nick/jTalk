@@ -17,7 +17,10 @@
 
 package net.ustyugov.jtalk.activity;
 
+import android.app.AlertDialog;
 import android.content.*;
+import android.content.res.AssetManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.view.KeyEvent;
 import android.widget.AdapterView;
@@ -55,6 +58,10 @@ import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 
 public class RosterActivity extends SherlockActivity implements OnItemClickListener, OnItemLongClickListener {
     private static final int ACTIVITY_PREFERENCES = 10;
@@ -115,8 +122,14 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
         if (getIntent().getBooleanExtra("status", false)) {
             RosterDialogs.changeStatusDialog(this, null, null);
         }
-       	Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
-		if (cursor == null || cursor.getCount() < 1) startActivity(new Intent(this, Accounts.class));
+
+        File table = new File(Constants.PATH_SMILES + "/default/table.xml");
+        if (!table.exists()) {
+            new CreateDefaultSmiles().execute();
+        } else {
+            Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
+            if (cursor == null || cursor.getCount() < 1) startActivity(new Intent(this, Accounts.class));
+        }
     }
     
     @Override
@@ -423,4 +436,46 @@ public class RosterActivity extends SherlockActivity implements OnItemClickListe
 		}
 		return true;
 	}
+
+    private class CreateDefaultSmiles extends AsyncTask<Integer, Integer, Integer> {
+        AlertDialog dialog;
+
+        @Override
+        protected void onPreExecute() {
+            AlertDialog.Builder builder = new AlertDialog.Builder(RosterActivity.this);
+            builder.setMessage("Please wait...");
+            builder.setCancelable(false);
+            dialog = builder.create();
+            dialog.show();
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            dialog.cancel();
+            Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
+            if (cursor == null || cursor.getCount() < 1) startActivity(new Intent(RosterActivity.this, Accounts.class));
+        }
+
+        @Override
+        protected Integer doInBackground(Integer... integers) {
+            File folder = new File(Constants.PATH_SMILES + "/default");
+            folder.mkdirs();
+
+            try {
+                AssetManager assetManager = getAssets();
+                for (String file : assetManager.list("emotion")) {
+                    InputStream in = assetManager.open("emotion/" + file);
+                    byte[] buffer = new byte[in.available()];
+                    in.read(buffer);
+                    in.close();
+
+                    FileOutputStream out = new FileOutputStream(Constants.PATH_SMILES + "/default/" + file);
+                    out.write(buffer);
+                    out.close();
+                }
+            } catch (Exception ignored) { }
+
+            return 0;
+        }
+    }
 }

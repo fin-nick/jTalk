@@ -33,6 +33,7 @@ import net.ustyugov.jtalk.db.MessageDbHelper;
 import net.ustyugov.jtalk.dialog.*;
 import net.ustyugov.jtalk.listener.DragAndDropListener;
 import net.ustyugov.jtalk.service.JTalkService;
+import net.ustyugov.jtalk.smiles.Smiles;
 import net.ustyugov.jtalk.view.MyListView;
 
 import org.jivesoftware.smack.RosterEntry;

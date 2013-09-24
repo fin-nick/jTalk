@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">jTalk</string>
     <string name="version">0.47.1</string>
-    <string name="build">390</string>
+    <string name="build">391</string>
     
     <string name="Connect">Connect</string>
     <string name="Disconnect">Disconnect</string>

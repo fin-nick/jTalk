@@ -22,15 +22,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
-import net.ustyugov.jtalk.Smiles;
+import net.ustyugov.jtalk.smiles.Smiles;
 import net.ustyugov.jtalk.listener.TextLinkClickListener;
-import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.view.MyTextView;
 
 import com.jtalk2.R;
@@ -178,10 +175,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
             }
         }
 
-        if (prefs.getBoolean("ShowSmiles", true)) {
-            int startPosition = message.length() - body.length();
-            ssb = smiles.parseSmiles(ssb, startPosition);
-        }
+
 
         LinearLayout linear = (LinearLayout) v.findViewById(R.id.chat_item);
         linear.setMinimumHeight(Integer.parseInt(prefs.getString("SmilesSize", "24")));
@@ -191,6 +185,12 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
         t1.setTextSize(fontSize);
         t1.setOnTextLinkClickListener(this);
         t1.setTextColor(Colors.PRIMARY_TEXT);
+
+        if (prefs.getBoolean("ShowSmiles", true)) {
+            int startPosition = message.length() - body.length();
+            ssb = smiles.parseSmiles(t1, ssb, startPosition);
+        }
+
         t1.setTextWithLinks(ssb, n);
         if (enableCollapse) {
             t1.setOnTouchListener(new OnTouchListener() {

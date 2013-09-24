@@ -1,0 +1,49 @@
+<package author="Igor Ustyugov">
+    <smile file="emotion_grin.png">
+        <value>:-D</value>
+        <value>:D</value>
+    </smile>
+
+    <smile file="emotion_oo.png">
+        <value>O_o</value>
+        <value>o_O</value>
+        <value>O_O</value>
+    </smile>
+
+    <smile file="emotion_sad.png">
+        <value>:-(</value>
+        <value>:(</value>
+        <value>=(</value>
+    </smile>
+
+    <smile file="emotion_serious.png">
+        <value>:-|</value>
+        <value>:|</value>
+        <value>=|</value>
+    </smile>
+
+    <smile file="emotion_shock.png">
+        <value>:-O</value>
+        <value>:O</value>
+        <value>:-o</value>
+        <value>:o</value>
+    </smile>
+
+    <smile file="emotion_smile.png">
+        <value>:-)</value>
+        <value>:)</value>
+        <value>=)</value>
+    </smile>
+
+    <smile file="emotion_tease.png">
+        <value>:-P</value>
+        <value>:P</value>
+        <value>:-p</value>
+        <value>:p</value>
+    </smile>
+
+    <smile file="emotion_wink.png">
+        <value>;-)</value>
+        <value>;)</value>
+    </smile>
+</package>

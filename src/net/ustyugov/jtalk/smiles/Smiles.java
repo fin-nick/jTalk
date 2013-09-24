@@ -15,56 +15,43 @@
  * along with this program. If not, see http://www.gnu.org/licenses/
  */
 
-package net.ustyugov.jtalk;
+package net.ustyugov.jtalk.smiles;
 
-import java.io.File;
-import java.io.FileReader;
+import java.io.*;
 import java.util.*;
 
+import android.app.AlertDialog;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.GridView;
+import android.widget.TextView;
+import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.adapter.SmilesDialogAdapter;
 
+import net.ustyugov.jtalk.smiles.MyImageSpan;
+import net.ustyugov.jtalk.smiles.SmileDrawable;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import com.jtalk2.R;
-
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.style.ImageSpan;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.GridView;
 
 public class Smiles implements DialogInterface.OnClickListener {
-	// Smiles
-	private static final String[] SMILE = {":-)", ":)", "=)"};
-	private static final String[] SAD = {":-(", ":(", "=("};
-	private static final String[] WINK = {";-)", ";)"};
-	private static final String[] LAUGH = {":-D", ":D"};
-	private static final String[] TEASE = {":-P", ":P", ":-p", ":p"};
-	private static final String[] SERIOUS = {":-|", ":|", "=|"};
-	private static final String[] AMAZE = {":-O", ":-o", ":o", ":O"};
-	private static final String[] OO = {"O_o", "o_O", "O_O"};
-	
+    private SharedPreferences prefs;
 	private Hashtable<String, List<String>> table;
-	private Hashtable<String, Bitmap> smiles = new Hashtable<String, Bitmap>();
+	private Hashtable<String, String> smiles = new Hashtable<String, String>();
 	private String path;
 	private Activity activity;
 	private SmilesDialogAdapter adapter;
 	private int columns = 3;
-    private int size = 18;
 
 	public Smiles(Activity activity) {
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+		prefs = PreferenceManager.getDefaultSharedPreferences(activity);
 		String pack = prefs.getString("SmilesPack", "default");
 		table = new Hashtable<String, List<String>>();
 		path = Constants.PATH_SMILES + pack;
@@ -73,71 +60,10 @@ public class Smiles implements DialogInterface.OnClickListener {
 		try {
 		    columns = Integer.parseInt(prefs.getString("SmilesColumns", 3+""));
 		} catch (NumberFormatException ignored) {	}
-		
-		try {
-			size = Integer.parseInt(prefs.getString("SmilesSize", size+""));
-		} catch (NumberFormatException ignored) {	}
 
-        size = (int) (size * activity.getResources().getDisplayMetrics().density);
-		
-		if (!pack.equals("default")) {
-			File file = new File(path + "/icondef.xml");
-            if (file.exists()) createPsiSmiles(); else createSmiles();
-		} else createBuiltInSmiles();
+        File file = new File(path + "/icondef.xml");
+        if (file.exists()) createPsiSmiles(); else createSmiles();
 	}
-
-    private void createBuiltInSmiles() {
-        table.clear();
-        smiles.clear();
-
-        List<String> tmp = new ArrayList<String>();
-        Collections.addAll(tmp, SMILE);
-        Bitmap smile = BitmapFactory.decodeResource(activity.getResources(), R.drawable.emotion_smile);
-        smiles.put("smile", Bitmap.createScaledBitmap(smile, size, size, true));
-        table.put("smile", tmp);
-
-        tmp = new ArrayList<String>();
-        Collections.addAll(tmp, SAD);
-        smile = BitmapFactory.decodeResource(activity.getResources(), R.drawable.emotion_sad);
-        smiles.put("sad", Bitmap.createScaledBitmap(smile, size, size, true));
-        table.put("sad", tmp);
-
-        tmp = new ArrayList<String>();
-        Collections.addAll(tmp, OO);
-        smile = BitmapFactory.decodeResource(activity.getResources(), R.drawable.emotion_oo);
-        smiles.put("oo", Bitmap.createScaledBitmap(smile, size, size, true));
-        table.put("oo", tmp);
-
-        tmp = new ArrayList<String>();
-        Collections.addAll(tmp, WINK);
-        smile = BitmapFactory.decodeResource(activity.getResources(), R.drawable.emotion_wink);
-        smiles.put("wink", Bitmap.createScaledBitmap(smile, size, size, true));
-        table.put("wink", tmp);
-
-        tmp = new ArrayList<String>();
-        Collections.addAll(tmp, LAUGH);
-        smile = BitmapFactory.decodeResource(activity.getResources(), R.drawable.emotion_grin);
-        smiles.put("laugh", Bitmap.createScaledBitmap(smile, size, size, true));
-        table.put("laugh", tmp);
-
-        tmp = new ArrayList<String>();
-        Collections.addAll(tmp, TEASE);
-        smile = BitmapFactory.decodeResource(activity.getResources(), R.drawable.emotion_tease);
-        smiles.put("tease", Bitmap.createScaledBitmap(smile, size, size, true));
-        table.put("tease", tmp);
-
-        tmp = new ArrayList<String>();
-        Collections.addAll(tmp, SERIOUS);
-        smile = BitmapFactory.decodeResource(activity.getResources(), R.drawable.emotion_serious);
-        smiles.put("serious", Bitmap.createScaledBitmap(smile, size, size, true));
-        table.put("serious", tmp);
-
-        tmp = new ArrayList<String>();
-        Collections.addAll(tmp, AMAZE);
-        smile = BitmapFactory.decodeResource(activity.getResources(), R.drawable.emotion_shock);
-        smiles.put("amaze", Bitmap.createScaledBitmap(smile, size, size, true));
-        table.put("amaze", tmp);
-    }
 
     private void createSmiles() {
         try {
@@ -172,16 +98,9 @@ public class Smiles implements DialogInterface.OnClickListener {
             Enumeration<String> keys = table.keys();
             while (keys.hasMoreElements()) {
                 String key = keys.nextElement();
-                Bitmap smile = BitmapFactory.decodeFile(path + "/" + key);
-
-                int h = smile.getHeight();
-                int w = smile.getWidth();
-                double k = (double)h/(double)size;
-                int ws = (int) (w/k);
-
-                smiles.put(key, Bitmap.createScaledBitmap(smile, ws, size, true));
+                smiles.put(key, path + "/" + key);
             }
-        } catch(Exception e) { createBuiltInSmiles(); }
+        } catch(Exception e) { }
     }
 
     private void createPsiSmiles() {
@@ -220,33 +139,32 @@ public class Smiles implements DialogInterface.OnClickListener {
                     end = true;
                 }
             }
+
             Enumeration<String> keys = table.keys();
             while (keys.hasMoreElements()) {
                 String key = keys.nextElement();
-                Bitmap smile = BitmapFactory.decodeFile(path + "/" + key);
-
-                int h = smile.getHeight();
-                int w = smile.getWidth();
-                double k = (double)h/(double)size;
-                int ws = (int) (w/k);
-
-                smiles.put(key, Bitmap.createScaledBitmap(smile, ws, size, true));
+                smiles.put(key, path + "/" + key);
             }
-        } catch(Exception e) { createBuiltInSmiles(); }
+        } catch(Exception e) { }
     }
 
-	public SpannableStringBuilder parseSmiles(SpannableStringBuilder ssb, int startPosition) {
+	public SpannableStringBuilder parseSmiles(final TextView textView, SpannableStringBuilder ssb, int startPosition) {
 		String message = ssb.toString();
-		
+
 		Enumeration<String> keys = table.keys();
 		while (keys.hasMoreElements()) {
 			String key = keys.nextElement();
 			List<String> list = table.get(key);
-			Bitmap smile = smiles.get(key);
+			String smilePath = smiles.get(key);
 			for (String s : list) {
 				int start = message.indexOf(s, startPosition);
 	       		while(start != -1) {
-	            	ssb.setSpan(new ImageSpan(activity, smile, ImageSpan.ALIGN_BASELINE), start, start + s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+	            	ssb.setSpan(new MyImageSpan(new SmileDrawable(smilePath, new SmileDrawable.UpdateListener() {
+                        @Override
+                        public void update() {
+                            textView.postInvalidate();
+                        }
+                    })), start, start + s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 	                start = message.indexOf(s, start + 1);
 	            }
 			}
@@ -256,21 +174,21 @@ public class Smiles implements DialogInterface.OnClickListener {
 	
 	public void showDialog() {
 		adapter = new SmilesDialogAdapter(activity, smiles, table);
-		
+
 		GridView view = new GridView(activity);
 		view.setNumColumns(columns);
 		view.setAdapter(adapter);
-		
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setView(view);
         final AlertDialog dialog = builder.create();
-		
-		view.setOnItemClickListener(new OnItemClickListener() {
+
+		view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				String key = (String) parent.getItemAtPosition(position);
 				String smile = table.get(key).get(0);
-				
+
 				Intent intent = new Intent(Constants.PASTE_TEXT);
 				intent.putExtra("text", smile);
 				activity.sendBroadcast(intent);

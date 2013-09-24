@@ -20,15 +20,12 @@ package net.ustyugov.jtalk.adapter;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import android.text.format.DateFormat;
-import android.util.Log;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
-import net.ustyugov.jtalk.Smiles;
+import net.ustyugov.jtalk.smiles.Smiles;
 import net.ustyugov.jtalk.dialog.JuickMessageMenuDialog;
 import net.ustyugov.jtalk.listener.TextLinkClickListener;
-import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.view.MyTextView;
 
 import com.jtalk2.R;
@@ -229,7 +226,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         
         if (prefs.getBoolean("ShowSmiles", true)) {
         	int startPosition = message.length() - body.length();
-        	ssb = smiles.parseSmiles(ssb, startPosition);
+        	ssb = smiles.parseSmiles(textView, ssb, startPosition);
         }
         
         if (jid.equals(Constants.JUICK) || jid.equals(Constants.JUBO)) textView.setTextWithLinks(ssb, MyTextView.Mode.juick);

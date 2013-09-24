@@ -21,6 +21,9 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
+import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
+import android.preference.PreferenceManager;
 import com.jtalk2.R;
 
 import android.content.Context;
@@ -30,16 +33,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import net.ustyugov.jtalk.service.JTalkService;
 
 public class SmilesDialogAdapter extends ArrayAdapter<String>{
 	private Context context;
-	private Hashtable<String,Bitmap> hash;
+	private Hashtable<String,String> hash;
+    private int size = 18;
 	
-	public SmilesDialogAdapter(Context context, Hashtable<String,Bitmap> hash, Hashtable<String, List<String>> table) {
+	public SmilesDialogAdapter(Context context, Hashtable<String,String> hash, Hashtable<String, List<String>> table) {
 		super(context, R.layout.selector);
 		this.context = context;
 		this.hash = hash;
-        
+
+        JTalkService service = JTalkService.getInstance();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
+        try {
+            size = Integer.parseInt(prefs.getString("SmilesSize", size+""));
+        } catch (NumberFormatException ignored) {	}
+        size = (int) (size * service.getResources().getDisplayMetrics().density);
+
 		Enumeration<String> keys = table.keys();
 		while (keys.hasMoreElements()) {
 			String key = keys.nextElement();
@@ -55,9 +67,18 @@ public class SmilesDialogAdapter extends ArrayAdapter<String>{
             LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             v = vi.inflate(R.layout.smile, null);
         }
-        
+
+        Bitmap smile = BitmapFactory.decodeFile(hash.get(key));
+
+        int h = smile.getHeight();
+        int w = smile.getWidth();
+        double k = (double)h/(double)size;
+        int ws = (int) (w/k);
+
+        Bitmap bitmap = Bitmap.createScaledBitmap(smile, ws, size, true);
+
 		ImageView icon = (ImageView) v.findViewById(R.id.smile);
-		icon.setImageBitmap(hash.get(key));
+		icon.setImageBitmap(bitmap);
         return v;
     }
 

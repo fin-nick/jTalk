@@ -57,7 +57,7 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		CharSequence[] smiles;
+		CharSequence[] smiles = new CharSequence[1];
         CharSequence[] colors;
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		addPreferencesFromResource(R.xml.preferences);  // TODO!
@@ -66,13 +66,11 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 		file.mkdirs();
 		File[] files = file.listFiles();
 		if (files != null) {
-			smiles = new CharSequence[files.length + 1];
+			smiles = new CharSequence[files.length];
 			for (int i = 0; i < files.length; i++) {
-				smiles[i+1] = files[i].getName();
+				smiles[i] = files[i].getName();
 			}
 		}
-		else smiles = new CharSequence[1];
-		smiles[0] = "default";
 
         File file_colors = new File(Constants.PATH_COLORS);
         file_colors.mkdirs();
@@ -121,7 +119,6 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 		smilespack = (ListPreference) getPreferenceScreen().findPreference("SmilesPack");
 		smilespack.setEntries(smiles);
 		smilespack.setEntryValues(smiles);
-		if (smiles.length == 1) smilespack.setValue("default");
 
         colortheme = (ListPreference) getPreferenceScreen().findPreference("ColorTheme");
         colortheme.setEntries(colors);

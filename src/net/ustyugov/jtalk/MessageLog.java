@@ -32,7 +32,12 @@ public class MessageLog {
 	public static void writeMessage(String account, String jid, MessageItem message) {
         JTalkService service = JTalkService.getInstance();
         List<MessageItem> list = service.getMessageList(account, jid);
-        list.add(message);
+        if (message.getType() == MessageItem.Type.status) {
+            if (service.getActiveChats(account).contains(jid)) list.add(message);
+        } else {
+            if (!service.getActiveChats(account).contains(jid)) service.addActiveChat(account, jid);
+            list.add(message);
+        }
         service.setMessageList(account, jid, list);
 
         try {
@@ -48,9 +53,6 @@ public class MessageLog {
             values.put(MessageDbHelper.FORM, "NULL");
             values.put(MessageDbHelper.BOB, "NULL");
             service.getContentResolver().insert(JTalkProvider.CONTENT_URI, values);
-
-            if (message.getType() == MessageItem.Type.message && !service.getActiveChats(account).contains(jid))
-                service.addActiveChat(account, jid);
 
             service.sendBroadcast(new Intent(Constants.NEW_MESSAGE).putExtra("jid", jid));
         } catch (Exception sqle) {

@@ -926,12 +926,14 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     }
 
     private void unregisterReceivers() {
-        unregisterReceiver(textReceiver);
-        unregisterReceiver(finishReceiver);
-        unregisterReceiver(msgReceiver);
-        unregisterReceiver(receivedReceiver);
-        unregisterReceiver(composeReceiver);
-        unregisterReceiver(presenceReceiver);
+        try {
+            unregisterReceiver(textReceiver);
+            unregisterReceiver(finishReceiver);
+            unregisterReceiver(msgReceiver);
+            unregisterReceiver(receivedReceiver);
+            unregisterReceiver(composeReceiver);
+            unregisterReceiver(presenceReceiver);
+        } catch (Exception ignored) { }
     }
 
     private void sendMessage() {

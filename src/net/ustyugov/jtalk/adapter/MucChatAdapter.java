@@ -83,7 +83,8 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
         clear();
 
         boolean showStatuses = prefs.getBoolean("ShowStatus", false);
-        for (MessageItem item : messages) {
+        for (int i = 0; i < messages.size(); i++) {
+            MessageItem item = messages.get(i);
             MessageItem.Type type = item.getType();
             if (searchString.length() > 0) {
                 String name = item.getName();

@@ -28,8 +28,6 @@ import android.widget.TextView;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.adapter.SmilesDialogAdapter;
 
-import net.ustyugov.jtalk.smiles.MyImageSpan;
-import net.ustyugov.jtalk.smiles.SmileDrawable;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 

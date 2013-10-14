@@ -182,8 +182,9 @@ public class MsgListener implements PacketListener {
                             service.addUnreadMessage(item);
                             Notify.messageNotify(account, group, Notify.Type.Direct, body);
                         }
-                    } else Notify.messageNotify(account, group, Notify.Type.Conference, body);
-
+                    } else {
+                        if (delayExt == null) Notify.messageNotify(account, group, Notify.Type.Conference, body);
+                    }
                     MessageLog.writeMucMessage(account, group, nick, item);
 	            }
 	        } else if (type.equals("chat") || type.equals("normal") || type.equals("headline")) {
@@ -271,7 +272,7 @@ public class MsgListener implements PacketListener {
 		            
 		            updateComposeList(user, false, false);
                     MessageLog.writeMessage(account, user, item);
-		            Notify.messageNotify(account, user, Notify.Type.Chat, body);
+		            if (delayExt == null) Notify.messageNotify(account, user, Notify.Type.Chat, body);
 	    		}
 	        }
 		}

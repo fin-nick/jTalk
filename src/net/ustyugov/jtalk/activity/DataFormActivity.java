@@ -19,8 +19,9 @@ package net.ustyugov.jtalk.activity;
 
 import java.util.Iterator;
 
+import android.app.Activity;
+import android.view.MenuItem;
 import android.view.ViewGroup;
-import com.actionbarsherlock.view.MenuItem;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.adapter.OptionsSpinnerAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -61,10 +62,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockActivity;
 import com.jtalk2.R;
 
-public class DataFormActivity extends SherlockActivity implements OnClickListener {
+public class DataFormActivity extends Activity implements OnClickListener {
 	private DataForm form;
 	private JTalkService service = JTalkService.getInstance();
 	private LinearLayout layout;
@@ -88,7 +88,7 @@ public class DataFormActivity extends SherlockActivity implements OnClickListene
 		super.onCreate(bundle);
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		setContentView(R.layout.data_form);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
        	LinearLayout linear = (LinearLayout) findViewById(R.id.data_form);
        	linear.setBackgroundColor(Colors.BACKGROUND);

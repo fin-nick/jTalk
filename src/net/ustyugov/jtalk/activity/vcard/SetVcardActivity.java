@@ -20,6 +20,8 @@ package net.ustyugov.jtalk.activity.vcard;
 import java.io.*;
 import java.util.ArrayList;
 
+import android.app.Activity;
+import android.view.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.adapter.MainPageAdapter;
@@ -35,8 +37,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
@@ -44,14 +44,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
 import com.viewpagerindicator.TitlePageIndicator;
 
-public class SetVcardActivity extends SherlockActivity implements OnClickListener {
+public class SetVcardActivity extends Activity implements OnClickListener {
 	private static final int IMAGE = 1;
 	
 	private String account;
@@ -67,7 +63,7 @@ public class SetVcardActivity extends SherlockActivity implements OnClickListene
 		super.onCreate(icicle);
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		setContentView(R.layout.paged_activity);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		setTitle("vCard");
 		
        	LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
@@ -223,7 +219,7 @@ public class SetVcardActivity extends SherlockActivity implements OnClickListene
 	
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getSupportMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.vcard, menu);
         return true;
     }

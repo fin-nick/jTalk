@@ -21,9 +21,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import android.app.ActionBar;
+import android.app.Activity;
 import android.content.*;
+import android.view.*;
 import android.widget.*;
-import com.actionbarsherlock.widget.SearchView;
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.filetransfer.SendFileActivity;
 import net.ustyugov.jtalk.activity.vcard.VCardActivity;
@@ -49,24 +51,15 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
-import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.MenuItem.OnActionExpandListener;
 import com.jtalk2.R;
 
-public class Chat extends SherlockActivity implements View.OnClickListener, OnScrollListener, OnItemLongClickListener {
+public class Chat extends Activity implements View.OnClickListener, OnScrollListener, OnItemLongClickListener {
     public static final int REQUEST_TEMPLATES = 1;
 
     private boolean isMuc = false;
@@ -123,11 +116,11 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 
         chatsSpinnerAdapter = new ChatsSpinnerAdapter(this);
-        ActionBar actionBar = getSupportActionBar();
+        ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        actionBar.setListNavigationCallbacks(chatsSpinnerAdapter, new OnNavigationListener() {
+        actionBar.setListNavigationCallbacks(chatsSpinnerAdapter, new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int position, long itemId) {
                 RosterItem item = chatsSpinnerAdapter.getItem(position);
@@ -384,7 +377,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
         createOptionMenu();
 
         int position = chatsSpinnerAdapter.getPosition(account, jid);
-        getSupportActionBar().setSelectedNavigationItem(position);
+        getActionBar().setSelectedNavigationItem(position);
         rosterItem = chatsSpinnerAdapter.getItem(position);
 
         if (searchString.length() > 0) {
@@ -462,7 +455,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     private void createOptionMenu() {
         if (menu != null) {
             menu.clear();
-            final MenuInflater inflater = getSupportMenuInflater();
+            final MenuInflater inflater = getMenuInflater();
 
             if (isMuc) inflater.inflate(R.menu.muc_chat, menu);
             else {
@@ -472,7 +465,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
             }
 
             if (Build.VERSION.SDK_INT >= 8) {
-                OnActionExpandListener listener = new OnActionExpandListener() {
+                MenuItem.OnActionExpandListener listener = new MenuItem.OnActionExpandListener() {
                     @Override
                     public boolean onMenuItemActionCollapse(MenuItem item) {
                         searchString = "";
@@ -487,7 +480,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                     }
                 };
 
-                SearchView searchView = new com.actionbarsherlock.widget.SearchView(getSupportActionBar().getThemedContext());
+                SearchView searchView = new SearchView(this);
                 searchView.setQueryHint(getString(android.R.string.search_go));
                 searchView.setSubmitButtonEnabled(false);
                 searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -831,7 +824,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
     private void updateStatus() {
         chatsSpinnerAdapter.notifyDataSetChanged();
 
-        ActionBar ab = getSupportActionBar();
+        ActionBar ab = getActionBar();
         ab.setDisplayUseLogoEnabled(true);
         if (isMuc) ab.setLogo(service.getIconPicker().getMucDrawable());
         else ab.setLogo(service.getIconPicker().getDrawableByPresence(service.getPresence(account, jid)));
@@ -866,6 +859,7 @@ public class Chat extends SherlockActivity implements View.OnClickListener, OnSc
                 boolean clear = intent.getBooleanExtra("clear", false);
                 if (user.equals(jid)) {
                     updateList();
+                    chatsSpinnerAdapter.notifyDataSetChanged();
                 } else {
                     updateUsers();
                     updateChats();

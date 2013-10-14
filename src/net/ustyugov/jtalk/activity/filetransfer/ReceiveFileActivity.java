@@ -17,15 +17,15 @@
 
 package net.ustyugov.jtalk.activity.filetransfer;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Notify;
@@ -37,7 +37,7 @@ import org.jivesoftware.smackx.filetransfer.IncomingFileTransfer;
 
 import java.io.File;
 
-public class ReceiveFileActivity extends SherlockActivity implements View.OnClickListener {
+public class ReceiveFileActivity extends Activity implements View.OnClickListener {
     private static final String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download";
     private Button ok, cancel;
     private FileTransferRequest request;
@@ -48,7 +48,7 @@ public class ReceiveFileActivity extends SherlockActivity implements View.OnClic
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
         setContentView(R.layout.receive_file);
         setTitle(R.string.AcceptFile);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
         linear.setBackgroundColor(Colors.BACKGROUND);

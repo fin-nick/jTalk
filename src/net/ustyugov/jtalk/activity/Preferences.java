@@ -21,8 +21,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.actionbarsherlock.app.SherlockPreferenceActivity;
-import com.actionbarsherlock.view.MenuItem;
+import android.preference.*;
+import android.view.MenuItem;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.IconPicker;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -34,12 +34,8 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageInfo;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
-import android.preference.EditTextPreference;
-import android.preference.ListPreference;
-import android.preference.PreferenceManager;
 
-public class Preferences extends SherlockPreferenceActivity implements OnSharedPreferenceChangeListener {
+public class Preferences extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 //	private CheckBoxPreference compression;
 	private CheckBoxPreference autoCollapse;
 	private EditTextPreference delayAway;
@@ -56,7 +52,7 @@ public class Preferences extends SherlockPreferenceActivity implements OnSharedP
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 		CharSequence[] smiles = new CharSequence[1];
         CharSequence[] colors;
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);

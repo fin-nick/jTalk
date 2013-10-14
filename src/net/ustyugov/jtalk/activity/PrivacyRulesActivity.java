@@ -20,6 +20,9 @@ package net.ustyugov.jtalk.activity;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Activity;
+import android.view.Menu;
+import android.view.MenuItem;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.adapter.PrivacyRulesAdapter;
 import net.ustyugov.jtalk.dialog.PrivacyDialogs;
@@ -44,12 +47,9 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
 
-public class PrivacyRulesActivity extends SherlockActivity {
+public class PrivacyRulesActivity extends Activity {
 	private static final int MENU_SAVE = 1;
 	private static final int MENU_ADD = 2;
 	private static final int CONTEXT_EDIT = 3;
@@ -76,7 +76,7 @@ public class PrivacyRulesActivity extends SherlockActivity {
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		setContentView(R.layout.rules_activity);
 		setTitle("Rules");
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
     	linear.setBackgroundColor(Colors.BACKGROUND);

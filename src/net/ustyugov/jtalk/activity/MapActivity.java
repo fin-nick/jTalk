@@ -18,8 +18,8 @@
 package net.ustyugov.jtalk.activity;
 
 import android.os.Bundle;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.MenuItem;
+import android.support.v4.app.FragmentActivity;
+import android.view.MenuItem;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -27,7 +27,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.jtalk2.R;
 
-public class MapActivity extends SherlockFragmentActivity {
+public class MapActivity extends FragmentActivity {
     private GoogleMap mMap;
     private String jid;
     private double lat;
@@ -37,7 +37,7 @@ public class MapActivity extends SherlockFragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.map);
         lat = Double.parseDouble(getIntent().getStringExtra("lat"));
         lon = Double.parseDouble(getIntent().getStringExtra("lon"));

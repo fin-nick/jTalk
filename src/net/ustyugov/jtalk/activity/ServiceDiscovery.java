@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import android.app.Activity;
+import android.view.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.DiscoItem;
 import net.ustyugov.jtalk.activity.vcard.VCardActivity;
@@ -48,9 +50,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.KeyEvent;
-import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
 import android.view.inputmethod.InputMethodManager;
@@ -66,13 +65,9 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
 
-public class ServiceDiscovery extends SherlockActivity implements OnClickListener, OnItemClickListener {
+public class ServiceDiscovery extends Activity implements OnClickListener, OnItemClickListener {
     private static final int CONTEXT_REG  = 1;
     private static final int CONTEXT_JOIN = 2;
     private static final int CONTEXT_INFO = 3;
@@ -98,7 +93,7 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
         setContentView(R.layout.discovery);
         setTitle(R.string.ServiceDiscovery);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         LinearLayout linear = (LinearLayout) findViewById(R.id.discovery_linear);
         linear.setBackgroundColor(Colors.BACKGROUND);
@@ -231,7 +226,7 @@ public class ServiceDiscovery extends SherlockActivity implements OnClickListene
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.clear();
 
-        MenuInflater inflater = getSupportMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.discovery, menu);
 
         menu.findItem(R.id.reg).setEnabled((discoItem != null && discoItem.isRegister()) ? true : false);

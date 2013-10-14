@@ -18,8 +18,10 @@
 package net.ustyugov.jtalk.activity;
 
 import android.accounts.AccountManager;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
+import android.view.*;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import net.ustyugov.jtalk.Account;
@@ -32,18 +34,12 @@ import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.service.JTalkService;
 
 import android.os.Bundle;
-import android.view.ContextMenu;
-import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
 
-public class Accounts extends SherlockActivity {
+public class Accounts extends Activity {
     private static final int REQUEST_ACCOUNT = 8;
     private static final int CONTEXT_VCARD = 1;
     private static final int CONTEXT_PRIVACY = 2;
@@ -59,7 +55,7 @@ public class Accounts extends SherlockActivity {
 		super.onCreate(bundle);
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
         setContentView(R.layout.accounts);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 		setTitle(R.string.Accounts);
         
         LinearLayout linear = (LinearLayout) findViewById(R.id.accounts_linear);
@@ -123,7 +119,7 @@ public class Accounts extends SherlockActivity {
 	
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getSupportMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.accounts, menu);
         return super.onCreateOptionsMenu(menu);
     }

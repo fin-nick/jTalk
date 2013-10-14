@@ -22,11 +22,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.*;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Environment;
 import android.text.ClipboardManager;
+import android.view.*;
 import android.widget.*;
-import com.actionbarsherlock.app.SherlockActivity;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.activity.MapActivity;
@@ -50,16 +51,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.DisplayMetrics;
-import android.view.LayoutInflater;
-import android.view.View;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
 import com.viewpagerindicator.TitlePageIndicator;
 
-public class VCardActivity extends SherlockActivity {
+public class VCardActivity extends Activity {
 	private JTalkService service;
 	private String account;
 	private String jid;
@@ -82,16 +78,16 @@ public class VCardActivity extends SherlockActivity {
 		jid = getIntent().getStringExtra("jid");
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		setContentView(R.layout.paged_activity);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 	    setTitle("vCard");
-	    getSupportActionBar().setSubtitle(jid);
+	    getActionBar().setSubtitle(jid);
 
         if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {
             Presence p = service.getConferencesHash(account).get(StringUtils.parseBareAddress(jid)).getOccupantPresence(jid);
             MUCUser mucUser = (MUCUser) p.getExtension("x", "http://jabber.org/protocol/muc#user");
             if (mucUser != null) {
                 String j = mucUser.getItem().getJid();
-                if (j != null && j.length() > 3) getSupportActionBar().setSubtitle(j);
+                if (j != null && j.length() > 3) getActionBar().setSubtitle(j);
             }
         }
 
@@ -199,7 +195,7 @@ public class VCardActivity extends SherlockActivity {
 	
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getSupportMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.view_vcard, menu);
 
         LocationExtension geoloc = service.getLocation(jid);

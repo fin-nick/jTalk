@@ -20,6 +20,8 @@ package net.ustyugov.jtalk.activity.muc;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import android.app.Activity;
+import android.view.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.adapter.AffiliateAdapter;
 import net.ustyugov.jtalk.adapter.MainPageAdapter;
@@ -33,15 +35,9 @@ import org.jivesoftware.smackx.packet.MUCAdmin;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -50,14 +46,10 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
 import com.viewpagerindicator.TitlePageIndicator;
 
-public class MucUsers extends SherlockActivity {
+public class MucUsers extends Activity {
 	private static final int CONTEXT_EDIT = 2;
 	private static final int CONTEXT_REMOVE = 3;
 	
@@ -81,7 +73,7 @@ public class MucUsers extends SherlockActivity {
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		setContentView(R.layout.paged_activity);
 		setTitle(R.string.Users);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
        	LinearLayout chat_linear = (LinearLayout) findViewById(R.id.linear);
        	chat_linear.setBackgroundColor(Colors.BACKGROUND);
@@ -139,7 +131,7 @@ public class MucUsers extends SherlockActivity {
 	
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getSupportMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.muc_users, menu);
         return super.onCreateOptionsMenu(menu);
     }

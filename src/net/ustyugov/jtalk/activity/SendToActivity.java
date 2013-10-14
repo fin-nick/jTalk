@@ -17,15 +17,15 @@
 
 package net.ustyugov.jtalk.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.RosterItem;
@@ -34,7 +34,7 @@ import net.ustyugov.jtalk.adapter.SearchAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
 import org.jivesoftware.smack.RosterEntry;
 
-public class SendToActivity extends SherlockActivity {
+public class SendToActivity extends Activity {
     private JTalkService service;
     private SearchAdapter adapter;
     private TextView tv;
@@ -47,7 +47,7 @@ public class SendToActivity extends SherlockActivity {
         service = JTalkService.getInstance();
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
         setContentView(R.layout.send_to);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(R.string.SendFile);
 
         LinearLayout linear = (LinearLayout) findViewById(R.id.linear);

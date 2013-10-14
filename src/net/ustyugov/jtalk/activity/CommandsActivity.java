@@ -17,6 +17,8 @@
 
 package net.ustyugov.jtalk.activity;
 
+import android.app.Activity;
+import android.view.MenuItem;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.adapter.CommandsAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -33,11 +35,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
 
-public class CommandsActivity extends SherlockActivity implements OnItemClickListener {
+public class CommandsActivity extends Activity implements OnItemClickListener {
 	private JTalkService service;
 	private String jid;
 	private String account;
@@ -55,7 +55,7 @@ public class CommandsActivity extends SherlockActivity implements OnItemClickLis
 
 		setContentView(R.layout.list_activity);
 		setTitle(R.string.ExecuteCommand);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
     	linear.setBackgroundColor(Colors.BACKGROUND);

@@ -22,8 +22,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import android.app.Activity;
+import android.view.MenuItem;
 import android.widget.*;
-import com.actionbarsherlock.view.MenuItem;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Notify;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -43,10 +44,9 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.view.View.OnClickListener;
 
-import com.actionbarsherlock.app.SherlockActivity;
 import com.jtalk2.R;
 
-public class SendFileActivity extends SherlockActivity implements OnClickListener {
+public class SendFileActivity extends Activity implements OnClickListener {
 	private static final int RESULT = 1;
 	private String jid;
 	private EditText description;
@@ -64,7 +64,7 @@ public class SendFileActivity extends SherlockActivity implements OnClickListene
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		setContentView(R.layout.send_file);
 		setTitle(R.string.SendFile);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 
         LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
         linear.setBackgroundColor(Colors.BACKGROUND);

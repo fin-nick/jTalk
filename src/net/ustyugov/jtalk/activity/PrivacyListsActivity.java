@@ -17,6 +17,8 @@
 
 package net.ustyugov.jtalk.activity;
 
+import android.app.Activity;
+import android.view.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.adapter.PrivacyListAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -28,8 +30,6 @@ import org.jivesoftware.smack.XMPPException;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.ContextMenu;
-import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
@@ -37,13 +37,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
 
-public class PrivacyListsActivity extends SherlockActivity implements OnItemClickListener {
+public class PrivacyListsActivity extends Activity implements OnItemClickListener {
 	private static final int CONTEXT_ACTIVATE = 1;
 	private static final int CONTEXT_DEFAULT = 2;
 	private static final int CONTEXT_EDIT = 3;
@@ -65,7 +61,7 @@ public class PrivacyListsActivity extends SherlockActivity implements OnItemClic
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		setContentView(R.layout.list_activity);
 		setTitle("Lists of privacy");
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
     	linear.setBackgroundColor(Colors.BACKGROUND);
@@ -92,7 +88,7 @@ public class PrivacyListsActivity extends SherlockActivity implements OnItemClic
 	
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getSupportMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.accounts, menu);
         return super.onCreateOptionsMenu(menu);
     }

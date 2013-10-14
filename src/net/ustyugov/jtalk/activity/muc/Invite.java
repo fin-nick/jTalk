@@ -17,14 +17,14 @@
 
 package net.ustyugov.jtalk.activity.muc;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.MenuItem;
 import com.jtalk2.R;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
@@ -33,7 +33,7 @@ import net.ustyugov.jtalk.service.JTalkService;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.bookmark.BookmarkManager;
 
-public class Invite extends SherlockActivity implements View.OnClickListener {
+public class Invite extends Activity implements View.OnClickListener {
     private Button ok, cancel;
     private EditText nickEd;
     private CheckBox add;
@@ -45,7 +45,7 @@ public class Invite extends SherlockActivity implements View.OnClickListener {
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
         setContentView(R.layout.invite);
         setTitle(R.string.Invite);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
         linear.setBackgroundColor(Colors.BACKGROUND);

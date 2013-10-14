@@ -19,6 +19,7 @@ package net.ustyugov.jtalk.adapter;
 
 import java.util.Enumeration;
 
+import android.graphics.Color;
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.Holders.ItemHolder;
 import net.ustyugov.jtalk.db.AccountDbHelper;
@@ -111,12 +112,13 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
         RosterItem item = getItem(position);
         String account = item.getAccount();
         String jid = service.getCurrentJid();
-		
+        String s;
+
         if (v == null) {
             LayoutInflater vi = (LayoutInflater) service.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            v = vi.inflate(R.layout.sherlock_spinner_item, null);
+            v = vi.inflate(R.layout.spinner_item, null);
         }
-        
+
         String name = jid;
         if (service.getConferencesHash(account).containsKey(jid)) {
         	name = StringUtils.parseName(jid);
@@ -127,13 +129,28 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
             if (re != null) name = re.getName();
             if (name == null || name.equals("")) name = jid;
         }
-        
-        TextView label = (TextView) v.findViewById(android.R.id.text1);
-        label.setText(name);
-        if (service.getComposeList().contains(jid)) {
-    		label.setTextColor(Colors.HIGHLIGHT_TEXT);
-    	} else label.setTextColor(Colors.PRIMARY_TEXT);
-        
+
+        if (service.getConferencesHash(account).containsKey(jid)) {
+            MultiUserChat muc = service.getConferencesHash(account).get(jid);
+            s = muc.getSubject();
+        } else {
+            if (service.getComposeList().contains(jid)) {
+                s = activity.getString(R.string.Composes);
+            } else s = service.getStatus(account, jid);
+        }
+
+        TextView title = (TextView) v.findViewById(R.id.title);
+        title.setText(name);
+        if (Colors.isLight) title.setTextColor(Color.BLACK);
+        else title.setTextColor(Color.WHITE);
+
+        TextView status = (TextView) v.findViewById(R.id.subtitle);
+        if (s != null && s.length() > 1) {
+            status.setText(s);
+            status.setVisibility(View.VISIBLE);
+        } else {
+            status.setVisibility(View.GONE);
+        }
         return v;
 	}
 

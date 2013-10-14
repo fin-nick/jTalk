@@ -1,5 +1,5 @@
 <resources>
-    <style name="AppThemeLight" parent="style/Theme.Sherlock.Light">
+    <style name="AppThemeLight" parent="@android:style/Theme.Holo.Light">
         <!-- for programmatic instantiation -->
         <item name="vpiTitlePageIndicatorStyle">@style/TitlePageIndicatorLight</item>
     </style>
@@ -13,7 +13,7 @@
     	<item name="footerPadding">8dp</item>
 	</style>
     
-    <style name="AppThemeDark" parent="style/Theme.Sherlock">
+    <style name="AppThemeDark" parent="@android:style/Theme.Holo">
         <!-- for programmatic instantiation -->
         <item name="vpiTitlePageIndicatorStyle">@style/TitlePageIndicatorDark</item>
     </style>

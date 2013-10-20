@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.jtalk2" android:versionName="@string/version" android:installLocation="auto" android:versionCode="392">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.jtalk2" android:versionName="@string/version" android:installLocation="auto" android:versionCode="393">
     <uses-feature android:glEsVersion="0x00020000" android:required="true"/>
     <uses-sdk android:minSdkVersion="11" android:targetSdkVersion="16"/>
     <permission android:name="com.jtalk2.permission.MAPS_RECEIVE" android:protectionLevel="signature"/>

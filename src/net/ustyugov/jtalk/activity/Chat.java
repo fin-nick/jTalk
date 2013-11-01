@@ -59,7 +59,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 
 import com.jtalk2.R;
 
-public class Chat extends Activity implements View.OnClickListener, OnScrollListener, OnItemLongClickListener {
+public class Chat extends Activity implements View.OnClickListener, OnScrollListener {
     public static final int REQUEST_TEMPLATES = 1;
 
     private boolean isMuc = false;
@@ -79,7 +79,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     private ListView chatsList;
     private ListView nickList;
     private List<MessageItem> msgList = new ArrayList<MessageItem>();
-    private List<String> selectedMessages = new ArrayList<String>();
     private EditText messageInput;
     private Button sendButton;
 
@@ -89,7 +88,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     private String searchString = "";
     private boolean compose = false;
     private int maxCount = 0;
-    private int maxMucCount = 0;
 
     private BroadcastReceiver textReceiver;
     private BroadcastReceiver finishReceiver;
@@ -110,7 +108,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         try {
             maxCount = Integer.parseInt(prefs.getString("MaxLogMessages", "0"));
-            maxMucCount = Integer.parseInt(prefs.getString("MaxMucMessages", "0"));
         } catch (NumberFormatException ignored) {	}
 
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
@@ -206,8 +203,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         listView.setOnScrollListener(this);
         listView.setDividerHeight(0);
         listView.setAdapter(listAdapter);
-        if (Build.VERSION.SDK_INT >= 11) listView.setOnItemLongClickListener(new DragAndDropListener(this));
-        else listView.setOnItemLongClickListener(this);
+        listView.setOnItemLongClickListener(new DragAndDropListener(this));
 
         nickList = (ListView) findViewById(R.id.muc_user_list);
         nickList.setCacheColorHint(0x00000000);
@@ -464,48 +460,46 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 else menu.findItem(R.id.resource).setVisible(true);
             }
 
-            if (Build.VERSION.SDK_INT >= 8) {
-                MenuItem.OnActionExpandListener listener = new MenuItem.OnActionExpandListener() {
-                    @Override
-                    public boolean onMenuItemActionCollapse(MenuItem item) {
-                        searchString = "";
-                        updateList();
-                        createOptionMenu();
-                        return true;
-                    }
+            MenuItem.OnActionExpandListener listener = new MenuItem.OnActionExpandListener() {
+                @Override
+                public boolean onMenuItemActionCollapse(MenuItem item) {
+                    searchString = "";
+                    updateList();
+                    createOptionMenu();
+                    return true;
+                }
 
-                    @Override
-                    public boolean onMenuItemActionExpand(MenuItem item) {
-                        return true;
-                    }
-                };
+                @Override
+                public boolean onMenuItemActionExpand(MenuItem item) {
+                    return true;
+                }
+            };
 
-                SearchView searchView = new SearchView(this);
-                searchView.setQueryHint(getString(android.R.string.search_go));
-                searchView.setSubmitButtonEnabled(false);
-                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                    @Override
-                    public boolean onQueryTextChange(String newText) {
-                        return true;
-                    }
-                    @Override
-                    public boolean onQueryTextSubmit(String query) {
-                        searchString = query;
-                        updateList();
-                        return true;
-                    }
-                });
+            SearchView searchView = new SearchView(this);
+            searchView.setQueryHint(getString(android.R.string.search_go));
+            searchView.setSubmitButtonEnabled(false);
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    return true;
+                }
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    searchString = query;
+                    updateList();
+                    return true;
+                }
+            });
 
-                MenuItem item = menu.findItem(R.id.search);
-                item.setActionView(searchView);
-                item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-                item.setOnActionExpandListener(listener);
-            } else menu.removeItem(R.id.search);
+            MenuItem item = menu.findItem(R.id.search);
+            item.setActionView(searchView);
+            item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+            item.setOnActionExpandListener(listener);
 
             if (prefs.getBoolean("InMUC", false)) menu.removeItem(R.id.sidebar);
             else {
-                MenuItem item = menu.findItem(R.id.sidebar);
-                item.setTitle(prefs.getBoolean("EnabledSidebar", true) ? R.string.HideSidebar : R.string.ShowSidebar);
+                MenuItem sidebar = menu.findItem(R.id.sidebar);
+                sidebar.setTitle(prefs.getBoolean("EnabledSidebar", true) ? R.string.HideSidebar : R.string.ShowSidebar);
             }
 
             if (!prefs.getBoolean("ShowSmiles", true)) menu.removeItem(R.id.smile);
@@ -660,100 +654,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         }
     }
 
-    @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long idx) {
-        CharSequence[] items;
-        final MessageItem message = (MessageItem) parent.getAdapter().getItem(position);
-
-        if (message.getName().equals(getResources().getString(R.string.Me))) {
-            items = new CharSequence[6];
-            items[4] = getString(R.string.Edit);
-        }
-        else if (message.containsCaptcha()) {
-            items = new CharSequence[6];
-            items[4] = "Captcha";
-        }
-        else if (service.getConferencesHash(account).containsKey(jid)) {
-            items = new CharSequence[6];
-            items[4] = getString(R.string.Reply);
-        }
-        else items = new CharSequence[5];
-
-        if (message.isSelected()) items[0] = getString(R.string.DeselectMessage);
-        else items[0] = getString(R.string.SelectMessage);
-        items[1] = getString(R.string.Quote);
-        items[2] = getString(R.string.Copy);
-        items[3] = getString(R.string.SelectText);
-        items[items.length-1] = getString(R.string.DeselectAllMessages);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(Chat.this);
-        builder.setTitle(R.string.Actions);
-        builder.setItems(items, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case 0:
-                        List<MessageItem> list = service.getMessageList(account, jid);
-                        String baseId = message.getBaseId();
-
-                        if (selectedMessages.contains(baseId)) selectedMessages.remove(baseId);
-                        else selectedMessages.add(baseId);
-
-                        for (MessageItem item : list) {
-                            if (item.getBaseId().equals(baseId)) {
-                                item.select(!item.isSelected());
-                            }
-                        }
-                        updateList();
-                        break;
-                    case 1:
-                        MessageDialogs.QuoteDialog(Chat.this, msgList, position);
-                        break;
-                    case 2:
-                        MessageDialogs.CopyDialog(Chat.this, msgList, position);
-                        break;
-                    case 3:
-                        MessageDialogs.SelectTextDialog(Chat.this, message);
-                        break;
-                    case 4:
-                        if (message.containsCaptcha()) {
-                            String id = message.getId();
-
-                            JTalkService.getInstance().addDataForm(id, message.getForm());
-                            Intent in = new Intent(Chat.this, DataFormActivity.class);
-                            in.putExtra("id", id);
-                            in.putExtra("cap", true);
-                            in.putExtra("jid", message.getName());
-                            in.putExtra("bob", message.getBob().getData());
-                            in.putExtra("cid", message.getBob().getCid());
-                            startActivity(in);
-                            break;
-                        } else if (message.getName().equals(getString(R.string.Me))) {
-                            MessageDialogs.EditMessageDialog(Chat.this, account, message, jid);
-                            break;
-                        } else if (service.getConferencesHash(account).containsKey(jid)) {
-                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(Chat.this);
-                            String separator = prefs.getString("nickSeparator", ", ");
-
-                            Intent intent = new Intent(Constants.PASTE_TEXT);
-                            intent.putExtra("text", message.getName() + separator);
-                            sendBroadcast(intent);
-                            break;
-                        } else {
-
-                        }
-                    case 5:
-                        selectedMessages.clear();
-                        updateList();
-                        break;
-                }
-            }
-        });
-        builder.create().show();
-        return true;
-    }
-
-    private void updateMessage(String id, String body) {
+//    private void updateMessage(String id, String body) {
 //        for (MessageItem item : msgList) {
 //            if (item.getType() == MessageItem.Type.message) {
 //                if (id.equals(item.getId())) {
@@ -763,7 +664,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
 //                }
 //            }
 //        }
-    }
+//    }
 
     private void updateList() {
         boolean scroll = listView.isScroll();
@@ -980,7 +881,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 item.setTime(stamp);
                 item.setBody(body);
                 item.setReceived(received);
-                item.select(selectedMessages.contains(baseId));
 
                 list.add(item);
             } while (cursor.moveToNext());

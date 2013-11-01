@@ -1,5 +1,8 @@
 package org.jivesoftware.smack.util;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import net.ustyugov.jtalk.service.JTalkService;
 import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.packet.*;
 import org.jivesoftware.smack.provider.IQProvider;
@@ -888,13 +891,16 @@ public class PacketParserUtils {
     }
     
   	private static void sendVersionInfo(String to, String id, Connection connection) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(JTalkService.getInstance());
   		Version result = new Version();
 		result.setTo(to);
 		result.setPacketID(id);
 		result.setType(IQ.Type.RESULT);
-		result.setOs(connection.getSoftOs());
-		result.setVersion(connection.getSoftVersion());
-		result.setName(connection.getSoftName());
+        if (!prefs.getBoolean("hideVersion", false)) {
+            result.setOs(connection.getSoftOs());
+            result.setVersion(connection.getSoftVersion());
+            result.setName(connection.getSoftName());
+        }
 		connection.sendPacket(result);
   	}
   	

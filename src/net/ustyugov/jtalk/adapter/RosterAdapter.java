@@ -344,7 +344,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
 				convertView = inflater.inflate(R.layout.entry, null, false);
 				holder = new ItemHolder();
 
-				holder.name = (TextView) convertView.findViewById(R.id.name);
+                holder.name = (TextView) convertView.findViewById(R.id.name);
 				holder.name.setTextColor(Colors.PRIMARY_TEXT);
 				holder.name.setTextSize(fontSize);
 				holder.status = (TextView) convertView.findViewById(R.id.status);

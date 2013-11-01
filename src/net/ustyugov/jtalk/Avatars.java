@@ -24,6 +24,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 
 import android.view.ViewGroup;
+import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.util.StringUtils;
@@ -127,12 +128,14 @@ public class Avatars {
 	public static void loadAllAvatars(XMPPConnection connection, String group) {
         JTalkService service = JTalkService.getInstance();
         String account = StringUtils.parseBareAddress(connection.getUser());
-        Iterator<Presence> it = service.getRoster(account).getPresences(group);
-
-        while (it.hasNext()) {
-            Presence p = it.next();
-            String jid = p.getFrom();
-            new LoadAllAvatars(connection, group, jid).execute();
+        Roster roster = service.getRoster(account);
+        if (roster != null) {
+            Iterator<Presence> it = roster.getPresences(group);
+            while (it.hasNext()) {
+                Presence p = it.next();
+                String jid = p.getFrom();
+                new LoadAllAvatars(connection, group, jid).execute();
+            }
         }
 	}
 	

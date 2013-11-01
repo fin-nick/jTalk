@@ -298,7 +298,11 @@ public class JTalkService extends Service {
     public String getGlobalState() { return globalState; }
     public void setGlobalState(String s) { globalState = s; }
     public Roster getRoster(String account) {
-    	if (connections != null && connections.containsKey(account)) return connections.get(account).getRoster();
+    	if (connections != null && account!= null && connections.containsKey(account)) {
+            XMPPConnection connection = connections.get(account);
+            if (connection != null) return connection.getRoster();
+            else return null;
+        }
     	else return null;
     }
     public List<String> getCollapsedGroups() { return collapsedGroups; }
@@ -354,8 +358,8 @@ public class JTalkService extends Service {
     public List<MessageItem> getUnreadMessages() {
         return unreadMessages;
     }
-    
-    public boolean isHighlight(String account, String jid) { 
+
+    public boolean isHighlight(String account, String jid) {
     	if (!mucHighlightsList.containsKey(account)) return false;
     	List<String> list = mucHighlightsList.get(account);
         return list.contains(jid);
@@ -770,12 +774,13 @@ public class JTalkService extends Service {
                 timer.purge();
             }
 
-    		XMPPConnection connection = connections.remove(account);
-            if (isAuthenticated(account)) {
+            try {
                 removeConnectionListener(account);
                 Presence presence = new Presence(Presence.Type.unavailable, "", 0, null);
+                XMPPConnection connection = connections.remove(account);
                 connection.disconnect(presence);
-            } else if (connection.isConnected()) connection.disconnect();
+            } catch (Exception ignored) { }
+
             setState(account, getString(R.string.Disconnect));
     	}
     	sendBroadcast(new Intent(Constants.UPDATE));

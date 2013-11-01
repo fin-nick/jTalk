@@ -16,12 +16,10 @@
     	<item>Только конференции</item>
     	<item>Никогда</item>
     </string-array>
-    
-    <string-array name="vibrationValues">
-    	<item>1</item>
-    	<item>2</item>
-    	<item>3</item>
-    	<item>4</item>
-    	<item>5</item>
+
+    <string-array name="lightsArray">
+        <item>Зеленый</item>
+        <item>Синий</item>
+        <item>Красный</item>
     </string-array>
 </resources>

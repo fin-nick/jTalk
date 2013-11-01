@@ -99,13 +99,6 @@ public class AccountsAdapter extends ArrayAdapter<Account> {
         ToggleButton toggle = (ToggleButton) v.findViewById(R.id.toggle);
         toggle.setChecked(account.isEnabled());
         toggle.setVisibility(View.VISIBLE);
-        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-
-            }
-        });
-
         toggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

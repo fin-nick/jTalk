@@ -16,13 +16,6 @@
         <item>Nunca</item>
     </string-array>
     
-    <string-array name="vibrationValues">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-    </string-array>
     <string-array name="privacyActions">
         <item>permitir</item>
         <item>denegar</item>

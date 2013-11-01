@@ -114,6 +114,7 @@
     <string name="ColorTheme">Tema</string>
     <string name="DisableSound">Desactivar sonido</string>
     <string name="EnableSound">Activar sonido</string>
+    <string name="hideVersion">Esconder la versión de cliente</string>
 
     <!--  Menus -->
     <string name="Update">Actualizar</string>

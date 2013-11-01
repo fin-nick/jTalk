@@ -104,11 +104,6 @@
                 android:title="@string/AutoJoin"
                 android:defaultValue="false" />
         <EditTextPreference
-                android:key="MaxMucMessages"
-                android:title="@string/MaxMessages"
-                android:defaultValue="0"
-                android:numeric="integer"/>
-        <EditTextPreference
                 android:key="MucHistorySize"
                 android:title="@string/MucHistorySize"
                 android:defaultValue="10"
@@ -137,6 +132,13 @@
                             android:showSilent="true"
                             android:showDefault="true"
                             android:ringtoneType="notification"	/>
+
+        <ListPreference
+                android:defaultValue="1"
+                android:entries="@array/lightsArray"
+                android:entryValues="@array/LightsValues"
+                android:key="lightsColor"
+                android:title="Indicator color"/>
 
         <ListPreference
                 android:defaultValue="1"
@@ -276,6 +278,10 @@
         <CheckBoxPreference
                 android:title="Send tune"
                 android:key="PlayingNow"
+                android:defaultValue="false"/>
+        <CheckBoxPreference
+                android:title="@string/hideVersion"
+                android:key="hideVersion"
                 android:defaultValue="false"/>
     </PreferenceScreen>
 

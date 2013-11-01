@@ -28,10 +28,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.*;
 import com.google.android.gms.location.LocationClient;
-import net.ustyugov.jtalk.Colors;
-import net.ustyugov.jtalk.Constants;
-import net.ustyugov.jtalk.Notify;
-import net.ustyugov.jtalk.RosterItem;
+import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.muc.Bookmarks;
 import net.ustyugov.jtalk.activity.muc.Muc;
 import net.ustyugov.jtalk.adapter.NoGroupsAdapter;
@@ -40,6 +37,7 @@ import net.ustyugov.jtalk.adapter.SearchAdapter;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.dialog.ChangeChatDialog;
+import net.ustyugov.jtalk.dialog.ErrorDialog;
 import net.ustyugov.jtalk.dialog.MucDialogs;
 import net.ustyugov.jtalk.dialog.RosterDialogs;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -82,6 +80,7 @@ public class RosterActivity extends Activity implements OnItemClickListener, OnI
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        Thread.setDefaultUncaughtExceptionHandler(new MyExceptionHandler(this));
         Colors.updateColors(this);
         startService(new Intent(this, JTalkService.class));
         service = JTalkService.getInstance();
@@ -125,6 +124,10 @@ public class RosterActivity extends Activity implements OnItemClickListener, OnI
         } else {
             Cursor cursor = getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
             if (cursor == null || cursor.getCount() < 1) startActivity(new Intent(this, Accounts.class));
+        }
+
+        if (prefs.getBoolean("BUG", false)) {
+            new ErrorDialog(this).show();
         }
     }
     

@@ -130,7 +130,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
 
         if (showtime) name = time + " " + name;
 
-        String message;
+        String message = "";
         if (type == MessageItem.Type.status) message = name + " " + body;
         else {
             if (body.length() > 4 && body.substring(0, 3).equals("/me")) {
@@ -175,8 +175,6 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
                 }
             }
         }
-
-
 
         LinearLayout linear = (LinearLayout) v.findViewById(R.id.chat_item);
         linear.setMinimumHeight(Integer.parseInt(prefs.getString("SmilesSize", "24")));

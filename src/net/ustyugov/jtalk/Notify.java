@@ -17,9 +17,12 @@
 
 package net.ustyugov.jtalk;
 
+import java.io.File;
 import java.util.List;
 
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import net.ustyugov.jtalk.activity.Chat;
 import net.ustyugov.jtalk.activity.DataFormActivity;
 import net.ustyugov.jtalk.activity.RosterActivity;
@@ -55,9 +58,9 @@ public class Notify {
 	
     public static void updateNotify() {
     	JTalkService service = JTalkService.getInstance();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
     	if (service.getUnreadMessages().isEmpty()) {
     		newMessages = false;
-        	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
         	String mode = prefs.getString("currentMode", "available");
         	int pos = prefs.getInt("currentSelection", 0);
             String text = prefs.getString("currentStatus", null);
@@ -104,6 +107,11 @@ public class Notify {
             NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
             mng.notify(NOTIFICATION, mBuilder.build());
     	} else {
+            int color = Color.GREEN;
+            try {
+                color = Integer.parseInt(prefs.getString("lightsColor", "-16711936"));
+            } catch (NumberFormatException nfe) {}
+
             List<MessageItem> list = service.getUnreadMessages();
             MessageItem messageItem = list.get(0);
 
@@ -114,40 +122,45 @@ public class Notify {
             PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
-            mBuilder.setLargeIcon(BitmapFactory.decodeResource(service.getResources(), R.drawable.ic_launcher));
             mBuilder.setSmallIcon(R.drawable.stat_msg);
-            mBuilder.setLights(0xFF00FF00, 2000, 3000);
+            mBuilder.setLights(color, 2000, 3000);
             mBuilder.setContentTitle(service.getString(R.string.app_name));
             mBuilder.setContentText(service.getString(R.string.UnreadMessage));
-            mBuilder.setNumber(service.getUnreadMessages().size());
+//            mBuilder.setNumber(service.getUnreadMessages().size());
             mBuilder.setContentIntent(contentIntent);
             mBuilder.setPriority(NotificationCompat.PRIORITY_MAX);
 
-            NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
-            inboxStyle.setBigContentTitle(service.getString(R.string.UnreadMessage));
-
-            for (MessageItem item : list) {
-                String account = item.getAccount();
-                String jid = item.getJid();
-                String n = StringUtils.parseBareAddress(jid);
-                if (service.getConferencesHash(account).containsKey(jid)) {
-                    n = StringUtils.parseName(jid);
-                } else if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {
-                    n = StringUtils.parseResource(jid);
-                } else {
-                    jid = StringUtils.parseBareAddress(jid);
-                    Roster roster = JTalkService.getInstance().getRoster(account);
-                    if (roster != null) {
-                        RosterEntry re = roster.getEntry(n);
-                        if (re != null && re.getName() != null) n = re.getName();
+            if (list.size() > 1) {
+                NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+                inboxStyle.setBigContentTitle(service.getString(R.string.UnreadMessage));
+                for (MessageItem item : list) {
+                    String n = item.getName();
+                    if (n != null && n.length() > 0) {
+                        inboxStyle.addLine(n + ": " + item.getBody());
                     }
                 }
-                if (n != null && n.length() > 0) {
-                    inboxStyle.addLine(n + ": (" + service.getMessagesCount(account, jid) + ") " + item.getBody());
+                mBuilder.setLargeIcon(BitmapFactory.decodeResource(service.getResources(), R.drawable.stat_msg));
+                mBuilder.setStyle(inboxStyle);
+            } else {
+                String from = messageItem.getJid();
+                if (!service.getConferencesHash(messageItem.getAccount()).containsKey(StringUtils.parseBareAddress(from))) {
+                    from = StringUtils.parseBareAddress(from);
                 }
-            }
+                Bitmap largeIcon = BitmapFactory.decodeResource(service.getResources(), R.drawable.stat_msg);
+                File a = new File(Constants.PATH + from.replaceAll("/", "%"));
+                if (a.exists()) largeIcon = BitmapFactory.decodeFile(Constants.PATH + from.replaceAll("/", "%"));
+                else {
+                    if (service.getConferencesHash(messageItem.getAccount()).containsKey(StringUtils.parseBareAddress(from))) {
+                        largeIcon = BitmapFactory.decodeResource(service.getResources(), R.drawable.icon_muc);
+                    }
+                }
 
-            mBuilder.setStyle(inboxStyle);
+                NotificationCompat.BigTextStyle bts = new NotificationCompat.BigTextStyle();
+                bts.setBigContentTitle(messageItem.getName());
+                bts.bigText(messageItem.getBody());
+                mBuilder.setLargeIcon(largeIcon);
+                mBuilder.setStyle(bts);
+            }
 
             NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
             mng.notify(NOTIFICATION, mBuilder.build());
@@ -209,6 +222,11 @@ public class Notify {
         String ignored = prefs.getString("IgnoreJids","");
         if (ignored.toLowerCase().contains(from.toLowerCase())) return;
 
+        int color = Color.GREEN;
+        try {
+            color = Integer.parseInt(prefs.getString("lightsColor", "-16711936"));
+        } catch (NumberFormatException nfe) {}
+
     	newMessages = true;
     	String nick = from;
         String ticker = "";
@@ -246,7 +264,6 @@ public class Notify {
     	
     	if (soundPath.equals("")) sound = false;
 
-    	
     	String currentJid = JTalkService.getInstance().getCurrentJid();
     	if (!currentJid.equals(from) || currentJid.equals("me")) {
     		if (vibro) vibrator.vibrate(200);
@@ -275,67 +292,48 @@ public class Notify {
         	i.putExtra("account", account);
             PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
+            Bitmap largeIcon = BitmapFactory.decodeResource(service.getResources(), R.drawable.stat_msg);
+            File a = new File(Constants.PATH + from.replaceAll("/", "%"));
+            if (a.exists()) largeIcon = BitmapFactory.decodeFile(Constants.PATH + from.replaceAll("/", "%"));
+            else {
+                if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(from))) {
+                    largeIcon = BitmapFactory.decodeResource(service.getResources(), R.drawable.icon_muc);
+                }
+            }
+
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
-//            mBuilder.setLargeIcon(BitmapFactory.decodeResource(service.getResources(), R.drawable.ic_launcher));
+            mBuilder.setLargeIcon(largeIcon);
             mBuilder.setSmallIcon(R.drawable.stat_msg);
-            mBuilder.setLights(0xFF00FF00, 2000, 3000);
-            mBuilder.setContentTitle(service.getString(R.string.UnreadMessage));
-            mBuilder.setContentText(ticker);
-            mBuilder.setNumber(service.getUnreadMessages().size());
+            mBuilder.setLights(color, 2000, 3000);
+            mBuilder.setContentTitle(service.getString(R.string.app_name));
+            mBuilder.setContentText(service.getString(R.string.UnreadMessage));
+//            mBuilder.setNumber(service.getUnreadMessages().size());
             mBuilder.setContentIntent(contentIntent);
             mBuilder.setTicker(ticker);
             mBuilder.setPriority(NotificationCompat.PRIORITY_MAX);
             if (sound) mBuilder.setSound(sound_file);
             
-            NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
-            inboxStyle.setBigContentTitle(service.getString(R.string.UnreadMessage));
-
             List<MessageItem> list = service.getUnreadMessages();
-            for (MessageItem item : list) {
-                String acc = item.getAccount();
-                String jid = item.getJid();
-                String n = StringUtils.parseBareAddress(jid);
-                if (service.getConferencesHash(acc).containsKey(jid)) {
-                    n = StringUtils.parseName(jid);
-                } else if (service.getConferencesHash(acc).containsKey(StringUtils.parseBareAddress(jid))) {
-                    n = StringUtils.parseResource(jid);
-                } else {
-                    jid = StringUtils.parseBareAddress(jid);
-                    Roster roster = JTalkService.getInstance().getRoster(acc);
-                    if (roster != null) {
-                        RosterEntry re = roster.getEntry(n);
-                        if (re != null && re.getName() != null) n = re.getName();
-                    }
+            if (list.size() > 1) {
+                NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+                inboxStyle.setBigContentTitle(service.getString(R.string.UnreadMessage));
+                for (MessageItem item : list) {
+                    String n = item.getName();
+                    if (n != null && n.length() > 0) inboxStyle.addLine(n + ": " + item.getBody());
                 }
-                if (n != null && n.length() > 0) inboxStyle.addLine(n + ": (" + service.getMessagesCount(acc, jid) + ") " + item.getBody());
+                mBuilder.setLargeIcon(BitmapFactory.decodeResource(service.getResources(), R.drawable.stat_msg));
+                mBuilder.setStyle(inboxStyle);
+            } else {
+                NotificationCompat.BigTextStyle bts = new NotificationCompat.BigTextStyle();
+                bts.setBigContentTitle(nick);
+                bts.bigText(text);
+                mBuilder.setStyle(bts);
             }
 
-            mBuilder.setStyle(inboxStyle);
-            
             NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
             mng.notify(NOTIFICATION, mBuilder.build());
     	}
     }
-    
-//    public static void subscribtionRequest(Context context, String from) {
-//    	newMessages = false;
-//    	Intent i = new Intent(context, RosterActivity.class);
-//        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, i, 0);
-//  
-//        String str = "Request subscribtion from " + from; 
-//        
-//        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);
-//        mBuilder.setOngoing(false);
-//        mBuilder.setSmallIcon(R.drawable.noface);
-//        mBuilder.setLights(0xFF0000FF, 2000, 3000);
-//        mBuilder.setContentTitle(context.getString(R.string.app_name));
-//        mBuilder.setContentText(str);
-//        mBuilder.setContentIntent(contentIntent);
-//        mBuilder.setTicker(str);
-//        
-//    	NotificationManager mng = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-//        mng.notify(NOTIFICATION_SUBSCRIBTION, mBuilder.build());
-//    }
     
     public static void fileProgress(String filename, Status status) {
     	JTalkService service = JTalkService.getInstance();

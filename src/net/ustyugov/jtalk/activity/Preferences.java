@@ -37,13 +37,6 @@ import android.os.Bundle;
 
 public class Preferences extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 //	private CheckBoxPreference compression;
-	private CheckBoxPreference autoCollapse;
-	private EditTextPreference delayAway;
-	private EditTextPreference textAway;
-	private EditTextPreference delayXa;
-	private EditTextPreference textXa;
-	private EditTextPreference priorityAway;
-	private EditTextPreference priorityXa;
 	private ListPreference smilespack;
     private ListPreference colortheme;
 	private ListPreference iconspack;
@@ -102,16 +95,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 			}
 		}
 		
-		autoCollapse = (CheckBoxPreference) getPreferenceScreen().findPreference("CollapseBigMessages");
-		autoCollapse.setEnabled(prefs.getBoolean("EnableCollapseMessages", true));
-		
-		delayAway = (EditTextPreference) getPreferenceScreen().findPreference("AutoStatusAway");
-		textAway = (EditTextPreference) getPreferenceScreen().findPreference("AutoStatusTextAway");
-		delayXa  = (EditTextPreference) getPreferenceScreen().findPreference("AutoStatusXa");
-		textXa   = (EditTextPreference) getPreferenceScreen().findPreference("AutoStatusTextXa");
-		priorityAway = (EditTextPreference) getPreferenceScreen().findPreference("AutoStatusPriorityAway");
-		priorityXa = (EditTextPreference) getPreferenceScreen().findPreference("AutoStatusPriorityXa");
-//		compression  = (CheckBoxPreference) getPreferenceScreen().findPreference("UseCompression"); 
+//		compression  = (CheckBoxPreference) getPreferenceScreen().findPreference("UseCompression");
 		smilespack = (ListPreference) getPreferenceScreen().findPreference("SmilesPack");
 		smilespack.setEntries(smiles);
 		smilespack.setEntryValues(smiles);
@@ -127,13 +111,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		if (icons.size() == 1) iconspack.setValue("default");
 		
 //		compression.setEnabled(prefs.getBoolean("EnableTls", true) ? true : false);
-		delayAway.setEnabled(prefs.getBoolean("AutoStatus", false));
-		textAway.setEnabled(prefs.getBoolean("AutoStatus", false));
-		delayXa.setEnabled(prefs.getBoolean("AutoStatus", false));
-		textXa.setEnabled(prefs.getBoolean("AutoStatus", false));
-		priorityAway.setEnabled(prefs.getBoolean("AutoStatus", false));
-		priorityXa.setEnabled(prefs.getBoolean("AutoStatus", false));
-		
+
 		if (smiles.length > 0) {
 			smilespack.setEnabled(prefs.getBoolean("ShowSmiles", true));
 		} else smilespack.setEnabled(false);
@@ -174,14 +152,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
 		smilespack.setEnabled(prefs.getBoolean("ShowSmiles", true));
-		autoCollapse.setEnabled(prefs.getBoolean("EnableCollapseMessages", true));
-		delayAway.setEnabled(prefs.getBoolean("AutoStatus", false));
-		textAway.setEnabled(prefs.getBoolean("AutoStatus", false));
-		delayXa.setEnabled(prefs.getBoolean("AutoStatus", false));
-		textXa.setEnabled(prefs.getBoolean("AutoStatus", false));
-		priorityAway.setEnabled(prefs.getBoolean("AutoStatus", false));
-		priorityXa.setEnabled(prefs.getBoolean("AutoStatus", false));
-		
+
 		String iconPack = prefs.getString("IconPack", "default");
 		IconPicker ip = JTalkService.getInstance().getIconPicker();
 		if (ip != null && !iconPack.equals(ip.getPackName())) ip.loadIconPack();

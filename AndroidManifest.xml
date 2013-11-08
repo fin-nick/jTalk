@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.jtalk2" android:versionName="@string/version" android:installLocation="auto" android:versionCode="394">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.jtalk2" android:versionName="@string/version" android:installLocation="auto" android:versionCode="395">
     <uses-feature android:glEsVersion="0x00020000" android:required="true"/>
     <uses-sdk android:minSdkVersion="11" android:targetSdkVersion="16"/>
     <permission android:name="com.jtalk2.permission.MAPS_RECEIVE" android:protectionLevel="signature"/>
@@ -57,18 +57,18 @@
         </activity>
 
         <!-- Receivers -->
-        <receiver android:name="net.ustyugov.jtalk.OnBootReceiver">
+        <receiver android:name="net.ustyugov.jtalk.receivers.OnBootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
-        <receiver android:name="net.ustyugov.jtalk.TunesReceiver">
+        <receiver android:name="net.ustyugov.jtalk.receivers.TunesReceiver">
             <intent-filter>
                 <action android:name="com.android.music.playstatechanged"/>
                 <action android:name="com.android.music.metachanged"/>
             </intent-filter>
         </receiver>
-        
+
         <!-- Services -->
         <service android:name="net.ustyugov.jtalk.service.JTalkService" />
         <service android:name="net.ustyugov.jtalk.service.AuthenticationService" android:exported="true" android:process=":auth">

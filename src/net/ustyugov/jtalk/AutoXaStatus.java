@@ -35,7 +35,9 @@ public class AutoXaStatus extends TimerTask {
 	public void run() {
 		JTalkService service = JTalkService.getInstance();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
-		
+
+        if (!service.isAuthenticated() || prefs.getBoolean("AutoStatusOnDisplay", false)) return;
+
 		if (prefs.getBoolean("AutoStatus", false) && service.getAutoStatus()) {
 			service.setAutoStatus(true);
 			String text = prefs.getString("AutoStatusTextXa", service.getResources().getString(R.string.AutoStatusTextXa));
@@ -47,7 +49,7 @@ public class AutoXaStatus extends TimerTask {
 			}
 			int priority = 3;
 			try {
-				priority = Integer.parseInt(prefs.getString("AutoStatusPriorityXa", 3+""));
+				priority = Integer.parseInt(prefs.getString("AutoStatusPriorityXa", 0+""));
 			} catch(Exception e) { priority = 3; }
 			service.sendPresence(text, Presence.Mode.xa.name(), priority);
 		}

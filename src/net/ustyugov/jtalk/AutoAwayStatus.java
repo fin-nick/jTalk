@@ -38,6 +38,8 @@ public class AutoAwayStatus extends TimerTask {
 		String currentMode = prefs.getString("currentMode", "available");
 		String currentStatus = prefs.getString("currentStatus", "");
 		int currentPriority = prefs.getInt("currentPriority", 0);
+
+        if (!service.isAuthenticated() || prefs.getBoolean("AutoStatusOnDisplay", false)) return;
 		
 		if (prefs.getBoolean("AutoStatus", false) && !service.getAutoStatus()) { // TODO && isAuthenticated
 			if (currentMode.equals("available") || currentMode.equals("chat")) {
@@ -57,7 +59,7 @@ public class AutoAwayStatus extends TimerTask {
 				}
 				int priority = 5;
 				try {
-					priority = Integer.parseInt(prefs.getString("AutoStatusPriorityAway", 5+""));
+					priority = Integer.parseInt(prefs.getString("AutoStatusPriorityAway", 0+""));
 				} catch(Exception e) { priority = 5; }
 				service.sendPresence(text, Presence.Mode.away.name(), priority);
 			}

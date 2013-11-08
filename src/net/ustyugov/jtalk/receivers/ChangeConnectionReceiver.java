@@ -15,7 +15,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/
  */
 
-package net.ustyugov.jtalk;
+package net.ustyugov.jtalk.receivers;
 
 import android.database.Cursor;
 import android.net.NetworkInfo;

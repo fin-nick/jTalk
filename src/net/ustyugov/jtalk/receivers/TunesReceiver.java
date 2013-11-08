@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012, Igor Ustyugov <igor@ustyugov.net>
+ * Copyright (C) 2013, Igor Ustyugov <igor@ustyugov.net>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,27 +15,32 @@
  * along with this program. If not, see http://www.gnu.org/licenses/
  */
 
-package net.ustyugov.jtalk;
+package net.ustyugov.jtalk.receivers;
 
-import net.ustyugov.jtalk.service.JTalkService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import net.ustyugov.jtalk.service.JTalkService;
 
-public class OnBootReceiver extends BroadcastReceiver {
+public class TunesReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-            if (prefs.getBoolean("AUTOSTART", false)) {
-            	int activeAccount = prefs.getInt("Account", 0);
-                if (activeAccount >= 1) {
-                	context.startService(new Intent(context, JTalkService.class));
-                }
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        if (prefs.getBoolean("PlayingNow", false)) {
+            String artist = null;
+            String album  = null;
+            String track  = null;
+
+            if (intent.getBooleanExtra("playing", false)) {
+                artist = intent.getStringExtra("artist");
+                album = intent.getStringExtra("album");
+                track = intent.getStringExtra("track");
             }
+
+            JTalkService.getInstance().sendTunes(artist, track, album);
         }
     }
 }

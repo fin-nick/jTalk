@@ -29,6 +29,8 @@ import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.listener.*;
 
+import net.ustyugov.jtalk.receivers.ChangeConnectionReceiver;
+import net.ustyugov.jtalk.receivers.ScreenStateReceiver;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.PacketListener;
@@ -113,6 +115,7 @@ public class JTalkService extends Service {
     private String globalState = "";
     private SharedPreferences prefs;
 //    private BroadcastReceiver updateReceiver;
+    private ScreenStateReceiver screenStateReceiver;
     private ChangeConnectionReceiver connectionReceiver;
     private FileTransferManager fileTransferManager;
     private List<FileTransferRequest> incomingRequests = new ArrayList<FileTransferRequest>();
@@ -291,6 +294,7 @@ public class JTalkService extends Service {
     public void setAutoStatus(boolean auto) { this.autoStatus = auto; }
     public boolean getAutoStatus() { return autoStatus; }
     public void setOldPresence(Presence presence) { this.oldPresence = presence; }
+    public Presence getOldPresence() { return oldPresence; }
     public FileTransferManager getFileTransferManager() { return fileTransferManager; }
     public List<FileTransferRequest> getIncomingRequests() { return incomingRequests; }
     public void setCurrentJid(String jid) { this.currentJid = jid; }
@@ -630,6 +634,8 @@ public class JTalkService extends Service {
     
     public void resetTimer() {
     	if (prefs != null) {
+            if (prefs.getBoolean("AutoStatusOnDisplay", false)) return;
+
     		autoStatusTimer.purge();
             autoStatusTimer.cancel();
             if (autoStatus) {
@@ -692,6 +698,10 @@ public class JTalkService extends Service {
         
         connectionReceiver = new ChangeConnectionReceiver();
         registerReceiver(connectionReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
+        screenStateReceiver = new ScreenStateReceiver();
+        registerReceiver(new ScreenStateReceiver(), new IntentFilter(Intent.ACTION_SCREEN_ON));
+        registerReceiver(new ScreenStateReceiver(), new IntentFilter(Intent.ACTION_SCREEN_OFF));
         
         Intent i = new Intent(this, RosterActivity.class);
    		i.setAction(Intent.ACTION_MAIN);
@@ -727,6 +737,7 @@ public class JTalkService extends Service {
     	try {
 //    		unregisterReceiver(updateReceiver);
     		unregisterReceiver(connectionReceiver);
+            unregisterReceiver(screenStateReceiver);
     	} catch(Exception ignored) { }
 
         Notify.cancelAll(this);

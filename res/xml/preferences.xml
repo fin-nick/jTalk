@@ -71,6 +71,8 @@
                 android:title="@string/EnableCollapseMessages"
                 android:defaultValue="true" />
         <CheckBoxPreference
+                android:dependency="EnableCollapseMessages"
+                android:disableDependentsState="false"
                 android:key="CollapseBigMessages"
                 android:title="@string/CollapseBigMessages"
                 android:defaultValue="false" />
@@ -167,34 +169,51 @@
                 android:key="AutoStatus"
                 android:title="@string/Autostatus"
                 android:defaultValue="false" />
+        <CheckBoxPreference
+                android:dependency="AutoStatus"
+                android:key="AutoStatusOnDisplayOn"
+                android:title="Screen turns on"
+                android:defaultValue="false" />
+        <CheckBoxPreference
+                android:dependency="AutoStatusOnDisplayOn"
+                android:key="AutoStatusOnDisplayOff"
+                android:title="Screen turns off"
+                android:defaultValue="false" />
         <EditTextPreference
+                android:dependency="AutoStatus"
+                android:disableDependentsState="false"
                 android:key="AutoStatusAway"
                 android:numeric="integer"
                 android:title="@string/DelayAway"
                 android:defaultValue="10" />
         <EditTextPreference
+                android:dependency="AutoStatus"
                 android:key="AutoStatusXa"
                 android:numeric="integer"
                 android:title="@string/DelayXa"
                 android:defaultValue="20" />
         <EditTextPreference
+                android:dependency="AutoStatus"
                 android:key="AutoStatusTextAway"
                 android:title="@string/AutoStatusTextAway"
                 android:defaultValue="@string/AutoStatusTextAway" />
         <EditTextPreference
+                android:dependency="AutoStatus"
                 android:key="AutoStatusTextXa"
                 android:title="@string/AutoStatusTextXa"
                 android:defaultValue="@string/AutoStatusTextXa" />
         <EditTextPreference
+                android:dependency="AutoStatus"
                 android:key="AutoStatusPriorityAway"
                 android:numeric="integer"
                 android:title="Away priority"
-                android:defaultValue="5" />
+                android:defaultValue="0" />
         <EditTextPreference
+                android:dependency="AutoStatus"
                 android:key="AutoStatusPriorityXa"
                 android:numeric="integer"
                 android:title="Extended Away priority"
-                android:defaultValue="3" />
+                android:defaultValue="0" />
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/Interface">

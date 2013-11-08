@@ -239,47 +239,45 @@ public class RosterActivity extends Activity implements OnItemClickListener, OnI
                 sound.setIcon(R.drawable.ic_menu_sound_on);
             }
 
-            if (Build.VERSION.SDK_INT >= 8) {
-                MenuItem.OnActionExpandListener listener = new MenuItem.OnActionExpandListener() {
-                    @Override
-                    public boolean onMenuItemActionCollapse(MenuItem item) {
-                        gridView.setAdapter(null);
-                        searchString = null;
-                        updateList();
-                        updateMenu();
-                        return true;
-                    }
+            MenuItem.OnActionExpandListener listener = new MenuItem.OnActionExpandListener() {
+                @Override
+                public boolean onMenuItemActionCollapse(MenuItem item) {
+                    gridView.setAdapter(null);
+                    searchString = null;
+                    updateList();
+                    updateMenu();
+                    return true;
+                }
 
-                    @Override
-                    public boolean onMenuItemActionExpand(MenuItem item) {
-                        gridView.setAdapter(searchAdapter);
-                        searchString = "";
-                        updateList();
-                        return true;
-                    }
-                };
+                @Override
+                public boolean onMenuItemActionExpand(MenuItem item) {
+                    gridView.setAdapter(searchAdapter);
+                    searchString = "";
+                    updateList();
+                    return true;
+                }
+            };
 
-                SearchView searchView = new SearchView(this);
-                searchView.setQueryHint(getString(android.R.string.search_go));
-                searchView.setSubmitButtonEnabled(false);
-                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                    @Override
-                    public boolean onQueryTextChange(String newText) {
-                        searchString = newText;
-                        updateList();
-                        return true;
-                    }
-                    @Override
-                    public boolean onQueryTextSubmit(String query) {
-                        return true;
-                    }
-                });
+            SearchView searchView = new SearchView(this);
+            searchView.setQueryHint(getString(android.R.string.search_go));
+            searchView.setSubmitButtonEnabled(false);
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    searchString = newText;
+                    updateList();
+                    return true;
+                }
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    return true;
+                }
+            });
 
-                MenuItem item = menu.findItem(R.id.search);
-                item.setActionView(searchView);
-                item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-                item.setOnActionExpandListener(listener);
-            } else menu.removeItem(R.id.search);
+            MenuItem item = menu.findItem(R.id.search);
+            item.setActionView(searchView);
+            item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+            item.setOnActionExpandListener(listener);
             super.onCreateOptionsMenu(menu);
     	}
     }

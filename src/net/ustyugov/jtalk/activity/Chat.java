@@ -104,6 +104,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        Thread.setDefaultUncaughtExceptionHandler(new MyExceptionHandler(this));
         service = JTalkService.getInstance();
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         try {

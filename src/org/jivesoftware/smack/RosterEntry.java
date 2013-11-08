@@ -74,7 +74,8 @@ public class RosterEntry {
      * @return the name.
      */
     public String getName() {
-        return name;
+        if (name != null && name.length() > 0) return name;
+        else return user;
     }
 
     /**

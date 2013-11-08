@@ -1,0 +1,29 @@
+<resources>
+    <array name="statusArray">
+        <item>Dispoñible</item>
+        <item>Ausente</item>
+        <item>Ausencia estendida</item>
+        <item>Non molestar</item>
+        <item>Free for chat</item>
+        <item>Desconectado</item>
+    </array>
+    
+    <string-array name="vibrationArray">
+        <item>Sempre</item>
+        <item>Só en chats</item>
+        <item>En chats e mensaxes directas de conferencias</item>
+        <item>Só en conferencias</item>
+        <item>Nunca</item>
+    </string-array>
+    
+    <string-array name="privacyActions">
+        <item>permitir</item>
+        <item>denegar</item>
+    </string-array>
+
+    <string-array name="privacyTypes">
+        <item>jid</item>
+        <item>grupo</item>
+        <item>subscrición</item>
+    </string-array>
+</resources>

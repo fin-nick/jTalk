@@ -1,0 +1,29 @@
+<resources>
+    <array name="statusArray">
+        <item>Disponible</item>
+        <item>Absent</item>
+        <item>Absència estesa</item>
+        <item>No molestar</item>
+        <item>Lliure per el xat</item>
+        <item>Desconnectat</item>
+    </array>
+    
+    <string-array name="vibrationArray">
+        <item>Sempre</item>
+        <item>Només en xats</item>
+        <item>En xats i missatges directes de conferències</item>
+        <item>Només en conferències</item>
+        <item>Mai</item>
+    </string-array>
+    
+    <string-array name="privacyActions">
+        <item>permetre</item>
+        <item>denegar</item>
+    </string-array>
+
+    <string-array name="privacyTypes">
+        <item>jid</item>
+        <item>grup</item>
+        <item>subscripció</item>
+    </string-array>
+</resources>

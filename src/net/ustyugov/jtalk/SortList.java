@@ -58,7 +58,14 @@ public class SortList {
     			offline.add(hm);
     		}
     	}
-    	
+
+        Collections.sort(online, new HashMapComparator());
+        Collections.sort(chat, new HashMapComparator());
+        Collections.sort(away, new HashMapComparator());
+        Collections.sort(xa, new HashMapComparator());
+        Collections.sort(dnd, new HashMapComparator());
+        Collections.sort(offline, new HashMapComparator());
+
     	List<HashMap<String, RosterEntry>> result = new ArrayList<HashMap<String, RosterEntry>>();
     	result.addAll(chat);
     	result.addAll(chat.size(), online);
@@ -99,6 +106,13 @@ public class SortList {
                 offline.add(jid);
             }
         }
+
+        Collections.sort(chat, new StringComparator());
+        Collections.sort(online, new StringComparator());
+        Collections.sort(away, new StringComparator());
+        Collections.sort(xa, new StringComparator());
+        Collections.sort(dnd, new StringComparator());
+        Collections.sort(offline, new StringComparator());
 
         List<String> result = new ArrayList<String>();
         result.addAll(chat);
@@ -162,6 +176,13 @@ public class SortList {
         @Override
         public int compare(String s1, String s2) {
             return s1.toLowerCase().compareTo(s2.toLowerCase());
+        }
+    }
+
+    public static class HashMapComparator implements Comparator<HashMap<String, RosterEntry>> {
+        @Override
+        public int compare(HashMap<String, RosterEntry> h1, HashMap<String, RosterEntry> h2) {
+            return h1.get("entry").getName().toLowerCase().compareTo(h2.get("entry").getName().toLowerCase());
         }
     }
 }

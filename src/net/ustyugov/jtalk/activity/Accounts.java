@@ -21,6 +21,7 @@ import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
+import android.net.Uri;
 import android.view.*;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
@@ -41,6 +42,7 @@ import com.jtalk2.R;
 
 public class Accounts extends Activity {
     private static final int REQUEST_ACCOUNT = 8;
+    private static final int REQUEST_REGISTRATION = 10;
     private static final int CONTEXT_VCARD = 1;
     private static final int CONTEXT_PRIVACY = 2;
     private static final int CONTEXT_EDIT = 3;
@@ -114,6 +116,10 @@ public class Accounts extends Activity {
                     else Notify.offlineNotify(service.getGlobalState());
                 }
             }
+            return;
+        }
+        if (request == REQUEST_REGISTRATION) {
+            startActivityForResult(new Intent(this, AddAccountActivity.class), REQUEST_ACCOUNT);
         }
     }
 	
@@ -133,6 +139,21 @@ public class Accounts extends Activity {
 	     	case R.id.add:
 	     		startActivityForResult(new Intent(this, AddAccountActivity.class), REQUEST_ACCOUNT);
 	     		break;
+            case R.id.reg:
+                String[] serverNames = getResources().getStringArray(R.array.serverNames);
+                final String[] servers = getResources().getStringArray(R.array.servers);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setItems(serverNames, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse(servers[which]));
+                        startActivityForResult(intent, REQUEST_REGISTRATION);
+                    }
+                });
+                builder.create().show();
+                break;
 	     	default:
 	     		return false;
 	    }

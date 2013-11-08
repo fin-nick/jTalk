@@ -22,4 +22,16 @@
         <item>Синий</item>
         <item>Красный</item>
     </string-array>
+
+    <string-array name="servers">
+        <item>https://register.jabber.org</item>
+        <item>http://reg.jabber.ru/xreg/</item>
+        <item>https://secure.jabbim.com/reg/</item>
+    </string-array>
+
+    <string-array name="serverNames">
+        <item>Jabber.Org</item>
+        <item>Jabber.Ru</item>
+        <item>JabbIM</item>
+    </string-array>
 </resources>

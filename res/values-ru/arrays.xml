@@ -34,4 +34,8 @@
         <item>Jabber.Ru</item>
         <item>JabbIM</item>
     </string-array>
+
+    <string-array name="rooms">
+        <item>jtalk@conference.jabber.ru</item>
+    </string-array>
 </resources>

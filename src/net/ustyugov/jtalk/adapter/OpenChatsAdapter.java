@@ -72,7 +72,8 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
                 for(String jid : service.getActiveChats(account)) {
                     if (!service.getConferencesHash(account).containsKey(jid)) {
                         Roster roster = service.getRoster(account);
-                        RosterEntry entry = roster.getEntry(jid);
+                        RosterEntry entry = null;
+                        if (roster != null) entry = roster.getEntry(jid);
                         if (entry == null) entry = new RosterEntry(jid, jid, RosterPacket.ItemType.both, RosterPacket.ItemStatus.SUBSCRIPTION_PENDING, roster, connection);
                         RosterItem item = new RosterItem(account, RosterItem.Type.entry, entry);
                         add(item);
@@ -125,7 +126,7 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 			TextView label = (TextView) v.findViewById(R.id.name);
 			label.setTypeface(Typeface.DEFAULT_BOLD);
 	       	label.setTextSize(fontSize);
-	        label.setText("Chats: " + (getCount()-1));
+	        label.setText(service.getString(R.string.Chats) + ": " + (getCount()-1));
             label.setTextColor(Colors.PRIMARY_TEXT);
             v.setBackgroundColor(Colors.GROUP_BACKGROUND);
         } else {

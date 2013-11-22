@@ -45,7 +45,8 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
 public class Notify {
-	private static final int NOTIFICATION = 1;
+	public static final int NOTIFICATION = 1;
+    private static final int NOTIFICATION_MSG = 10;
 	private static final int NOTIFICATION_FILE = 2;
 	private static final int NOTIFICATION_IN_FILE = 3;
 	private static final int NOTIFICATION_FILE_REQUEST = 4;
@@ -53,122 +54,64 @@ public class Notify {
 	private static final int NOTIFICATION_CAPTCHA = 6;
 	private static final int NOTIFICATION_INVITE = 7;
 	
-	public static boolean newMessages = false;
+//	public static boolean newMessages = false;
 	public enum Type {Chat, Conference, Direct}
 	
     public static void updateNotify() {
-    	JTalkService service = JTalkService.getInstance();
+        JTalkService service = JTalkService.getInstance();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
-    	if (service.getUnreadMessages().isEmpty()) {
-    		newMessages = false;
-        	String mode = prefs.getString("currentMode", "available");
-        	int pos = prefs.getInt("currentSelection", 0);
-            String text = prefs.getString("currentStatus", null);
-            String[] statusArray = service.getResources().getStringArray(R.array.statusArray);
+        NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
 
-            int icon = R.drawable.stat_online;
-            if (mode.equals("available")) {
-            	icon = R.drawable.stat_online;
-            }
-            else if (mode.equals("chat")) {
-            	icon = R.drawable.stat_chat;
-            }
-            else if (mode.equals("away")) {
-            	icon = R.drawable.stat_away;
-            }
-            else if (mode.equals("xa")) {
-            	icon = R.drawable.stat_xaway;
-            }
-            else if (mode.equals("dnd")) {
-            	icon = R.drawable.stat_dnd;
-            }
+        if (service.getUnreadMessages().isEmpty()) mng.cancel(NOTIFICATION_MSG);
 
-            Intent i = new Intent(service, RosterActivity.class);
-            i.setAction(Constants.UPDATE);
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            i.putExtra("status", false);
-            PendingIntent piRoster = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+        String mode = prefs.getString("currentMode", "available");
+        int pos = prefs.getInt("currentSelection", 0);
+        String text = prefs.getString("currentStatus", null);
+        String[] statusArray = service.getResources().getStringArray(R.array.statusArray);
 
-            Intent i2 = new Intent(service, RosterActivity.class);
-            i2.setAction(Constants.PRESENCE_CHANGED);
-            i2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            i2.putExtra("status", true);
-            PendingIntent piStatus = PendingIntent.getActivity(service, 0, i2, PendingIntent.FLAG_UPDATE_CURRENT);
+        int icon = R.drawable.stat_online;
+        if (mode.equals("available")) {
+            icon = R.drawable.stat_online;
+        }
+        else if (mode.equals("chat")) {
+            icon = R.drawable.stat_chat;
+        }
+        else if (mode.equals("away")) {
+            icon = R.drawable.stat_away;
+        }
+        else if (mode.equals("xa")) {
+            icon = R.drawable.stat_xaway;
+        }
+        else if (mode.equals("dnd")) {
+            icon = R.drawable.stat_dnd;
+        }
 
-            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
-            mBuilder.setLargeIcon(BitmapFactory.decodeResource(service.getResources(), R.drawable.ic_launcher));
-            mBuilder.setSmallIcon(icon);
-            mBuilder.setContentTitle(statusArray[pos]);
-            mBuilder.setContentText(text);
-            mBuilder.setContentIntent(piRoster);
-            mBuilder.addAction(R.drawable.ic_action_refresh, service.getString(R.string.Status), piStatus);
-            mBuilder.setPriority(NotificationCompat.PRIORITY_MAX);
+        Intent i = new Intent(service, RosterActivity.class);
+        i.setAction(Constants.UPDATE);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        i.putExtra("status", false);
+        PendingIntent piRoster = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
-            mng.notify(NOTIFICATION, mBuilder.build());
-    	} else {
-            int color = Color.GREEN;
-            try {
-                color = Integer.parseInt(prefs.getString("lightsColor", "-16711936"));
-            } catch (NumberFormatException nfe) {}
+        Intent i2 = new Intent(service, RosterActivity.class);
+        i2.setAction(Constants.PRESENCE_CHANGED);
+        i2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        i2.putExtra("status", true);
+        PendingIntent piStatus = PendingIntent.getActivity(service, 0, i2, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            List<MessageItem> list = service.getUnreadMessages();
-            MessageItem messageItem = list.get(0);
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+        mBuilder.setLargeIcon(BitmapFactory.decodeResource(service.getResources(), R.drawable.ic_launcher));
+        mBuilder.setSmallIcon(icon);
+        mBuilder.setContentTitle(statusArray[pos]);
+        mBuilder.setContentText(text);
+        mBuilder.setContentIntent(piRoster);
+        mBuilder.addAction(R.drawable.ic_action_refresh, service.getString(R.string.Status), piStatus);
+//        mBuilder.setPriority(NotificationCompat.PRIORITY_MAX);
 
-           	Intent i = new Intent(service, Chat.class);
-           	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            i.putExtra("jid", messageItem.getJid());
-            i.putExtra("account", messageItem.getAccount());
-            PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
-            mBuilder.setSmallIcon(R.drawable.stat_msg);
-            mBuilder.setLights(color, 2000, 3000);
-            mBuilder.setContentTitle(service.getString(R.string.app_name));
-            mBuilder.setContentText(service.getString(R.string.UnreadMessage));
-//            mBuilder.setNumber(service.getUnreadMessages().size());
-            mBuilder.setContentIntent(contentIntent);
-            mBuilder.setPriority(NotificationCompat.PRIORITY_MAX);
-
-            if (list.size() > 1) {
-                NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
-                inboxStyle.setBigContentTitle(service.getString(R.string.UnreadMessage));
-                for (MessageItem item : list) {
-                    String n = item.getName();
-                    if (n != null && n.length() > 0) {
-                        inboxStyle.addLine(n + ": " + item.getBody());
-                    }
-                }
-                mBuilder.setLargeIcon(BitmapFactory.decodeResource(service.getResources(), R.drawable.stat_msg));
-                mBuilder.setStyle(inboxStyle);
-            } else {
-                String from = messageItem.getJid();
-                if (!service.getConferencesHash(messageItem.getAccount()).containsKey(StringUtils.parseBareAddress(from))) {
-                    from = StringUtils.parseBareAddress(from);
-                }
-                Bitmap largeIcon = BitmapFactory.decodeResource(service.getResources(), R.drawable.stat_msg);
-                File a = new File(Constants.PATH + from.replaceAll("/", "%"));
-                if (a.exists()) largeIcon = BitmapFactory.decodeFile(Constants.PATH + from.replaceAll("/", "%"));
-                else {
-                    if (service.getConferencesHash(messageItem.getAccount()).containsKey(StringUtils.parseBareAddress(from))) {
-                        largeIcon = BitmapFactory.decodeResource(service.getResources(), R.drawable.icon_muc);
-                    }
-                }
-
-                NotificationCompat.BigTextStyle bts = new NotificationCompat.BigTextStyle();
-                bts.setBigContentTitle(messageItem.getName());
-                bts.bigText(messageItem.getBody());
-                mBuilder.setLargeIcon(largeIcon);
-                mBuilder.setStyle(bts);
-            }
-
-            NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
-            mng.notify(NOTIFICATION, mBuilder.build());
-    	}
+        mng.notify(NOTIFICATION, mBuilder.build());
     }
     
     public static void offlineNotify(String state) {
-    	newMessages = false;
+//    	newMessages = false;
     	JTalkService service = JTalkService.getInstance();
         Intent i = new Intent(service, RosterActivity.class);
         i.setAction(Intent.ACTION_MAIN);
@@ -189,7 +132,7 @@ public class Notify {
     }
 
     public static void connecingNotify(String account) {
-        newMessages = false;
+//        newMessages = false;
         JTalkService service = JTalkService.getInstance();
         Intent i = new Intent(service, RosterActivity.class);
         i.setAction(Intent.ACTION_MAIN);
@@ -211,7 +154,7 @@ public class Notify {
     }
     
     public static void cancelAll(Context context) {
-    	newMessages = false;
+//    	newMessages = false;
     	NotificationManager mng = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     	mng.cancelAll();
     }
@@ -227,7 +170,7 @@ public class Notify {
             color = Integer.parseInt(prefs.getString("lightsColor", "-16711936"));
         } catch (NumberFormatException nfe) {}
 
-    	newMessages = true;
+//    	newMessages = true;
     	String nick = from;
         String ticker = "";
     	boolean include = prefs.getBoolean("MessageInNotification", false);
@@ -302,6 +245,7 @@ public class Notify {
             }
 
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+            mBuilder.setAutoCancel(true);
             mBuilder.setLargeIcon(largeIcon);
             mBuilder.setSmallIcon(R.drawable.stat_msg);
             mBuilder.setLights(color, 2000, 3000);
@@ -331,7 +275,7 @@ public class Notify {
             }
 
             NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
-            mng.notify(NOTIFICATION, mBuilder.build());
+            mng.notify(NOTIFICATION_MSG, mBuilder.build());
     	}
     }
     

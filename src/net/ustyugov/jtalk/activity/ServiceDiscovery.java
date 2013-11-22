@@ -177,7 +177,6 @@ public class ServiceDiscovery extends Activity implements OnClickListener, OnIte
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo info) {
         AdapterContextMenuInfo cm = (AdapterContextMenuInfo) info;
         DiscoItem item = (DiscoItem) list.getAdapter().getItem(cm.position);
-        Log.i("CONTEXTMENU", "Position: " + cm.position + "Jid: " + item.getJid());
 
         menu.setHeaderTitle(R.string.Actions);
         if (item.isRegister()) menu.add(Menu.NONE, CONTEXT_REG, Menu.NONE, R.string.Registration);
@@ -214,6 +213,7 @@ public class ServiceDiscovery extends Activity implements OnClickListener, OnIte
             case CONTEXT_INFO:
                 if (discoItem != null && discoItem.isVCard()) {
                     Intent infoIntent = new Intent(this, VCardActivity.class);
+                    infoIntent.putExtra("account", account);
                     infoIntent.putExtra("jid", jid);
                     startActivity(infoIntent);
                 }

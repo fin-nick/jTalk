@@ -129,6 +129,8 @@ public class RosterActivity extends Activity implements OnItemClickListener, OnI
         if (prefs.getBoolean("BUG", false)) {
             new ErrorDialog(this).show();
         }
+
+        Notify.updateNotify();
     }
     
     @Override

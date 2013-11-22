@@ -44,7 +44,7 @@ import com.jtalk2.R;
 public class TemplatesActivity extends Activity implements OnItemClickListener {
 	private static final int CONTEXT_EDIT = 1;
 	private static final int CONTEXT_REMOVE = 2;
-	
+
 	private JTalkService service;
 	private ProgressBar progress;
 	private ListView list;
@@ -56,7 +56,7 @@ public class TemplatesActivity extends Activity implements OnItemClickListener {
 		super.onCreate(bundle);
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		service = JTalkService.getInstance();
-		
+
 		setContentView(R.layout.list_activity);
 		setTitle(R.string.Templates);
 		getActionBar().setDisplayHomeAsUpEnabled(true);

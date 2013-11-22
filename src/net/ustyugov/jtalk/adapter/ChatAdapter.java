@@ -76,7 +76,8 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
 		clear();
 
         boolean showStatuses = prefs.getBoolean("ShowStatus", false);
-        for (MessageItem item : list) {
+        for (int i = 0; i < list.size(); i++) {
+            MessageItem item = list.get(i);
             MessageItem.Type type = item.getType();
             if (searchString.length() > 0) {
                 String name = item.getName();
@@ -94,7 +95,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
                     add(item);
                 }
             } else {
-                if (showStatuses || (!showStatuses && type != MessageItem.Type.status)) add(item);
+                if (showStatuses || type != MessageItem.Type.status) add(item);
             }
         }
 	}

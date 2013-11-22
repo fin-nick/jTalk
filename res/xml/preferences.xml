@@ -117,6 +117,11 @@
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/Notifications">
+        <!--<CheckBoxPreference-->
+                <!--android:title="@string/AlwaysVisibleState"-->
+                <!--android:key="StatusNotification"-->
+                <!--android:defaultValue="true"/>-->
+
         <RingtonePreference android:key="ringtone"
                             android:title="@string/Ringtone"
                             android:showSilent="true"
@@ -140,7 +145,7 @@
                 android:entries="@array/lightsArray"
                 android:entryValues="@array/LightsValues"
                 android:key="lightsColor"
-                android:title="Indicator color"/>
+                android:title="@string/IndicatorColor"/>
 
         <ListPreference
                 android:defaultValue="1"
@@ -160,7 +165,7 @@
                 android:defaultValue="64" />
         <EditTextPreference
                 android:key="IgnoreJids"
-                android:title="Ignore users"
+                android:title="@string/IgnoreUsers"
                 android:defaultValue="" />
     </PreferenceScreen>
 
@@ -172,12 +177,12 @@
         <CheckBoxPreference
                 android:dependency="AutoStatus"
                 android:key="AutoStatusOnDisplayOn"
-                android:title="Screen turns on"
+                android:title="@string/ScreenTurnsOn"
                 android:defaultValue="false" />
         <CheckBoxPreference
                 android:dependency="AutoStatusOnDisplayOn"
                 android:key="AutoStatusOnDisplayOff"
-                android:title="Screen turns off"
+                android:title="@string/ScreenTurnsOff"
                 android:defaultValue="false" />
         <EditTextPreference
                 android:dependency="AutoStatus"
@@ -206,13 +211,13 @@
                 android:dependency="AutoStatus"
                 android:key="AutoStatusPriorityAway"
                 android:numeric="integer"
-                android:title="Away priority"
+                android:title="@string/AwayPriority"
                 android:defaultValue="0" />
         <EditTextPreference
                 android:dependency="AutoStatus"
                 android:key="AutoStatusPriorityXa"
                 android:numeric="integer"
-                android:title="Extended Away priority"
+                android:title="@string/ExtendedAwayPriority"
                 android:defaultValue="0" />
     </PreferenceScreen>
 
@@ -236,13 +241,13 @@
             <EditTextPreference
                     android:key="SmilesColumns"
                     android:title="@string/Columns"
-                    android:summary="The number of columns in the dialog"
-                    android:defaultValue="3"
+                    android:summary="@string/TheNumberColumnsDialog"
+                    android:defaultValue="5"
                     android:numeric="integer"/>
         </PreferenceScreen>
         <ListPreference
                 android:key="IconPack"
-                android:title="Icons"/>
+                android:title="@string/Icons"/>
         <PreferenceScreen android:title="@string/Sidebar">
             <CheckBoxPreference
                     android:key="CompactMode"
@@ -260,24 +265,24 @@
 
         <CheckBoxPreference
                 android:key="showSound"
-                android:title="Show sound icon on ActionBar"
+                android:title="@string/ShowSoundIconOnActionBar"
                 android:defaultValue="false" />
     </PreferenceScreen>
 
-    <PreferenceScreen android:title="Ignore-List">
+    <PreferenceScreen android:title="@string/IgnoreList">
         <CheckBoxPreference
-                android:title="Auto activate"
-                android:summary="Activate Ignore-List on start"
+                android:title="@string/AutoАctivate"
+                android:summary="@string/ActivateIgnoreListOnStart"
                 android:key="ActivateIgnoreList"
                 android:defaultValue="false"/>
         <CheckBoxPreference
-                android:title="Default"
-                android:summary="Ignore-List is a default list"
+                android:title="@string/Default"
+                android:summary="@string/IgnoreListDefaultList"
                 android:key="SetIgnoreListDefault"
                 android:defaultValue="false"/>
     </PreferenceScreen>
 
-    <PreferenceScreen android:title="Other">
+    <PreferenceScreen android:title="@string/Other">
         <CheckBoxPreference
                 android:title="@string/AutostartOnBoot"
                 android:key="AUTOSTART"
@@ -293,10 +298,6 @@
         <CheckBoxPreference
                 android:title="@string/Locations"
                 android:key="Locations"
-                android:defaultValue="false"/>
-        <CheckBoxPreference
-                android:title="Send tune"
-                android:key="PlayingNow"
                 android:defaultValue="false"/>
         <CheckBoxPreference
                 android:title="@string/hideVersion"

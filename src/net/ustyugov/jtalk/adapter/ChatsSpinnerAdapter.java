@@ -58,7 +58,7 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 	public ChatsSpinnerAdapter(Activity activity) {
 		super(activity, R.id.name);
         this.service = JTalkService.getInstance();
-        this.prefs = PreferenceManager.getDefaultSharedPreferences(service);
+        this.prefs = PreferenceManager.getDefaultSharedPreferences(activity);
         this.activity = activity;
     }
 	

@@ -38,7 +38,7 @@ public class BookmarkedConference implements SharedBookmark {
         this.jid = jid;
     }
 
-    protected BookmarkedConference(String name, String jid, boolean autoJoin, String nickname,
+    public BookmarkedConference(String name, String jid, boolean autoJoin, String nickname,
             String password)
     {
         this.name = name;

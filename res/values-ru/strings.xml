@@ -15,7 +15,7 @@
     <string name="Add">Добавить</string>
     <string name="Status">Статус</string>
     <string name="Exit">Выход</string>
-    <string name="Send">Send</string>
+    <string name="Send">Отправить</string>
     <string name="NotConnected">Отключен</string>
     <string name="ConnectionError">Проверьте настройки аккаунта</string>
     <string name="Actions">Действия</string>
@@ -36,6 +36,8 @@
     <string name="Composes">Печатает...</string>
     <string name="Templates">Шаблоны</string>
     <string name="and">и</string>
+    <string name="Chats">Чаты</string>
+    <string name="To">Для</string>
     
     <!--  Service Discovery -->
     <string name="Registration">Регистрация</string>
@@ -49,6 +51,8 @@
     <string name="RingtoneConference">Звук для конференций</string>
 	<string name="RingtoneDirect">Звук для обращений</string>
     <string name="Vibration">Вибрация</string>
+    <string name="IndicatorColor">Цвет индикатора</string>
+    <string name="IgnoreUsers">Игнорирование</string>
     <string name="Notifications">Уведомления</string>
     <string name="Resource">Ресурс</string>
     <string name="Autoconnect">Автоподключение</string>
@@ -69,8 +73,12 @@
     <string name="KeepHistory">Хранить историю</string>
     <string name="LoadHistory">Подгружать историю</string>
     <string name="Autostatus">Автостатус</string>
+    <string name="ScreenTurnsOn">При включении</string>
+    <string name="ScreenTurnsOff">При выключении</string>
     <string name="AutoStatusTextAway">Автостатус \"Отошел\" c %time%</string>
     <string name="AutoStatusTextXa">Автостатус \"Давно отошел\" c %time%</string>
+    <string name="AwayPriority">Приоритет \"Отошел\"</string>
+    <string name="ExtendedAwayPriority">Приоритет \"Давно отошел\"</string>
     <string name="DelayAway">Задержка перед \"Отошел\"</string>
     <string name="DelayXa">Задержка перед \"Давно отошел\"</string>
     <string name="ShowGroups">Показывать группы</string>
@@ -83,6 +91,8 @@
     <string name="ShowSmiles">Показывать смайлики</string>
     <string name="Autoscroll">Автопрокрутка</string>
     <string name="ShowClientsIcons">Иконки клиентов</string>
+    <string name="Icons">Иконки</string>
+    <string name="ShowSoundIconOnActionBar">Показывать иконку звука</string>
     <string name="DarkColors">Темная тема</string>
     <string name="DeleteHistoryOnExit">Удалять историю при выходе</string>
     <string name="MessageInNotification">Сообщение в уведомлении</string>
@@ -90,6 +100,12 @@
     <string name="Size">Размер</string>
     <string name="Interface">Интерфейс</string>
     <string name="Sidebar">Боковая панель</string>
+    <string name="IgnoreList">Игнор лист</string>
+    <string name="AutoАctivate">Автовключение</string>
+    <string name="ActivateIgnoreListOnStart">Активировать игнорлист при запуске</string>
+    <string name="Default">По умолчанию</string>
+    <string name="IgnoreListDefaultList">Сделать игнорлист списком по умолчанию</string>
+    <string name="Experimental">Тонкие настройки</string>
     <string name="ShowMucGroup">Всегда показывать группу Конференции</string>
     <string name="SortByStatuses">Сортировать по статусам</string>
     <string name="ShowSelfResources">Показывать свои ресурсы</string>
@@ -98,6 +114,7 @@
     <string name="AddAfterNick">Добавлять после ника</string>
     <string name="NumberOfCharacters">Число символов</string>
     <string name="Columns">Число колонок</string>
+    <string name="TheNumberColumnsDialog">Число колонок в диалоговом окне</string>
     <string name="Locations">Отправлять информацию о местоположении</string>
     <string name="AutostartOnBoot">Запуск при загрузке устройства</string>
     <string name="CompactMode">Компактный режим</string>
@@ -112,6 +129,8 @@
     <string name="EnableSound">Включить звук</string>
     <string name="MucHistorySize">Размер истории</string>
     <string name="hideVersion">Скрывать версию клиента</string>
+    <string name="Version">Версия</string>
+    <string name="AlwaysVisibleState">Всегда показывать статус</string>
     
     <!--  Menus -->
     <string name="Update">Обновить</string>

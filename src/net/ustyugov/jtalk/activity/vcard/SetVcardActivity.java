@@ -55,7 +55,7 @@ public class SetVcardActivity extends Activity implements OnClickListener {
 	private ImageView av;
 	private Button load, clear;
 	private JTalkService service = JTalkService.getInstance();
-	private VCard vcard = new VCard();
+	private VCard vcard = null;
 	private byte[] bytes = null;
 
 	@Override
@@ -71,6 +71,13 @@ public class SetVcardActivity extends Activity implements OnClickListener {
        	
        	account = getIntent().getStringExtra("account");
        	vcard = service.getVCard(account);
+        if (vcard == null) {
+            VCard vCard = new VCard();
+            try {
+                vCard.load(service.getConnection(account), account);
+            } catch (XMPPException ignored) { }
+            service.setVCard(account, vCard);
+        }
        	
 		LayoutInflater inflater = LayoutInflater.from(this);
 		View aboutPage = inflater.inflate(R.layout.set_vcard_about, null);

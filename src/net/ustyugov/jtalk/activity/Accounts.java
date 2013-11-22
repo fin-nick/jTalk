@@ -127,6 +127,7 @@ public class Accounts extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.accounts, menu);
+        menu.findItem(R.id.reg).setVisible(true);
         return super.onCreateOptionsMenu(menu);
     }
 	

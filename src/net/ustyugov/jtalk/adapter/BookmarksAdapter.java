@@ -72,6 +72,16 @@ public class BookmarksAdapter extends ArrayAdapter<RosterItem> {
 				context.sendBroadcast(intent);
 			}
 		}
+
+        if (isEmpty()) {    // Add recomendations
+            String[] rooms = context.getResources().getStringArray(R.array.rooms);
+            for (String s : rooms) {
+                BookmarkedConference bc = new BookmarkedConference(s, s, false, account.substring(0, account.indexOf("@")), null);
+                RosterItem item = new RosterItem(account, RosterItem.Type.muc, null);
+                item.setObject(bc);
+                add(item);
+            }
+        }
 	}
 	
 	@Override

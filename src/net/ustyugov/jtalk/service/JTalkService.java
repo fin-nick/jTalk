@@ -713,8 +713,8 @@ public class JTalkService extends Service {
         mBuilder.setSmallIcon(R.drawable.stat_offline);
         mBuilder.setContentTitle(getString(R.string.app_name));
         mBuilder.setContentIntent(contentIntent);
-    		
-		startForeground(1, mBuilder.build());
+
+		startForeground(Notify.NOTIFICATION, mBuilder.build());
 
         WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 		wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL, "jTalk");
@@ -894,6 +894,7 @@ public class JTalkService extends Service {
     public void joinRoom(final String account, final String group, final String nick, final String password) {
         if (connections.containsKey(account)) {
             final XMPPConnection connection = connections.get(account);
+            if (!connection.isAuthenticated()) return;
 
             new Thread() {
                 @Override
@@ -1582,27 +1583,27 @@ public class JTalkService extends Service {
                     return null;
                 }
 
-                if (connection != null && connection.isConnected() && !connection.isAuthenticated()) {
-                    connection.addPacketListener(new MsgListener(JTalkService.this, connection, username), new PacketTypeFilter(Message.class));
-                    addConnectionListener(username, connection);
+                try {
+                    if (connection.isConnected() && !connection.isAuthenticated()) {
+                        connection.addPacketListener(new MsgListener(JTalkService.this, connection, username), new PacketTypeFilter(Message.class));
+                        addConnectionListener(username, connection);
 
-                    try {
                         connection.login(user, password, resource);
-                    } catch (XMPPException e) {
-                        XMPPError error = e.getXMPPError();
-                        if (error != null) setState(username, "[" + error.getCode() + "]: " + error.getMessage());
-                        else setState(username, e.getLocalizedMessage());
-                        sendBroadcast(intent);
-                        if (!isAuthenticated()) Notify.offlineNotify("");
-                        return null;
+
+                        Roster roster = connection.getRoster();
+                        roster.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
+                        roster.addRosterListener(new RstListener(username));
+
+                        connections.put(username, connection);
+                        return username;
                     }
-
-                    Roster roster = connection.getRoster();
-                    roster.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
-                    roster.addRosterListener(new RstListener(username));
-
-                    connections.put(username, connection);
-                    return username;
+                } catch (XMPPException e) {
+                    XMPPError error = e.getXMPPError();
+                    if (error != null) setState(username, "[" + error.getCode() + "]: " + error.getMessage());
+                    else setState(username, e.getLocalizedMessage());
+                    sendBroadcast(intent);
+                    if (!isAuthenticated()) Notify.offlineNotify("");
+                    return null;
                 }
             }
             return null;
@@ -1624,15 +1625,6 @@ public class JTalkService extends Service {
                 new AdHocCommandManager(connection);
                 fileTransferManager = new FileTransferManager(connection);
                 fileTransferManager.addFileTransferListener(new IncomingFileListener());
-
-                File file = new File(Constants.PATH + "/" + username);
-                if (!file.exists()) {
-                    VCard vCard = new VCard();
-                    try {
-                        vCard.load(connection, username);
-                    } catch (XMPPException ignored) { }
-                    setVCard(username, vCard);
-                }
 
                 try {
                     MultiUserChat.addInvitationListener(connection, new InviteListener(username));

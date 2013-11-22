@@ -98,10 +98,10 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
                 }
 
                 if (body.toLowerCase().contains(searchString.toLowerCase())) {
-                    if (showStatuses || (!showStatuses && type != MessageItem.Type.status)) add(item);
+                    if (showStatuses || type != MessageItem.Type.status) add(item);
                 }
             } else {
-                if (showStatuses || (!showStatuses && type != MessageItem.Type.status)) add(item);
+                if (showStatuses || type != MessageItem.Type.status) add(item);
             }
         }
     }
@@ -149,13 +149,13 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
             if (showtime && time.length() > 2) {
                 ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, time.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
-            if (n.equals(nick)) {
+            if (nick != null && n.equals(nick)) {
                 int idx = message.indexOf(n);
                 ssb.setSpan(new ForegroundColorSpan(Colors.SECONDARY_TEXT), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), idx, idx + n.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
                 int idx = message.indexOf(n);
-                if (message.contains(nick)) {
+                if (nick != null && message.contains(nick)) {
                     ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     ssb.setSpan(new ForegroundColorSpan(Colors.HIGHLIGHT_TEXT), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }

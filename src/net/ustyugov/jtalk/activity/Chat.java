@@ -362,6 +362,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
 
         if (service.isAuthenticated()) Notify.updateNotify();
         else Notify.offlineNotify(service.getGlobalState());
+        Notify.cancelNotify(this, account, jid);
 
         updateChats();
         updateUsers();

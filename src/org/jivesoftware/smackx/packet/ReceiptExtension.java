@@ -8,14 +8,11 @@ import org.xmlpull.v1.XmlPullParser;
 public class ReceiptExtension implements PacketExtension {
 
     private Receipt receipt;
+    private String id;
 
-    /**
-     * Default constructor. The argument provided is the state that the extension will represent.
-     *
-     * @param state the state that the extension represents.
-     */
-    public ReceiptExtension(Receipt receipt) {
+    public ReceiptExtension(Receipt receipt, String id) {
         this.receipt = receipt;
+        this.id = id;
     }
 
     public String getElementName() {
@@ -26,21 +23,31 @@ public class ReceiptExtension implements PacketExtension {
         return "urn:xmpp:receipts";
     }
 
+    public String getId() {
+        return id;
+    }
+
     public String toXML() {
-        return "<" + getElementName() + " xmlns=\"" + getNamespace() + "\" />";
+        StringBuilder sb = new StringBuilder();
+        sb.append("<" + getElementName() + " xmlns=\"" + getNamespace() + "\" ");
+        if (id != null && !id.isEmpty()) sb.append("id=\"" + id + "\"");
+        sb.append("/>");
+        return sb.toString();
     }
 
     public static class Provider implements PacketExtensionProvider {
 
         public PacketExtension parseExtension(XmlPullParser parser) throws Exception {
             Receipt receipt;
+            String id = "";
             try {
                 receipt = Receipt.valueOf(parser.getName());
+                id = parser.getAttributeValue("id", "");
             }
             catch (Exception ex) {
                 receipt = Receipt.received;
             }
-            return new ReceiptExtension(receipt);
+            return new ReceiptExtension(receipt, id);
         }
     }
 }

@@ -122,6 +122,7 @@ public class SendFileActivity extends Activity implements OnClickListener {
 
         if (scheme.equals("file")) {
             path = uri.getPath();
+            if (path == null) path = "none";
         } else if (scheme.equals("content")) {
             try {
                 String[] proj = { MediaStore.Files.FileColumns.DATA };

@@ -18,7 +18,7 @@
 package net.ustyugov.jtalk;
 
 import java.io.File;
-import java.util.List;
+import java.util.HashMap;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -46,7 +46,7 @@ import android.support.v4.app.NotificationCompat;
 
 public class Notify {
 	public static final int NOTIFICATION = 1;
-    private static final int NOTIFICATION_MSG = 10;
+    public static final HashMap<String, Integer> ids = new HashMap<String, Integer>();
 	private static final int NOTIFICATION_FILE = 2;
 	private static final int NOTIFICATION_IN_FILE = 3;
 	private static final int NOTIFICATION_FILE_REQUEST = 4;
@@ -61,8 +61,6 @@ public class Notify {
         JTalkService service = JTalkService.getInstance();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
         NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (service.getUnreadMessages().isEmpty()) mng.cancel(NOTIFICATION_MSG);
 
         String mode = prefs.getString("currentMode", "available");
         int pos = prefs.getInt("currentSelection", 0);
@@ -131,7 +129,7 @@ public class Notify {
         mng.notify(NOTIFICATION, mBuilder.build());
     }
 
-    public static void connecingNotify(String account) {
+    public static void connectingNotify(String account) {
 //        newMessages = false;
         JTalkService service = JTalkService.getInstance();
         Intent i = new Intent(service, RosterActivity.class);
@@ -157,6 +155,14 @@ public class Notify {
 //    	newMessages = false;
     	NotificationManager mng = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     	mng.cancelAll();
+    }
+
+    public static void cancelNotify(Context context, String account, String jid) {
+        String key = account + "/" + jid;
+        if (!ids.containsKey(key)) return;
+        NotificationManager mng = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        mng.cancel(ids.get(key));
+        ids.remove(key);
     }
     
     public static void messageNotify(String account, String from, Type type, String text) {
@@ -228,12 +234,18 @@ public class Notify {
             } else ticker = service.getString(R.string.NewMessageFrom) + " " + nick;
     		
         	Uri sound_file = Uri.parse(soundPath);
-        	
+
+            String key = account + "/" + from;
+            int id = 11 + ids.size();
+            if (ids.containsKey(key)) id = ids.get(key);
+            else ids.put(key, id);
+
         	Intent i = new Intent(service, Chat.class);
         	i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            i.setAction(ids+"");
             i.putExtra("jid", from);
         	i.putExtra("account", account);
-            PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
 
             Bitmap largeIcon = BitmapFactory.decodeResource(service.getResources(), R.drawable.stat_msg);
             File a = new File(Constants.PATH + from.replaceAll("/", "%"));
@@ -245,37 +257,23 @@ public class Notify {
             }
 
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
-            mBuilder.setAutoCancel(true);
             mBuilder.setLargeIcon(largeIcon);
             mBuilder.setSmallIcon(R.drawable.stat_msg);
             mBuilder.setLights(color, 2000, 3000);
-            mBuilder.setContentTitle(service.getString(R.string.app_name));
-            mBuilder.setContentText(service.getString(R.string.UnreadMessage));
-//            mBuilder.setNumber(service.getUnreadMessages().size());
+            mBuilder.setContentTitle(nick);
+            mBuilder.setContentText(text);
             mBuilder.setContentIntent(contentIntent);
             mBuilder.setTicker(ticker);
             mBuilder.setPriority(NotificationCompat.PRIORITY_MAX);
             if (sound) mBuilder.setSound(sound_file);
-            
-            List<MessageItem> list = service.getUnreadMessages();
-            if (list.size() > 1) {
-                NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
-                inboxStyle.setBigContentTitle(service.getString(R.string.UnreadMessage));
-                for (MessageItem item : list) {
-                    String n = item.getName();
-                    if (n != null && n.length() > 0) inboxStyle.addLine(n + ": " + item.getBody());
-                }
-                mBuilder.setLargeIcon(BitmapFactory.decodeResource(service.getResources(), R.drawable.stat_msg));
-                mBuilder.setStyle(inboxStyle);
-            } else {
-                NotificationCompat.BigTextStyle bts = new NotificationCompat.BigTextStyle();
-                bts.setBigContentTitle(nick);
-                bts.bigText(text);
-                mBuilder.setStyle(bts);
-            }
+
+            NotificationCompat.BigTextStyle bts = new NotificationCompat.BigTextStyle();
+            bts.setBigContentTitle(nick);
+            bts.bigText(text);
+            mBuilder.setStyle(bts);
 
             NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
-            mng.notify(NOTIFICATION_MSG, mBuilder.build());
+            mng.notify(id, mBuilder.build());
     	}
     }
     

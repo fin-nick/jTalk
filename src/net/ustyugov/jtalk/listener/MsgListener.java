@@ -94,13 +94,15 @@ public class MsgListener implements PacketListener {
 			}
 		}
 		
-		PacketExtension receiptExt = msg.getExtension("urn:xmpp:receipts");
+		ReceiptExtension receiptExt = (ReceiptExtension) msg.getExtension("urn:xmpp:receipts");
 		if (receiptExt != null && !type.equals("error")) {
 			String receipt = receiptExt.getElementName();
 			if (receipt.equals("request")) {
 				service.sendReceivedPacket(connection, user, id);
 			} else if (receipt.equals("received")) {
-                Cursor cursor = context.getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + user + "' and id = '" + id + "'", null, MessageDbHelper._ID);
+                String rid = receiptExt.getId();
+                if (rid == null && rid.isEmpty()) rid = id;
+                Cursor cursor = context.getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + user + "' and id = '" + rid + "'", null, MessageDbHelper._ID);
                 if (cursor != null && cursor.getCount() > 0) {
                     cursor.moveToLast();
                     String nick = cursor.getString(cursor.getColumnIndex(MessageDbHelper.NICK));
@@ -112,7 +114,7 @@ public class MsgListener implements PacketListener {
                     ContentValues values = new ContentValues();
                     values.put(MessageDbHelper.TYPE, t);
                     values.put(MessageDbHelper.JID, user);
-                    values.put(MessageDbHelper.ID, id);
+                    values.put(MessageDbHelper.ID, rid);
                     values.put(MessageDbHelper.STAMP, stamp);
                     values.put(MessageDbHelper.NICK, nick);
                     values.put(MessageDbHelper.BODY, b);
@@ -120,12 +122,12 @@ public class MsgListener implements PacketListener {
                     values.put(MessageDbHelper.RECEIVED, "true");
                     values.put(MessageDbHelper.FORM, "NULL");
                     values.put(MessageDbHelper.BOB, "NULL");
-                    service.getContentResolver().update(JTalkProvider.CONTENT_URI, values, MessageDbHelper.ID + " = '" + id + "'", null);
+                    service.getContentResolver().update(JTalkProvider.CONTENT_URI, values, MessageDbHelper.ID + " = '" + rid + "'", null);
 
                     List<MessageItem> list = service.getMessageList(account, user);
                     if (!list.isEmpty()) {
                         for(MessageItem item : list) {
-                            if (item.getId().equals(id)) {
+                            if (item.getId().equals(rid)) {
                                 item.setReceived(true);
                                 service.setMessageList(account, user, list);
                                 context.sendBroadcast(new Intent(Constants.RECEIVED));

@@ -925,7 +925,7 @@ public class JTalkService extends Service {
                                 if (p.isAvailable()) sendBroadcast(new Intent(Constants.PRESENCE_CHANGED));
                             }
                         });
-                        muc.join(nick, password, h, 5000, presence);
+                        muc.join(nick, password, h, 10000, presence);
                     } catch (Exception e) {
                         Intent eIntent = new Intent(Constants.ERROR);
                         eIntent.putExtra("error", "Error: " + e.getLocalizedMessage());
@@ -1046,7 +1046,7 @@ public class JTalkService extends Service {
   	  		msg.setPacketID(mil);
   	  		msg.setBody(message);
   	  		
-  	  		ReceiptExtension receipt = new ReceiptExtension(Receipt.request);
+  	  		ReceiptExtension receipt = new ReceiptExtension(Receipt.request, "");
   	  		msg.addExtension(receipt);
   	  		
   	  		Date date = new java.util.Date();
@@ -1107,18 +1107,18 @@ public class JTalkService extends Service {
   	}
   	
   	public void sendReceivedPacket(final XMPPConnection connection, String user, String id) {
-  		ReceiptExtension extension = new ReceiptExtension(Receipt.received);
-	  		final Message msg = new Message(user);
-	  		msg.setPacketID(id);
-	  		msg.addExtension(extension);
-	  		new Thread() {
-	  			@Override
-	  			public void run() {
-	  				if(connection != null && connection.getUser() != null) {
-	  					connection.sendPacket(msg);
-	  				}
-	  			}
-	  		}.start();
+          ReceiptExtension extension = new ReceiptExtension(Receipt.received, id);
+          final Message msg = new Message(user);
+          msg.setPacketID(id);
+          msg.addExtension(extension);
+          new Thread() {
+              @Override
+              public void run() {
+                  if(connection != null && connection.getUser() != null) {
+                      connection.sendPacket(msg);
+                  }
+              }
+          }.start();
   	}
 
   	public void setChatState(String account, String user, ChatState state) {
@@ -1517,7 +1517,7 @@ public class JTalkService extends Service {
                 sendBroadcast(intent);
                 return null;
             } else {
-                Notify.connecingNotify(username);
+                Notify.connectingNotify(username);
 
                 setState(username, getString(R.string.Connecting));
                 sendBroadcast(new Intent(Constants.UPDATE));
@@ -1613,6 +1613,7 @@ public class JTalkService extends Service {
         public void onPostExecute(final String username) {
             if (username != null) {
                 XMPPConnection connection = connections.get(username);
+                if (!connection.isAuthenticated()) return;
 
                 int priority = prefs.getInt("currentPriority", 0);
                 String status  = prefs.getString("currentStatus", "");

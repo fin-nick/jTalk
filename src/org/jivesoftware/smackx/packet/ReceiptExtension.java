@@ -38,15 +38,10 @@ public class ReceiptExtension implements PacketExtension {
     public static class Provider implements PacketExtensionProvider {
 
         public PacketExtension parseExtension(XmlPullParser parser) throws Exception {
-            Receipt receipt;
+            Receipt receipt = Receipt.received;
+            receipt = Receipt.valueOf(parser.getName().toLowerCase());
             String id = "";
-            try {
-                receipt = Receipt.valueOf(parser.getName());
-                id = parser.getAttributeValue("id", "");
-            }
-            catch (Exception ex) {
-                receipt = Receipt.received;
-            }
+            id = parser.getAttributeValue(null, "id");
             return new ReceiptExtension(receipt, id);
         }
     }

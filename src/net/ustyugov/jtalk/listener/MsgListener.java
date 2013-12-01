@@ -101,7 +101,7 @@ public class MsgListener implements PacketListener {
 				service.sendReceivedPacket(connection, user, id);
 			} else if (receipt.equals("received")) {
                 String rid = receiptExt.getId();
-                if (rid == null && rid.isEmpty()) rid = id;
+                if (rid == null || rid.isEmpty()) rid = id;
                 Cursor cursor = context.getContentResolver().query(JTalkProvider.CONTENT_URI, null, "jid = '" + user + "' and id = '" + rid + "'", null, MessageDbHelper._ID);
                 if (cursor != null && cursor.getCount() > 0) {
                     cursor.moveToLast();

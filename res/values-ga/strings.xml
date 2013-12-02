@@ -177,9 +177,7 @@
     <string name="HideOfflineContacts">Ocultar contactos desconectados</string>
     <string name="ShowOfflineContacts">Mostrar contactos desconectados</string>
     <string name="SelectMessage">Seleccionar mensaxe</string>
-    <string name="DeselectMessage">Deseleccionar mensaxe</string>
-    <string name="DeselectAllMessages">Deseleccionar todos</string>
-    
+
     <!-- Dialogs -->
     <string name="Room">Salga</string>
     <string name="From">De</string>

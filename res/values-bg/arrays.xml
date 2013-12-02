@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="statusArray">
+        <item>Достъпен</item>
+        <item>Оттеглих се</item>
+        <item>Отдавна се оттеглих</item>
+        <item>Не ме безпокойте</item>
+        <item>Готов за чат</item>
+        <item>Изключен</item>
+    </array>
+    
+    <string-array name="vibrationArray">
+    	<item>Винаги</item>
+    	<item>Само чат</item>
+    	<item>Чат и обръщения от конференции</item>
+    	<item>Само конференции</item>
+    	<item>Никога</item>
+    </string-array>
+
+    <string-array name="lightsArray">
+        <item>Зелен</item>
+        <item>Син</item>
+        <item>Червен</item>
+    </string-array>
+
+    <string-array name="servers">
+        <item>https://register.jabber.org</item>
+        <item>http://reg.jabber.ru/xreg/</item>
+        <item>https://secure.jabbim.com/reg/</item>
+    </string-array>
+
+    <string-array name="serverNames">
+        <item>Jabber.Org</item>
+        <item>Jabber.Ru</item>
+        <item>JabbIM</item>
+    </string-array>
+
+    <string-array name="rooms">
+        <item>jtalk@conference.jabber.ru</item>
+    </string-array>
+</resources>

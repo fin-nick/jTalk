@@ -53,11 +53,10 @@ public class MessageLog {
             values.put(MessageDbHelper.FORM, "NULL");
             values.put(MessageDbHelper.BOB, "NULL");
             service.getContentResolver().insert(JTalkProvider.CONTENT_URI, values);
-
-            service.sendBroadcast(new Intent(Constants.NEW_MESSAGE).putExtra("jid", jid));
         } catch (Exception sqle) {
             Log.i("SQL", sqle.getLocalizedMessage());
         }
+        service.sendBroadcast(new Intent(Constants.NEW_MESSAGE).putExtra("jid", jid));
     }
 	
 	public static void writeMucMessage(String account, final String group, final String nick, final MessageItem message) {

@@ -20,9 +20,12 @@ package net.ustyugov.jtalk.adapter;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import android.content.*;
+import android.widget.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
+import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.smiles.Smiles;
 import net.ustyugov.jtalk.dialog.JuickMessageMenuDialog;
 import net.ustyugov.jtalk.listener.TextLinkClickListener;
@@ -30,9 +33,6 @@ import net.ustyugov.jtalk.view.MyTextView;
 
 import com.jtalk2.R;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
@@ -47,11 +47,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkClickListener {
+    public enum ViewMode { single, multi }
+
 	private String searchString = "";
 
 	private SharedPreferences prefs;
@@ -61,7 +60,9 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
 	private boolean firstClick = false;
 	private boolean showtime;
 	private Timer doubleClickTimer = new Timer();
-	
+    private ViewMode viewMode = ViewMode.single;
+    private List<MessageItem> list = new ArrayList<MessageItem>();
+
 	public ChatAdapter(Context context, Smiles smiles) {
         super(context, R.id.chat1);
         this.context = context;
@@ -70,12 +71,17 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         this.showtime = prefs.getBoolean("ShowTime", false);
     }
 	
-	public void update(String jid, List<MessageItem> list, String searchString) {
+	public void update(String account, String jid, String searchString, ViewMode viewMode) {
+        if (this.viewMode == ViewMode.multi && viewMode == ViewMode.multi) return;
+
+        this.viewMode = viewMode;
 		this.jid = jid;
         this.searchString = searchString;
 		clear();
 
         boolean showStatuses = prefs.getBoolean("ShowStatus", false);
+
+        list = JTalkService.getInstance().getMessageList(account, jid);
         for (int i = 0; i < list.size(); i++) {
             MessageItem item = list.get(i);
             MessageItem.Type type = item.getType();
@@ -172,7 +178,18 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
 
         LinearLayout linear = (LinearLayout) convertView.findViewById(R.id.chat_item);
         linear.setMinimumHeight(Integer.parseInt(prefs.getString("SmilesSize", "24")));
-        
+
+        CheckBox checkBox = (CheckBox) convertView.findViewById(R.id.check);
+        checkBox.setVisibility(viewMode == ViewMode.multi ? View.VISIBLE : View.GONE);
+        checkBox.setChecked(item.isSelected());
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                item.select(b);
+                getItem(position).select(b);
+            }
+        });
+
         final ImageView expand = (ImageView) convertView.findViewById(R.id.expand);
         final MyTextView textView = (MyTextView) convertView.findViewById(R.id.chat1);
         textView.setOnTextLinkClickListener(this);
@@ -243,8 +260,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         
         textView.setTextSize(fontSize);
 
-        if (item.isSelected()) convertView.setBackgroundColor(Colors.SELECTED_MESSAGE);
-        else convertView.setBackgroundColor(0X00000000);
+        convertView.setBackgroundColor(0X00000000);
         return convertView;
     }
 	
@@ -274,5 +290,32 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         String currentDate = df.format(d).substring(0,10);
         if (currentDate.equals(time.substring(0,10))) return "(" + time.substring(11) + ")";
         else return "(" + time + ")";
+    }
+
+    public void copySelectedMessages() {
+        String text = "";
+        for(int i = 0; i < getCount(); i++) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            boolean showtime = prefs.getBoolean("ShowTime", false);
+
+            MessageItem message = getItem(i);
+            if (message.isSelected()) {
+                String body = message.getBody();
+                String time = message.getTime();
+                String name = message.getName();
+                String t = "(" + time + ")";
+                if (showtime) name = t + " " + name;
+                text += "> " + name + ": " + body + "\n";
+            }
+        }
+
+        ClipData.Item item = new ClipData.Item(text);
+
+        String[] mimes = {"text/plain"};
+        ClipData copyData = new ClipData(text, mimes, item);
+
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        clipboard.setPrimaryClip(copyData);
+        Toast.makeText(context, R.string.MessagesCopied, Toast.LENGTH_SHORT).show();
     }
 }

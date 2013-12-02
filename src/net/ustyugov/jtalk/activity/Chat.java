@@ -78,7 +78,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     private MyListView listView;
     private ListView chatsList;
     private ListView nickList;
-    private List<MessageItem> msgList = new ArrayList<MessageItem>();
     private EditText messageInput;
     private Button sendButton;
 
@@ -100,6 +99,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     private Smiles smiles;
 
     private RosterItem rosterItem;
+    private ChatAdapter.ViewMode viewMode = ChatAdapter.ViewMode.single;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -308,7 +308,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
             } else messageInput.setHint(getString(R.string.From) + " " + StringUtils.parseName(account));
 
             String j = listAdapter.getJid();
-            listAdapter.update(jid, msgList, searchString);
+            listAdapter.update(account, jid, searchString, viewMode);
             if (listView.getAdapter() instanceof MucChatAdapter) {
                 listView.setAdapter(listAdapter);
                 listView.setScroll(true);
@@ -386,7 +386,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         }
 
         updateList();
-        if (msgList.isEmpty()) loadStory(false);
+        if (service.getMessageList(account, jid).isEmpty()) loadStory(false);
 
         int unreadMessages = service.getMessagesCount(account, jid);
         int lastPosition = service.getLastPosition(jid);
@@ -416,7 +416,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         if (!isMuc)  {
             service.setChatState(account, jid, ChatState.active);
             service.setResource(account, jid, resource);
-            if (msgList.isEmpty()) service.removeActiveChat(account, jid);
+            if (service.getMessageList(account, jid).isEmpty()) service.removeActiveChat(account, jid);
         }
         service.setCurrentJid("me");
         service.setText(jid, messageInput.getText().toString());
@@ -426,7 +426,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (msgList.isEmpty()) {
+        if (service.getMessageList(account,jid).isEmpty()) {
             if (!isMuc) service.setChatState(account, jid, ChatState.gone);
         }
 //        msgList.clear();
@@ -455,57 +455,62 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
             menu.clear();
             final MenuInflater inflater = getMenuInflater();
 
-            if (isMuc) inflater.inflate(R.menu.muc_chat, menu);
-            else {
-                inflater.inflate(R.menu.chat, menu);
-                if (isPrivate) menu.findItem(R.id.resource).setVisible(false);
-                else menu.findItem(R.id.resource).setVisible(true);
+            if (viewMode == ChatAdapter.ViewMode.multi) {
+                inflater.inflate(R.menu.select_messages, menu);
+                super.onCreateOptionsMenu(menu);
+            } else {
+                if (isMuc) inflater.inflate(R.menu.muc_chat, menu);
+                else {
+                    inflater.inflate(R.menu.chat, menu);
+                    if (isPrivate) menu.findItem(R.id.resource).setVisible(false);
+                    else menu.findItem(R.id.resource).setVisible(true);
+                }
+
+                MenuItem.OnActionExpandListener listener = new MenuItem.OnActionExpandListener() {
+                    @Override
+                    public boolean onMenuItemActionCollapse(MenuItem item) {
+                        searchString = "";
+                        updateList();
+                        createOptionMenu();
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onMenuItemActionExpand(MenuItem item) {
+                        return true;
+                    }
+                };
+
+                SearchView searchView = new SearchView(this);
+                searchView.setQueryHint(getString(android.R.string.search_go));
+                searchView.setSubmitButtonEnabled(false);
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        return true;
+                    }
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        searchString = query;
+                        updateList();
+                        return true;
+                    }
+                });
+
+                MenuItem item = menu.findItem(R.id.search);
+                item.setActionView(searchView);
+                item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+                item.setOnActionExpandListener(listener);
+
+                if (prefs.getBoolean("InMUC", false)) menu.removeItem(R.id.sidebar);
+                else {
+                    MenuItem sidebar = menu.findItem(R.id.sidebar);
+                    sidebar.setTitle(prefs.getBoolean("EnabledSidebar", true) ? R.string.HideSidebar : R.string.ShowSidebar);
+                }
+
+                if (!prefs.getBoolean("ShowSmiles", true)) menu.removeItem(R.id.smile);
+                super.onCreateOptionsMenu(menu);
             }
-
-            MenuItem.OnActionExpandListener listener = new MenuItem.OnActionExpandListener() {
-                @Override
-                public boolean onMenuItemActionCollapse(MenuItem item) {
-                    searchString = "";
-                    updateList();
-                    createOptionMenu();
-                    return true;
-                }
-
-                @Override
-                public boolean onMenuItemActionExpand(MenuItem item) {
-                    return true;
-                }
-            };
-
-            SearchView searchView = new SearchView(this);
-            searchView.setQueryHint(getString(android.R.string.search_go));
-            searchView.setSubmitButtonEnabled(false);
-            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                @Override
-                public boolean onQueryTextChange(String newText) {
-                    return true;
-                }
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-                    searchString = query;
-                    updateList();
-                    return true;
-                }
-            });
-
-            MenuItem item = menu.findItem(R.id.search);
-            item.setActionView(searchView);
-            item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-            item.setOnActionExpandListener(listener);
-
-            if (prefs.getBoolean("InMUC", false)) menu.removeItem(R.id.sidebar);
-            else {
-                MenuItem sidebar = menu.findItem(R.id.sidebar);
-                sidebar.setTitle(prefs.getBoolean("EnabledSidebar", true) ? R.string.HideSidebar : R.string.ShowSidebar);
-            }
-
-            if (!prefs.getBoolean("ShowSmiles", true)) menu.removeItem(R.id.smile);
-            super.onCreateOptionsMenu(menu);
         }
     }
 
@@ -601,8 +606,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 break;
             case R.id.delete_history:
                 getContentResolver().delete(JTalkProvider.CONTENT_URI, "jid = '" + jid + "'", null);
-                msgList.clear();
-                service.setMessageList(account, jid, msgList);
+                service.setMessageList(account, jid, new ArrayList<MessageItem>());
                 updateList();
                 break;
             case R.id.chats:
@@ -624,6 +628,20 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                     menu.removeItem(R.id.smile);
                     item.expandActionView();
                 }
+                break;
+            case R.id.select:
+                viewMode = ChatAdapter.ViewMode.multi;
+                createOptionMenu();
+                updateList();
+                break;
+            case R.id.copy:
+                if (listView.getAdapter() instanceof ChatAdapter) listAdapter.copySelectedMessages();
+                else if (listView.getAdapter() instanceof MucChatAdapter) listMucAdapter.copySelectedMessages();
+                break;
+            case R.id.finish:
+                viewMode = ChatAdapter.ViewMode.single;
+                createOptionMenu();
+                updateList();
                 break;
             default:
                 return super.onOptionsItemSelected(item);
@@ -670,14 +688,11 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
 
     private void updateList() {
         boolean scroll = listView.isScroll();
-
-        msgList = service.getMessageList(account, jid);
-
         if (isMuc) {
-            listMucAdapter.update(jid, muc.getNickname(), msgList, searchString);
+            listMucAdapter.update(account, jid, muc.getNickname(), searchString, viewMode);
             listMucAdapter.notifyDataSetChanged();
         } else {
-            listAdapter.update(jid, msgList, searchString);
+            listAdapter.update(account, jid, searchString, viewMode);
             listAdapter.notifyDataSetChanged();
         }
 
@@ -893,8 +908,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     }
 
     private void clearChat() {
-        msgList.clear();
-        service.setMessageList(account, jid, msgList);
+        service.setMessageList(account, jid, new ArrayList<MessageItem>());
         updateList();
     }
 

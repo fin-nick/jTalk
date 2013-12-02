@@ -38,6 +38,7 @@
     <string name="and">и</string>
     <string name="Chats">Чаты</string>
     <string name="To">Для</string>
+    <string name="MessagesCopied">Сообщения скопированны</string>
     
     <!--  Service Discovery -->
     <string name="Registration">Регистрация</string>
@@ -193,10 +194,9 @@
     <string name="PrivacyLists">Списки приватности</string>
     <string name="HideOfflineContacts">Спрятать отключенных</string>
     <string name="ShowOfflineContacts">Показать отключенных</string>
-    <string name="SelectMessage">Выбрать сообщение</string>
-    <string name="DeselectMessage">Снять выделение</string>
-    <string name="DeselectAllMessages">Снять все выделения</string>
-    
+    <string name="SelectMessage">Выбрать сообщения</string>
+    <string name="Finish">Готово</string>
+
     <!-- Dialogs -->
     <string name="Room">Комната</string>
     <string name="From">От</string>

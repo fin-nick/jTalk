@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">jTalk</string>
     <string name="version">0.47.2</string>
-    <string name="build">396</string>
+    <string name="build">397</string>
     
     <string name="Connect">Connect</string>
     <string name="Disconnect">Disconnect</string>
@@ -45,6 +45,7 @@
     <string name="and">and</string>
     <string name="Chats">Chats</string>
     <string name="To">To</string>
+    <string name="MessagesCopied">Messages is copied</string>
 
     <!--  Service Discovery -->
     <string name="Registration">Registration</string>
@@ -200,10 +201,9 @@
     <string name="PrivacyLists">Privacy Lists</string>
     <string name="HideOfflineContacts">Hide offline contacts</string>
     <string name="ShowOfflineContacts">Show offline contacts</string>
-    <string name="SelectMessage">Select message</string>
-    <string name="DeselectMessage">Deselect message</string>
-    <string name="DeselectAllMessages">Deselect all messages</string>
-    
+    <string name="SelectMessages">Select messages</string>
+    <string name="Finish">Finish</string>
+
     <!-- Dialogs -->
     <string name="Room">Room</string>
     <string name="From">From</string>

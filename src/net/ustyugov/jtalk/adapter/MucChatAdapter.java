@@ -23,18 +23,18 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.content.*;
+import android.widget.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
+import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.smiles.Smiles;
 import net.ustyugov.jtalk.listener.TextLinkClickListener;
 import net.ustyugov.jtalk.view.MyTextView;
 
 import com.jtalk2.R;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
@@ -49,9 +49,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnTouchListener;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkClickListener {
     private String searchString = "";
@@ -63,6 +60,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
     private boolean firstClick = false;
     private boolean showtime = false;
     private Timer doubleClickTimer = new Timer();
+    private ChatAdapter.ViewMode viewMode = ChatAdapter.ViewMode.single;
 
     private SharedPreferences prefs;
 
@@ -76,13 +74,16 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
 
     public String getGroup() { return this.group; }
 
-    public void update(String group, String nick, List<MessageItem> messages, String searchString) {
+    public void update(String account, String group, String nick, String searchString, ChatAdapter.ViewMode viewMode) {
+        if (this.viewMode == ChatAdapter.ViewMode.multi && viewMode == ChatAdapter.ViewMode.multi) return;
+        this.viewMode = viewMode;
         this.group = group;
         this.nick = nick;
         this.searchString = searchString;
         clear();
 
         boolean showStatuses = prefs.getBoolean("ShowStatus", false);
+        List<MessageItem> messages = JTalkService.getInstance().getMessageList(account, group);
         for (int i = 0; i < messages.size(); i++) {
             MessageItem item = messages.get(i);
             MessageItem.Type type = item.getType();
@@ -107,7 +108,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         boolean enableCollapse = prefs.getBoolean("EnableCollapseMessages", true);
         int fontSize = Integer.parseInt(context.getResources().getString(R.string.DefaultFontSize));
         try {
@@ -178,6 +179,17 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
 
         LinearLayout linear = (LinearLayout) v.findViewById(R.id.chat_item);
         linear.setMinimumHeight(Integer.parseInt(prefs.getString("SmilesSize", "24")));
+
+        CheckBox checkBox = (CheckBox) v.findViewById(R.id.check);
+        checkBox.setVisibility(viewMode == ChatAdapter.ViewMode.multi ? View.VISIBLE : View.GONE);
+        checkBox.setChecked(item.isSelected());
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                item.select(b);
+                getItem(position).select(b);
+            }
+        });
 
         final ImageView expand = (ImageView) v.findViewById(R.id.expand);
         final MyTextView t1 = (MyTextView) v.findViewById(R.id.chat1);
@@ -281,5 +293,32 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
             if (currentDate.equals(time.substring(0,10))) return "(" + time.substring(11) + ")";
             else return "(" + time + ")";
         } catch (Exception e) { return "( )"; }
+    }
+
+    public void copySelectedMessages() {
+        String text = "";
+        for(int i = 0; i < getCount(); i++) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            boolean showtime = prefs.getBoolean("ShowTime", false);
+
+            MessageItem message = getItem(i);
+            if (message.isSelected()) {
+                String body = message.getBody();
+                String time = message.getTime();
+                String name = message.getName();
+                String t = "(" + time + ")";
+                if (showtime) name = t + " " + name;
+                text += "> " + name + ": " + body + "\n";
+            }
+        }
+
+        ClipData.Item item = new ClipData.Item(text);
+
+        String[] mimes = {"text/plain"};
+        ClipData copyData = new ClipData(text, mimes, item);
+
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        clipboard.setPrimaryClip(copyData);
+        Toast.makeText(context, R.string.MessagesCopied, Toast.LENGTH_SHORT).show();
     }
 }

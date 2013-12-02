@@ -28,6 +28,7 @@ import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Toast;
+import com.jtalk2.R;
 import net.ustyugov.jtalk.MessageItem;
 
 public class DragAndDropListener implements AdapterView.OnItemLongClickListener {
@@ -60,7 +61,7 @@ public class DragAndDropListener implements AdapterView.OnItemLongClickListener 
 
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         clipboard.setPrimaryClip(dragData);
-        Toast.makeText(context, "Message is copied", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, R.string.MessagesCopied, Toast.LENGTH_SHORT).show();
         return true;
     }
 

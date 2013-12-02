@@ -217,7 +217,7 @@ public class JTalkService extends Service {
     	if (account != null && connections.containsKey(account)) return connections.get(account);
     	else return null;
     }
-    
+
     public int getMessagesCount() {
     	int result = 0;
     	for (Hashtable<String, Integer> hash : messagesCount.values()) {

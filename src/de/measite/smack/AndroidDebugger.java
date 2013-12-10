@@ -168,7 +168,7 @@ public class AndroidDebugger implements SmackDebugger {
 
     public Reader getReader() {
         return reader;
-    }
+    }/* I was here!*/
 
     public Writer getWriter() {
         return writer;

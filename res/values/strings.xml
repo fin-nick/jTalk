@@ -201,7 +201,7 @@
     <string name="PrivacyLists">Privacy Lists</string>
     <string name="HideOfflineContacts">Hide offline contacts</string>
     <string name="ShowOfflineContacts">Show offline contacts</string>
-    <string name="SelectMessages">Select messages</string>
+    <string name="SelectMessage">Select messages</string>
     <string name="Finish">Finish</string>
 
     <!-- Dialogs -->

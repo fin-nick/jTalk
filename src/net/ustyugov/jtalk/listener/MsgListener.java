@@ -137,6 +137,7 @@ public class MsgListener implements PacketListener {
                     }
                     return;
                 }
+                cursor.close();
 			}
 		}
 
@@ -165,30 +166,29 @@ public class MsgListener implements PacketListener {
 	        	String mynick = context.getResources().getString(R.string.Me);
 	        	if (service.getConferencesHash(account).containsKey(group)) mynick = service.getConferencesHash(account).get(group).getNickname();
 
-	            if (nick != null && nick.length() > 0) {
-	            	MessageItem item = new MessageItem(account, from);
-					item.setBody(body);
-					item.setId(id);
-					item.setTime(time);
-					item.setReceived(false);
-		            item.setName(nick);
-		            
-                    if (!service.getCurrentJid().equals(group)) {
-                        service.addMessagesCount(account, group);
-                    }
+                MessageItem item = new MessageItem(account, from);
+                item.setBody(body);
+                item.setId(id);
+                item.setTime(time);
+                item.setReceived(false);
+                item.setName(nick);
+                if (nick == null || nick.length() < 1) item.setType(MessageItem.Type.status);
 
-                    if (body.contains(mynick)) {
-                        if (!service.getCurrentJid().equals(group)) {
-                            item.setJid(group);
-                            service.addHighlight(account, group);
-                            service.addUnreadMessage(item);
-                            Notify.messageNotify(account, group, Notify.Type.Direct, body);
-                        }
-                    } else {
-                        if (delayExt == null) Notify.messageNotify(account, group, Notify.Type.Conference, body);
+                if (!service.getCurrentJid().equals(group)) {
+                    service.addMessagesCount(account, group);
+                }
+
+                if (body.contains(mynick)) {
+                    if (!service.getCurrentJid().equals(group)) {
+                        item.setJid(group);
+                        service.addHighlight(account, group);
+                        service.addUnreadMessage(item);
+                        Notify.messageNotify(account, group, Notify.Type.Direct, body);
                     }
-                    MessageLog.writeMucMessage(account, group, nick, item);
-	            }
+                } else {
+                    if (delayExt == null) Notify.messageNotify(account, group, Notify.Type.Conference, body);
+                }
+                MessageLog.writeMucMessage(account, group, nick, item);
 	        } else if (type.equals("chat") || type.equals("normal") || type.equals("headline")) {
                 // If invite to room
                 PacketExtension extension = msg.getExtension("jabber:x:conference");

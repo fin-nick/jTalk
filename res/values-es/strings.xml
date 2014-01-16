@@ -39,20 +39,25 @@
     <string name="Composes">Escribir mensaje...</string>
     <string name="Templates">Plantillas</string>
     <string name="and">y</string>
+    <string name="Chats">Chats</string>
+    <string name="To">a</string>
+    <string name="MessagesCopied">Mensaje copiado</string>
 
     <!--  Service Discovery -->
     <string name="Registration">Registro</string>
     <string name="AddInRoster">Añadir a lista de contactos</string>
-    
+
     <!-- Preferences -->
     <string name="Accounts">Cuentas</string>
     <string name="JabberId">JID</string>
-        <string name="Password">Contraseña</string>
-        <string name="Ringtone">Sonido</string>
-        <string name="RingtoneConference">Sonido para conferencias</string>
-        <string name="RingtoneDirect">Sonido para mensajes directos</string>
-        <string name="Vibration">Vibración</string>
-        <string name="Notifications">Notificaciones</string>
+    <string name="Password">Contraseña</string>
+    <string name="Ringtone">Sonido</string>
+    <string name="RingtoneConference">Sonido para conferencias</string>
+    <string name="RingtoneDirect">Sonido para mensajes directos</string>
+    <string name="Vibration">Vibración</string>
+    <string name="IndicatorColor">Color del indicador</string>
+    <string name="IgnoreUsers">Usuarios ignorados</string>
+    <string name="Notifications">Notificaciones</string>
     <string name="Resource">Recurso</string>
     <string name="Autoconnect">Autoconectar</string>
     <string name="OfflineContacts">Ocultar contactos desconectados</string>
@@ -73,10 +78,14 @@
     <string name="KeepHistory">Mantener historial</string>
     <string name="LoadHistory">Cargar historial</string>
     <string name="Autostatus">Estado automático</string>
+    <string name="ScreenTurnsOn">Encendido de la pantalla</string>
+    <string name="ScreenTurnsOff">Apagado de la pantalla</string>
     <string name="DelayAway">Tiempo antes de \"Ausente\"</string>
     <string name="DelayXa">Tiempo antes de \"Ae\"</string>
     <string name="AutoStatusTextAway">Estado automático \"Ausente\" %time%</string>
     <string name="AutoStatusTextXa">Estado automático \"Ausencia extendida\" %time%</string>
+    <string name="AwayPriority">Prioridad de Ausencia</string>
+    <string name="ExtendedAwayPriority">Prioridad de Ausencia extendida</string>
     <string name="ShowGroups">Mostrar grupos</string>
     <string name="ShowStatuses">Mostrar estados</string>
     <string name="AutoJoin">Unirse automáticamente</string>
@@ -87,6 +96,8 @@
     <string name="ShowSmiles">Mostrar emoticonos</string>
     <string name="Autoscroll">Autoscroll</string>
     <string name="ShowClientsIcons">Mostrar iconos de cliente</string>
+    <string name="Icons">Iconos</string>
+    <string name="ShowSoundIconOnActionBar">Mostrar icono de sonido en la barra de notificacones</string>
     <string name="DarkColors">Colores oscuros</string>
     <string name="DeleteHistoryOnExit">Borrar historial al salir</string>
     <string name="MessageInNotification">Mensaje en notificación</string>
@@ -94,14 +105,21 @@
     <string name="Size">Tamaño</string>
     <string name="Interface">Apariencia</string>
     <string name="Sidebar">Barra lateral</string>
+    <string name="IgnoreList">Lista de ignorados</string>
+    <string name="AutoАctivate">Autoactivación</string>
+    <string name="ActivateIgnoreListOnStart">Activar lista de ignorados al inicio</string>
+    <string name="Default">Predeterminado</string>
+    <string name="IgnoreListDefaultList">La lista de ignorados es una lista predeterminada</string>
+    <string name="Experimental">Experimental</string>
     <string name="ShowMucGroup">Siempre mostrar el grupo Conferencias</string>
     <string name="SortByStatuses">Ordenar por estado</string>
-    <string name="ShowSelfResources">Mostrar recursos propiosShow self resources</string>
+    <string name="ShowSelfResources">Mostrar recursos propios</string>
     <string name="HideKeyboard">Ocultar teclado al enviar</string>
     <string name="MaxMessages">Máximo de mensajes en el historial</string>
     <string name="AddAfterNick">Añadir tras apodo</string>
     <string name="NumberOfCharacters">Número de caracteres</string>
     <string name="Columns">Columnas</string>
+    <string name="TheNumberColumnsDialog">El número de columnas en el diálogo</string>
     <string name="Locations">Enviar notificación de lugar</string>
     <string name="AutostartOnBoot">Iniciar al encender el teléfono</string>
     <string name="CompactMode">Modo compacto</string>
@@ -114,7 +132,10 @@
     <string name="ColorTheme">Tema</string>
     <string name="DisableSound">Desactivar sonido</string>
     <string name="EnableSound">Activar sonido</string>
+    <string name="MucHistorySize">Tamaño del historial</string>
     <string name="hideVersion">Esconder la versión de cliente</string>
+    <string name="Version">Versión</string>
+    <string name="AlwaysVisibleState">Estado siempre visible</string>
 
     <!--  Menus -->
     <string name="Update">Actualizar</string>
@@ -177,6 +198,7 @@
     <string name="HideOfflineContacts">Ocultar contactos desconectados</string>
     <string name="ShowOfflineContacts">Mostrar contactos desconectados</string>
     <string name="SelectMessage">Seleccionar mensaje</string>
+    <string name="Finish">Terminar</string>
 
     <!-- Dialogs -->
     <string name="Room">Sala</string>
@@ -193,7 +215,7 @@
     <string name="SelectResource">Seleccionar recurso</string>
     <string name="AcceptFile">¿Acceptar archivo?</string>
     <string name="Reason">Razón</string>
-    
+
     <!-- vCard -->
     <string name="vcard">vCard</string>
     <string name="FullName">Nombre completo:</string>
@@ -219,7 +241,7 @@
     <string name="Work">Tranajo</string>
     <string name="Photo">Foto</string>
     <string name="Publish">Publicar</string>
-    
+
     <!-- MUC -->
     <string name="Join">Unirse</string>
     <string name="Browse">Navegar</string>
@@ -241,7 +263,7 @@
     <string name="Privates">Chats privadosPrivate chats</string>
     <string name="YouJoin">Te has unido al grupo</string>
     <string name="YouLeave">Has salido del grupo</string>
-    
+
     <!--  Files statuses -->
     <string name="Downloading">Descargando...</string>
     <string name="Sending">Enviando...</string>
@@ -250,5 +272,5 @@
     <string name="Completed">Completado</string>
     <string name="Canceled">Cancelado</string>
     <string name="Refused">Rechazado</string>
-    
+
 </resources>

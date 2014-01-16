@@ -259,8 +259,7 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
             }
         }
 
-        if (item.isSelected()) v.setBackgroundColor(Colors.SELECTED_MESSAGE);
-        else v.setBackgroundColor(0X00000000);
+        v.setBackgroundColor(0X00000000);
         return v;
     }
 

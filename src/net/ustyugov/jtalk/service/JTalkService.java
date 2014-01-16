@@ -899,7 +899,11 @@ public class JTalkService extends Service {
             new Thread() {
                 @Override
                 public void run() {
-                    if (getConferencesHash(account).containsKey(group)) getConferencesHash(account).remove(group);
+                    boolean reconnecting = false;
+                    if (getConferencesHash(account).containsKey(group)) {
+                        getConferencesHash(account).remove(group);
+                        reconnecting = true;
+                    }
 
                     MultiUserChat muc = new MultiUserChat(connection, group);
                     getConferencesHash(account).put(group, muc);
@@ -909,11 +913,14 @@ public class JTalkService extends Service {
                     presence.setMode(Presence.Mode.valueOf(prefs.getString("currentMode", "available")));
 
                     DiscussionHistory h = new DiscussionHistory();
-                    try {
-                        h.setMaxStanzas(Integer.parseInt(prefs.getString("MucHistorySize", "10")));
-                    } catch (NumberFormatException nfe) {
-                        h.setMaxStanzas(10);
-                    }
+                    if (!reconnecting) {
+                        try {
+                            h.setMaxStanzas(Integer.parseInt(prefs.getString("MucHistorySize", "10")));
+                        } catch (NumberFormatException nfe) {
+                            h.setMaxStanzas(10);
+                        }
+                    } else h.setMaxStanzas(0);
+
 
                     try {
                         writeMucMessage(account, group, nick, getString(R.string.YouJoin));

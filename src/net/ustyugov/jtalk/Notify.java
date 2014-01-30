@@ -108,24 +108,23 @@ public class Notify {
         mng.notify(NOTIFICATION, mBuilder.build());
     }
     
-    public static void offlineNotify(String state) {
+    public static void offlineNotify(Context context, String state) {
 //    	newMessages = false;
-    	JTalkService service = JTalkService.getInstance();
-        Intent i = new Intent(service, RosterActivity.class);
+        Intent i = new Intent(context, RosterActivity.class);
         i.setAction(Intent.ACTION_MAIN);
         i.addCategory(Intent.CATEGORY_LAUNCHER);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, i, 0);
    		
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
-        mBuilder.setLargeIcon(BitmapFactory.decodeResource(service.getResources(), R.drawable.ic_launcher));
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);
+        mBuilder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_launcher));
         mBuilder.setSmallIcon(R.drawable.stat_offline);
-        mBuilder.setContentTitle(service.getString(R.string.app_name));
+        mBuilder.setContentTitle(context.getString(R.string.app_name));
         mBuilder.setContentText(state);
         mBuilder.setContentIntent(contentIntent);
         mBuilder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
-        NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager mng = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         mng.notify(NOTIFICATION, mBuilder.build());
     }
 

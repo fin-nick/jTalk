@@ -160,7 +160,7 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
                         if (service.isAuthenticated(jid)) {
                             service.disconnect(jid);
                             if (service.isAuthenticated()) Notify.updateNotify();
-                            else Notify.offlineNotify(service.getGlobalState());
+                            else Notify.offlineNotify(service, service.getGlobalState());
                         }
 
                         Account account = new Account(jid, getString(R.string.app_name));

@@ -85,7 +85,7 @@ public class AuthenticationService extends Service {
             if (service.isAuthenticated(jid)) {
                 service.disconnect(jid);
                 if (service.isAuthenticated()) Notify.updateNotify();
-                else Notify.offlineNotify(service.getGlobalState());
+                else Notify.offlineNotify(service, service.getGlobalState());
             }
 
             return result;

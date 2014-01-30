@@ -113,7 +113,7 @@ public class Accounts extends Activity {
                 if (service.isAuthenticated(account)) {
                     service.disconnect(account);
                     if (service.isAuthenticated()) Notify.updateNotify();
-                    else Notify.offlineNotify(service.getGlobalState());
+                    else Notify.offlineNotify(service, service.getGlobalState());
                 }
             }
             return;
@@ -197,7 +197,7 @@ public class Accounts extends Activity {
                 if (service.isAuthenticated(account.getJid())) {
                     service.disconnect(account.getJid());
                     if (service.isAuthenticated()) Notify.updateNotify();
-                    else Notify.offlineNotify(service.getGlobalState());
+                    else Notify.offlineNotify(service, service.getGlobalState());
                 }
 
                 android.accounts.Account acc = new android.accounts.Account(jid, getString(R.string.app_name));

@@ -61,7 +61,7 @@
         <CheckBoxPreference
                 android:key="ShowStatus"
                 android:title="@string/ShowStatus"
-                android:defaultValue="false" />
+                android:defaultValue="true" />
         <CheckBoxPreference
                 android:key="AutoScroll"
                 android:title="@string/Autoscroll"
@@ -101,10 +101,6 @@
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/MUC">
-        <CheckBoxPreference
-                android:key="AutoJoin"
-                android:title="@string/AutoJoin"
-                android:defaultValue="false" />
         <EditTextPreference
                 android:key="MucHistorySize"
                 android:title="@string/MucHistorySize"
@@ -114,6 +110,10 @@
                 android:key="nickSeparator"
                 android:title="@string/AddAfterNick"
                 android:defaultValue=", " />
+        <EditTextPreference
+                android:key="Highlights"
+                android:title="Words for highlight"
+                android:defaultValue="" />
     </PreferenceScreen>
 
     <PreferenceScreen android:title="@string/Notifications">
@@ -298,6 +298,10 @@
         <CheckBoxPreference
                 android:title="@string/Locations"
                 android:key="Locations"
+                android:defaultValue="false"/>
+        <CheckBoxPreference
+                android:title="Send Tunes"
+                android:key="PlayingNow"
                 android:defaultValue="false"/>
         <CheckBoxPreference
                 android:title="@string/hideVersion"

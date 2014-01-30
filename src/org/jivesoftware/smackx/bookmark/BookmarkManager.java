@@ -63,7 +63,6 @@ public class BookmarkManager {
 
     private PrivateDataManager privateDataManager;
     private Bookmarks bookmarks;
-    private final Object bookmarkLock = new Object();
 
     /**
      * Default constructor. Registers the data provider with the private data manager in the
@@ -213,12 +212,12 @@ public class BookmarkManager {
     }
 
     private Bookmarks retrieveBookmarks() throws XMPPException {
-        synchronized(bookmarkLock) {
+//        synchronized(bookmarkLock) {
             if(bookmarks == null) {
                 bookmarks = (Bookmarks) privateDataManager.getPrivateData("storage",
                         "storage:bookmarks");
             }
             return bookmarks;
-        }
+//        }
     }
 }

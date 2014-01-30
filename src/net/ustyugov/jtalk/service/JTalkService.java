@@ -87,6 +87,7 @@ import com.jtalk2.R;
  
 public class JTalkService extends Service {
     private boolean started = false;
+    private boolean connecting = false;
 	private static JTalkService js = new JTalkService();
     private List<String> collapsedGroups = new ArrayList<String>();
     private List<String> composeList = new ArrayList<String>();
@@ -820,6 +821,9 @@ public class JTalkService extends Service {
     		@Override
     		public void run() {
 //    			disconnect(account);
+                try {
+                    Thread.sleep(8000);
+                } catch (Exception ignored) { }
     			connect(account);
     		}
     	}.start();
@@ -1182,11 +1186,11 @@ public class JTalkService extends Service {
   	  						removeConnectionListener(account);
   	  						Presence presence = new Presence(Presence.Type.unavailable, state, priority, null);
   	  						connection.disconnect(presence);
-  	  						if (!isAuthenticated()) Notify.offlineNotify(state);
+  	  						if (!isAuthenticated()) Notify.offlineNotify(JTalkService.this, state);
   	  					}
   	  				} else {
   	  					if (mode.equals("unavailable")) {
-  	  						if (!isAuthenticated()) Notify.offlineNotify(state);
+  	  						if (!isAuthenticated()) Notify.offlineNotify(JTalkService.this, state);
   	  					}
   	  				}
   	  				
@@ -1228,11 +1232,11 @@ public class JTalkService extends Service {
   	  						removeConnectionListener(account);
   	  						Presence presence = new Presence(Presence.Type.unavailable, state, priority, null);
   	  						connection.disconnect(presence);
-  	  						if (!isAuthenticated()) Notify.offlineNotify(state);
+  	  						if (!isAuthenticated()) Notify.offlineNotify(JTalkService.this, state);
   	  					}
   	  				} else {
   	  					if (mode.equals("unavailable")) {
-  	  						if (isAuthenticated()) Notify.offlineNotify(state);
+  	  						if (isAuthenticated()) Notify.offlineNotify(JTalkService.this, state);
   	  					}
   	  				}
                     setState(account, state);
@@ -1508,6 +1512,9 @@ public class JTalkService extends Service {
 
         @Override
         protected String doInBackground(String... args) {
+            if (connecting) return null;
+            else connecting = true;
+
             String username = args[0];
             String password = args[1];
             String resource = args[2];
@@ -1584,18 +1591,19 @@ public class JTalkService extends Service {
                 try {
                     if (!connection.isConnected()) connection.connect();
                 } catch (XMPPException xe) {
-                    setState(username, "Error connecting to " + connection.getServiceName());
+                    String error = "Error connecting to " + connection.getServiceName();
+                    setState(username, error);
                     sendBroadcast(intent);
-                    if (!isAuthenticated()) Notify.offlineNotify("");
+                    if (!isAuthenticated()) Notify.offlineNotify(JTalkService.this, error);
                     return null;
                 }
 
                 try {
                     if (connection.isConnected() && !connection.isAuthenticated()) {
+                        connection.login(user, password, resource);
+
                         connection.addPacketListener(new MsgListener(JTalkService.this, connection, username), new PacketTypeFilter(Message.class));
                         addConnectionListener(username, connection);
-
-                        connection.login(user, password, resource);
 
                         Roster roster = connection.getRoster();
                         roster.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
@@ -1609,7 +1617,7 @@ public class JTalkService extends Service {
                     if (error != null) setState(username, "[" + error.getCode() + "]: " + error.getMessage());
                     else setState(username, e.getLocalizedMessage());
                     sendBroadcast(intent);
-                    if (!isAuthenticated()) Notify.offlineNotify("");
+                    if (!isAuthenticated()) Notify.offlineNotify(JTalkService.this, "");
                     return null;
                 }
             }
@@ -1618,8 +1626,9 @@ public class JTalkService extends Service {
 
         @Override
         public void onPostExecute(final String username) {
+            connecting = false;
             if (username != null) {
-                XMPPConnection connection = connections.get(username);
+                final XMPPConnection connection = connections.get(username);
                 if (!connection.isAuthenticated()) return;
 
                 int priority = prefs.getInt("currentPriority", 0);
@@ -1638,23 +1647,31 @@ public class JTalkService extends Service {
                     MultiUserChat.addInvitationListener(connection, new InviteListener(username));
                 } catch (Exception ignored) { }
 
-                if (!getConferencesHash(username).isEmpty()) {
-                    Collection<Conference> coll = joinedConferences.values();
-                    for (Conference conf : coll) {
-                        joinRoom(username, conf.getName(), conf.getNick(), conf.getPassword());
-                    }
-                } else {
-                    if (prefs.getBoolean("AutoJoin", false)) {
+                // Join to rooms if reconnected or autojoin is enabled
+                new Thread() {
+                    public void run() {
                         try {
-                            BookmarkManager bm = BookmarkManager.getBookmarkManager(connection);
-                            for(BookmarkedConference bc : bm.getBookmarkedConferences()) {
-                                String nick = bc.getNickname();
-                                if (nick == null || nick.length() < 1) nick = StringUtils.parseName(username);
-                                if (bc.isAutoJoin()) joinRoom(username, bc.getJid(), bc.getNickname(), bc.getPassword());
+                            Thread.sleep(5000);
+                        } catch (Exception ignored) { }
+
+                        if (!getConferencesHash(username).isEmpty()) {
+                            Collection<Conference> coll = joinedConferences.values();
+                            for (Conference conf : coll) {
+                                joinRoom(username, conf.getName(), conf.getNick(), conf.getPassword());
                             }
-                        } catch (XMPPException ignored) { }
+                        } else {
+                            try {
+                                BookmarkManager bm = BookmarkManager.getBookmarkManager(connection);
+                                Collection<BookmarkedConference> bookmarks = bm.getBookmarkedConferences();
+                                for(BookmarkedConference bc : bookmarks) {
+                                    String nick = bc.getNickname();
+                                    if (nick == null || nick.length() < 1) nick = StringUtils.parseName(username);
+                                    if (bc.isAutoJoin()) joinRoom(username, bc.getJid(), bc.getNickname(), bc.getPassword());
+                                }
+                            } catch (XMPPException ignored) { }
+                        }
                     }
-                }
+                }.start();
 
                 if (prefs.getBoolean("Locations", false)) {
                     if (!locationClient.isConnected() && !locationClient.isConnecting()) {

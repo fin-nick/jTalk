@@ -24,13 +24,13 @@ import java.util.*;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Environment;
 import android.text.ClipboardManager;
 import android.view.*;
 import android.widget.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
-import net.ustyugov.jtalk.activity.MapActivity;
 import net.ustyugov.jtalk.adapter.MainPageAdapter;
 import net.ustyugov.jtalk.adapter.VCardAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
@@ -219,10 +219,8 @@ public class VCardActivity extends Activity {
 				onResume();
 				break;
             case R.id.map:
-                Intent intent = new Intent(VCardActivity.this, MapActivity.class);
-                intent.putExtra("jid", jid);
-                intent.putExtra("lat", lat);
-                intent.putExtra("lon", lon);
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse("https://maps.google.com/?ll=" + lat + "," + lon));
                 startActivity(intent);
                 break;
             case R.id.copy:

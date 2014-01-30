@@ -125,7 +125,7 @@ public class AccountsAdapter extends ArrayAdapter<Account> {
                     if (service.isAuthenticated(jid)) {
                         service.disconnect(jid);
                         if (service.isAuthenticated()) Notify.updateNotify();
-                        else Notify.offlineNotify(service.getGlobalState());
+                        else Notify.offlineNotify(service, service.getGlobalState());
                     }
                 }
                 activity.getContentResolver().update(JTalkProvider.ACCOUNT_URI, values, "_id = '" + id + "'", null);

@@ -383,9 +383,12 @@ public class ServiceDiscovery extends Activity implements OnClickListener, OnIte
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            discoManager = ServiceDiscoveryManager.getInstanceFor(service.getConnection(account));
-            list.setVisibility(View.GONE);
-            progress.setVisibility(View.VISIBLE);
+            XMPPConnection connection = service.getConnection(account);
+            if (connection != null) {
+                discoManager = ServiceDiscoveryManager.getInstanceFor(connection);
+                list.setVisibility(View.GONE);
+                progress.setVisibility(View.VISIBLE);
+            }
         }
     }
 }

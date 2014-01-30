@@ -52,6 +52,7 @@ import android.view.View.OnTouchListener;
 
 public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkClickListener {
     private String searchString = "";
+    private String[] highArray;
 
     private Context context;
     private Smiles smiles;
@@ -70,6 +71,9 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
         this.smiles = smiles;
         this.prefs = PreferenceManager.getDefaultSharedPreferences(context);
         this.showtime = prefs.getBoolean("ShowTime", false);
+
+        String highString = prefs.getString("Highlights", "");
+        highArray = highString.split(" ");
     }
 
     public String getGroup() { return this.group; }
@@ -156,7 +160,14 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
                 ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), idx, idx + n.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
                 int idx = message.indexOf(n);
-                if (nick != null && message.contains(nick)) {
+                boolean highlight = false;
+                if (nick != null && message.contains(nick)) highlight = true;
+                else {
+                    for (String light : highArray) {
+                        if (!light.isEmpty() && body.contains(light)) highlight = true;
+                    }
+                }
+                if (highlight) {
                     ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     ssb.setSpan(new ForegroundColorSpan(Colors.HIGHLIGHT_TEXT), 0, message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }

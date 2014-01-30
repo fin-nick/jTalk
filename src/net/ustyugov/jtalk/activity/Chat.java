@@ -361,7 +361,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         if (!prefs.getBoolean("NoMaxLines", true)) messageInput.setMaxLines(3);
 
         if (service.isAuthenticated()) Notify.updateNotify();
-        else Notify.offlineNotify(service.getGlobalState());
+        else Notify.offlineNotify(this, service.getGlobalState());
         Notify.cancelNotify(this, account, jid);
 
         updateChats();

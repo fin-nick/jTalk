@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 
 import android.database.Cursor;
+import android.util.Log;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.MessageLog;
@@ -144,13 +145,13 @@ public class MsgListener implements PacketListener {
         // Locations
         LocationExtension geoloc = (LocationExtension) msg.getExtension("http://jabber.org/protocol/geoloc");
         if (geoloc != null) {
-            service.addLocation(from, geoloc);
+            service.addLocation(user, geoloc);
         }
 
         // Tunes
         TunesExtension tunes = (TunesExtension) msg.getExtension("http://jabber.org/protocol/tune");
         if (tunes != null) {
-            service.addTunes(from, tunes);
+            service.addTunes(user, tunes);
         }
 
 		if (body != null && body.length() > 0) {
@@ -178,7 +179,18 @@ public class MsgListener implements PacketListener {
                     service.addMessagesCount(account, group);
                 }
 
-                if (body.contains(mynick)) {
+                boolean highlight = false;
+
+                if (body.contains(mynick)) highlight = true;
+                else {
+                    String highString = prefs.getString("Highlights", "");
+                    String[] highArray = highString.split(" ");
+                    for (String light : highArray) {
+                        if (!light.isEmpty() && body.contains(light)) highlight = true;
+                    }
+                }
+
+                if (highlight) {
                     if (!service.getCurrentJid().equals(group)) {
                         item.setJid(group);
                         service.addHighlight(account, group);

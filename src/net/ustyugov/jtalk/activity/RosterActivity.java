@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012, Igor Ustyugov <igor@ustyugov.net>
+ * Copyright (C) 2014, Igor Ustyugov <igor@ustyugov.net>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,15 +22,16 @@ import android.app.AlertDialog;
 import android.content.*;
 import android.content.res.AssetManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.*;
 import com.google.android.gms.location.LocationClient;
 import net.ustyugov.jtalk.*;
+import net.ustyugov.jtalk.activity.account.Accounts;
 import net.ustyugov.jtalk.activity.muc.Bookmarks;
 import net.ustyugov.jtalk.activity.muc.Muc;
+import net.ustyugov.jtalk.activity.note.NotesActivity;
 import net.ustyugov.jtalk.adapter.NoGroupsAdapter;
 import net.ustyugov.jtalk.adapter.RosterAdapter;
 import net.ustyugov.jtalk.adapter.SearchAdapter;
@@ -325,6 +326,9 @@ public class RosterActivity extends Activity implements OnItemClickListener, OnI
   	    	case R.id.disco:
   	    		startActivity(new Intent(this, ServiceDiscovery.class));
   	    		break;
+            case R.id.notes:
+                startActivity(new Intent(this, NotesActivity.class));
+                break;
             case R.id.notify:
                 if (prefs.getBoolean("soundDisabled", false)) service.setPreference("soundDisabled", false);
                 else service.setPreference("soundDisabled", true);

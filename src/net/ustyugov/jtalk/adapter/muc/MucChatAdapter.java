@@ -15,7 +15,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/
  */
 
-package net.ustyugov.jtalk.adapter;
+package net.ustyugov.jtalk.adapter.muc;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -28,6 +28,7 @@ import android.widget.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
+import net.ustyugov.jtalk.adapter.ChatAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.smiles.Smiles;
 import net.ustyugov.jtalk.listener.TextLinkClickListener;

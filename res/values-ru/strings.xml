@@ -39,6 +39,7 @@
     <string name="Chats">Чаты</string>
     <string name="To">Для</string>
     <string name="MessagesCopied">Сообщения скопированны</string>
+    <string name="notes">Заметки</string>
     
     <!--  Service Discovery -->
     <string name="Registration">Регистрация</string>

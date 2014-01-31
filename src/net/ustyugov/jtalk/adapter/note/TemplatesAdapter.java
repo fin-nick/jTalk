@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012, Igor Ustyugov <igor@ustyugov.net>
+ * Copyright (C) 2014, Igor Ustyugov <igor@ustyugov.net>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,25 +15,17 @@
  * along with this program. If not, see http://www.gnu.org/licenses/
  */
 
-package net.ustyugov.jtalk.adapter;
+package net.ustyugov.jtalk.adapter.note;
 
-import java.util.Collection;
-
+import android.content.Intent;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.IconPicker;
-import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.service.JTalkService;
-
-import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.packet.XMPPError;
-import org.jivesoftware.smackx.bookmark.BookmarkManager;
-import org.jivesoftware.smackx.bookmark.BookmarkedConference;
 
 import com.jtalk2.R;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -42,9 +34,16 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.XMPPError;
+import org.jivesoftware.smackx.note.Note;
+import org.jivesoftware.smackx.note.NoteManager;
 
-public class BookmarksAdapter extends ArrayAdapter<RosterItem> {
+import java.util.Collection;
+
+public class TemplatesAdapter extends ArrayAdapter<Note> {
 	Context context;
+    String account;
 	
 	static class ViewHolder {
 		protected ImageView icon;
@@ -52,37 +51,27 @@ public class BookmarksAdapter extends ArrayAdapter<RosterItem> {
 		protected TextView jid;
 	}
 	
-	public BookmarksAdapter(Context context, String account) {
+	public TemplatesAdapter(Context context, String account) {
 		super(context, R.id.name);
 		this.context = context;
-		
-		try {
-			BookmarkManager bm = BookmarkManager.getBookmarkManager(JTalkService.getInstance().getConnection(account));
-			Collection<BookmarkedConference> collection = bm.getBookmarkedConferences();
-			for (BookmarkedConference bc : collection) {
-				RosterItem item = new RosterItem(account, RosterItem.Type.muc, null);
-				item.setObject(bc);
-				add(item);
-			}
-		} catch (XMPPException e) {
-			XMPPError error = e.getXMPPError();
-			if (error != null) {
-				Intent intent = new Intent(Constants.ERROR);
-				intent.putExtra("error", "[" + error.getCode() + "] " + error.getMessage());
-				context.sendBroadcast(intent);
-			}
-		}
-
-        if (isEmpty()) {    // Add recomendations
-            String[] rooms = context.getResources().getStringArray(R.array.rooms);
-            for (String s : rooms) {
-                BookmarkedConference bc = new BookmarkedConference(s, s, false, account.substring(0, account.indexOf("@")), null);
-                RosterItem item = new RosterItem(account, RosterItem.Type.muc, null);
-                item.setObject(bc);
-                add(item);
+        this.account = account;
+        try {
+            NoteManager nm = NoteManager.getNoteManager(JTalkService.getInstance().getConnection(account));
+            Collection<Note> collection = nm.getNotes();
+            for (Note note : collection) {
+                if (note.getTag() != null && note.getTag().toLowerCase().contains("template")) add(note);
+            }
+        } catch (XMPPException e) {
+            XMPPError error = e.getXMPPError();
+            if (error != null) {
+                Intent intent = new Intent(Constants.ERROR);
+                intent.putExtra("error", "[" + error.getCode() + "] " + error.getMessage());
+                context.sendBroadcast(intent);
             }
         }
 	}
+
+    public String getAccount() { return account; }
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
@@ -103,28 +92,21 @@ public class BookmarksAdapter extends ArrayAdapter<RosterItem> {
             holder = new ViewHolder();
             holder.icon = (ImageView) convertView.findViewById(R.id.status_icon);
             holder.icon.setVisibility(View.VISIBLE);
-        	holder.icon.setImageBitmap(ip.getMucBitmap());
+        	holder.icon.setImageBitmap(ip.getMsgBitmap());
         	
         	holder.label = (TextView) convertView.findViewById(R.id.name);
         	holder.label.setTextColor(Colors.PRIMARY_TEXT);
             holder.label.setTextSize(fontSize);
         	
             holder.jid = (TextView) convertView.findViewById(R.id.status);
-            holder.jid.setVisibility(View.VISIBLE);
-            holder.jid.setTextColor(Colors.SECONDARY_TEXT);
-            holder.jid.setTextSize(fontSize - 4);
+            holder.jid.setVisibility(View.GONE);
             convertView.setTag(holder);
         } else {
         	holder = (ViewHolder) convertView.getTag();
         }
 
-        BookmarkedConference item = (BookmarkedConference) getItem(position).getObject();
-        String name = item.getName();
-        String jid  = item.getJid();
-        String nick = item.getNickname();
-
-        holder.label.setText(name);
-        holder.jid.setText(nick + " in " + jid);
+        Note note = getItem(position);
+        holder.label.setText(note.getText());
         return convertView;
     }
 }

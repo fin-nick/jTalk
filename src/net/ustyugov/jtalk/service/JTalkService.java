@@ -58,6 +58,7 @@ import org.jivesoftware.smackx.filetransfer.FileTransferManager;
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
 import org.jivesoftware.smackx.muc.DiscussionHistory;
 import org.jivesoftware.smackx.muc.MultiUserChat;
+import org.jivesoftware.smackx.note.Notes;
 import org.jivesoftware.smackx.packet.*;
 import org.jivesoftware.smackx.provider.*;
 import org.jivesoftware.smackx.search.UserSearch;
@@ -1587,6 +1588,7 @@ public class JTalkService extends Service {
                 connection.addFeature("urn:xmpp:receipts");
                 connection.addFeature("urn:xmpp:time");
                 connection.addFeature("urn:xmpp:message-correct:0");
+                connection.addFeature(Notes.NAMESPACE);
 
                 try {
                     if (!connection.isConnected()) connection.connect();

@@ -25,7 +25,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.os.IBinder;
 import net.ustyugov.jtalk.Notify;
-import net.ustyugov.jtalk.activity.AddAccountActivity;
+import net.ustyugov.jtalk.activity.account.AddAccountActivity;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
 

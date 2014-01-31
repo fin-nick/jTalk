@@ -15,7 +15,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/
  */
 
-package net.ustyugov.jtalk.activity;
+package net.ustyugov.jtalk.activity.account;
 
 import android.accounts.AccountManager;
 import android.app.Activity;
@@ -29,6 +29,7 @@ import net.ustyugov.jtalk.Account;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.Notify;
+import net.ustyugov.jtalk.activity.privacy.PrivacyListsActivity;
 import net.ustyugov.jtalk.activity.vcard.SetVcardActivity;
 import net.ustyugov.jtalk.adapter.AccountsAdapter;
 import net.ustyugov.jtalk.db.JTalkProvider;

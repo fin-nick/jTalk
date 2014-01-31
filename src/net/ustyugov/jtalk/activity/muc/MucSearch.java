@@ -22,7 +22,7 @@ import java.util.Collection;
 import android.app.Activity;
 import android.view.MenuItem;
 import net.ustyugov.jtalk.Colors;
-import net.ustyugov.jtalk.adapter.MucSearchAdapter;
+import net.ustyugov.jtalk.adapter.muc.MucSearchAdapter;
 import net.ustyugov.jtalk.dialog.BookmarksDialogs;
 import net.ustyugov.jtalk.dialog.MucDialogs;
 import net.ustyugov.jtalk.service.JTalkService;

@@ -28,7 +28,7 @@ import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.activity.Chat;
 import net.ustyugov.jtalk.adapter.MainPageAdapter;
-import net.ustyugov.jtalk.adapter.MucRosterAdapter;
+import net.ustyugov.jtalk.adapter.muc.MucRosterAdapter;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.dialog.ChangeChatDialog;

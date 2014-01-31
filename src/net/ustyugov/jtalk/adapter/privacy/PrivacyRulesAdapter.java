@@ -15,15 +15,15 @@
  * along with this program. If not, see http://www.gnu.org/licenses/
  */
 
-package net.ustyugov.jtalk.adapter;
+package net.ustyugov.jtalk.adapter.privacy;
+
+import java.util.List;
 
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.IconPicker;
 import net.ustyugov.jtalk.service.JTalkService;
 
-import org.jivesoftware.smack.PrivacyList;
-import org.jivesoftware.smack.PrivacyListManager;
-import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.PrivacyItem;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -35,10 +35,10 @@ import android.widget.TextView;
 
 import com.jtalk2.R;
 
-public class PrivacyListAdapter extends ArrayAdapter<PrivacyList> {
+public class PrivacyRulesAdapter extends ArrayAdapter<PrivacyItem> {
 	private JTalkService service;
 	private Context context;
-	private String account;
+	private IconPicker ip;
 	
 	static class ViewHolder {
 		protected TextView name;
@@ -46,33 +46,20 @@ public class PrivacyListAdapter extends ArrayAdapter<PrivacyList> {
 		protected ImageView close;
 	}
 	
-	public PrivacyListAdapter(Context context, String account) {
+	public PrivacyRulesAdapter(Context context, List<PrivacyItem> rules) {
 		super(context, R.id.item);
 		this.context = context;
         this.service = JTalkService.getInstance();
-        this.account = account;
-        update();
-	}
-	
-	public void update() {
-		PrivacyListManager plm = PrivacyListManager.getInstanceFor(service.getConnection(account));
-		clear();
-		try {
-			PrivacyList[] array = plm.getPrivacyLists();
-			for(int i = 0; i < array.length; i++) {
-				PrivacyList pl = array[i];
-				add(pl);
-			}
-		} catch (XMPPException e) {
-			e.printStackTrace();
-		}
+        this.ip = service.getIconPicker();
+
+        for(PrivacyItem p : rules) {
+        	add(p);
+        }
 	}
 	
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
-		IconPicker ip = service.getIconPicker();
-		PrivacyList list = getItem(position);
-      
+		PrivacyItem item = getItem(position);
         ViewHolder holder;
         if (convertView == null) {
             LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -87,19 +74,21 @@ public class PrivacyListAdapter extends ArrayAdapter<PrivacyList> {
         	holder = (ViewHolder) convertView.getTag();
         }
         
-        if (list.isDefaultList()) {
-        	holder.icon.setImageBitmap(ip.getChatBitmap());
-        	holder.name.setText(list.toString() + " (default)");
-        }
-        else if (list.isActiveList()) {
+        String text = ""; 
+        text += item.getOrder() + ". ";
+        if (item.isAllow()) {
         	holder.icon.setImageBitmap(ip.getOnlineBitmap());
-        	holder.name.setText(list.toString() + " (active)");
+        	text += "allow ";
+        } else {
+        	holder.icon.setImageBitmap(ip.getDndBitmap());
+        	text += "deny ";
         }
-        else {
-        	holder.icon.setImageBitmap(ip.getOfflineBitmap());
-        	holder.name.setText(list.toString());
-        }
-       	
+        
+        if (item.getType() != null) text += item.getType().name();
+        if (item.getValue() != null) text += " " + item.getValue();
+        
+        holder.name.setText(text);
+        
         return convertView;
     }
 }

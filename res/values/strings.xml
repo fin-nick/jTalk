@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">jTalk</string>
     <string name="version">0.47.2</string>
-    <string name="build">399</string>
+    <string name="build">400</string>
     
     <string name="Connect">Connect</string>
     <string name="Disconnect">Disconnect</string>
@@ -46,6 +46,7 @@
     <string name="Chats">Chats</string>
     <string name="To">To</string>
     <string name="MessagesCopied">Messages is copied</string>
+    <string name="notes">Notes</string>
 
     <!--  Service Discovery -->
     <string name="Registration">Registration</string>

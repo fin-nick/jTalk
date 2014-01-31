@@ -15,178 +15,173 @@
  * along with this program. If not, see http://www.gnu.org/licenses/
  */
 
-package net.ustyugov.jtalk.activity;
+package net.ustyugov.jtalk.activity.privacy;
 
 import android.app.Activity;
 import android.view.*;
 import net.ustyugov.jtalk.Colors;
-import net.ustyugov.jtalk.Template;
-import net.ustyugov.jtalk.adapter.TemplatesAdapter;
-import net.ustyugov.jtalk.db.JTalkProvider;
-import net.ustyugov.jtalk.db.TemplatesDbHelper;
+import net.ustyugov.jtalk.adapter.privacy.PrivacyListAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
-import android.app.AlertDialog;
-import android.content.ContentValues;
-import android.content.DialogInterface;
+
+import org.jivesoftware.smack.PrivacyList;
+import org.jivesoftware.smack.PrivacyListManager;
+import org.jivesoftware.smack.XMPPException;
+
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import com.jtalk2.R;
 
-public class TemplatesActivity extends Activity implements OnItemClickListener {
-	private static final int CONTEXT_EDIT = 1;
-	private static final int CONTEXT_REMOVE = 2;
-
+public class PrivacyListsActivity extends Activity implements OnItemClickListener {
+	private static final int CONTEXT_ACTIVATE = 1;
+	private static final int CONTEXT_DEFAULT = 2;
+	private static final int CONTEXT_EDIT = 3;
+	private static final int CONTEXT_REMOVE = 4;
+	
+	private String account;
 	private JTalkService service;
+	private PrivacyListManager plm;
 	private ProgressBar progress;
 	private ListView list;
-	private Init task;
-	private TemplatesAdapter adapter;
+	private PrivacyListAdapter adapter;
 	
 	@Override
-	public void onCreate(Bundle bundle) {
+	protected void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
-        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
+		account = getIntent().getStringExtra("account");
 		service = JTalkService.getInstance();
 
+        setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
 		setContentView(R.layout.list_activity);
-		setTitle(R.string.Templates);
+		setTitle("Lists of privacy");
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		LinearLayout linear = (LinearLayout) findViewById(R.id.linear);
     	linear.setBackgroundColor(Colors.BACKGROUND);
     	
-		progress = (ProgressBar) findViewById(R.id.progress);
-        
+    	progress = (ProgressBar) findViewById(R.id.progress);
         list = (ListView) findViewById(R.id.list);
         list.setOnItemClickListener(this);
         list.setDividerHeight(0);
         list.setCacheColorHint(0x00000000);
         registerForContextMenu(list);
-        
-        init();
 	}
 	
 	private void init() {
-		if (task != null && task.getStatus() == AsyncTask.Status.RUNNING) task.cancel(true);
-  		task = new Init();
-  		task.execute(null, null, null);
+		plm = PrivacyListManager.getInstanceFor(service.getConnection(account));
+  		new Init().execute(null, null, null);
 	}
 	
 	@Override
 	public void onResume() {
 		super.onResume();
 		service.resetTimer();
-	}
-
-	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		Template item = (Template) parent.getItemAtPosition(position);
-		setResult(RESULT_OK, new Intent().putExtra("text", item.getText()));
-		finish();
+		init();
 	}
 	
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.accounts, menu);
         return super.onCreateOptionsMenu(menu);
     }
 	
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-	    	case android.R.id.home:
-	    		finish();
-	    		break;
-	    	case R.id.add:
-	    		createDialog();
-	    		break;
-	    }
-	    return true;
-	}
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	switch (item.getItemId()) {
+    		case android.R.id.home:
+    			finish();
+    			break;
+    		case R.id.add:
+    			Intent intent = new Intent(this, PrivacyRulesActivity.class).putExtra("account", account);
+    			startActivity(intent);
+	     		break;
+	     	default:
+	     		return false;
+    	}
+    	return true;
+    }
 	
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo info) {
+		menu.add(Menu.NONE, CONTEXT_ACTIVATE, Menu.NONE, "Activate");
+		menu.add(Menu.NONE, CONTEXT_DEFAULT, Menu.NONE, "Set default");
 		menu.add(Menu.NONE, CONTEXT_EDIT, Menu.NONE, R.string.Edit);
 		menu.add(Menu.NONE, CONTEXT_REMOVE, Menu.NONE, R.string.Remove);
 		menu.setHeaderTitle(getString(R.string.Actions));
 	 	super.onCreateContextMenu(menu, v, info);
-	}
+	 }
 	
 	@Override
 	 public boolean onContextItemSelected(android.view.MenuItem item) {
 		 AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-	     Template template = (Template) list.getItemAtPosition(info.position);
-	     int id = template.getId();
-	     String text = template.getText();
+	     int position = info.position;
+	     PrivacyList pl = (PrivacyList) list.getItemAtPosition(position);
 	     
 	     switch(item.getItemId()) {
+	     	case CONTEXT_ACTIVATE:
+	     		try {
+					plm.setActiveListName(pl.toString());
+					init();
+				} catch (XMPPException e) {
+					e.printStackTrace();
+				}
+	            break;
 	     	case CONTEXT_EDIT:
-	     		createDialog(id, text);
+	     		Intent intent = new Intent(this, PrivacyRulesActivity.class);
+	    		intent.putExtra("list", pl.toString());
+	    		intent.putExtra("account", account);
+	    		startActivity(intent);
+	            break;
+	     	case CONTEXT_DEFAULT:
+	     		try {
+					plm.setDefaultListName(pl.toString());
+					init();
+				} catch (XMPPException e) {
+					e.printStackTrace();
+				}
 	            break;
 	        case CONTEXT_REMOVE:
-	        	getContentResolver().delete(JTalkProvider.TEMPLATES_URI, "_id = '" + id + "'", null);
-	        	init();
+	        	try {
+					plm.deletePrivacyList(pl.toString());
+					init();
+				} catch (XMPPException e) {
+					e.printStackTrace();
+				}
 	           	break;
 	     }
 	     return true;
-	}
+	    }
 	
-	private void createDialog() {
-		createDialog(-1, null);
-	}
-	
-	private void createDialog(final int id, String text) {
-		LayoutInflater inflater = getLayoutInflater();
-		View layout = inflater.inflate(R.layout.set_nick_dialog, (ViewGroup) findViewById(R.id.set_nick_linear));
-		
-		final EditText edit = (EditText) layout.findViewById(R.id.nick_edit);
-		edit.setLines(4);
-		if (text != null) edit.setText(text);
-	    
-	    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setView(layout);
-		builder.setTitle(R.string.Add);
-		builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				String message = edit.getText().toString();
-				if (message != null && message.length() > 0) {
-					ContentValues values = new ContentValues();
-	 	            values.put(TemplatesDbHelper.TEXT, message);
-	 	            if (id < 0) getContentResolver().insert(JTalkProvider.TEMPLATES_URI, values);
-	 	            else getContentResolver().update(JTalkProvider.TEMPLATES_URI, values, "_id = '" + id + "'", null);
-				}
-				init();
-			}
-		});
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		});
-		builder.create().show();
+	@Override
+	public void onItemClick(final AdapterView<?> parent, View view, final int position, long i) {
+		try {
+			PrivacyList pl = (PrivacyList) parent.getItemAtPosition(position);
+			plm.setActiveListName(pl.toString());
+			init();
+		} catch (XMPPException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private class Init extends AsyncTask<String, Void, Void> {
 		@Override
 		protected Void doInBackground(String... params) {
-			adapter = new TemplatesAdapter(TemplatesActivity.this);
+			if (service.isAuthenticated(account)) adapter = new PrivacyListAdapter(PrivacyListsActivity.this, account);
 			return null;
 		}
 		
 		@Override
 		protected void onPostExecute(Void v) {
 			super.onPostExecute(v);
-		    list.setAdapter(adapter);
+			list.setAdapter(adapter);
 		    list.setVisibility(View.VISIBLE);
 		    progress.setVisibility(View.GONE);
 		}

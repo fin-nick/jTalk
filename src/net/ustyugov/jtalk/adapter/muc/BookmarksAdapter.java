@@ -15,20 +15,26 @@
  * along with this program. If not, see http://www.gnu.org/licenses/
  */
 
-package net.ustyugov.jtalk.adapter;
+package net.ustyugov.jtalk.adapter.muc;
+
+import java.util.Collection;
 
 import net.ustyugov.jtalk.Colors;
+import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.IconPicker;
-import net.ustyugov.jtalk.Template;
-import net.ustyugov.jtalk.db.JTalkProvider;
-import net.ustyugov.jtalk.db.TemplatesDbHelper;
+import net.ustyugov.jtalk.RosterItem;
 import net.ustyugov.jtalk.service.JTalkService;
+
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.XMPPError;
+import org.jivesoftware.smackx.bookmark.BookmarkManager;
+import org.jivesoftware.smackx.bookmark.BookmarkedConference;
 
 import com.jtalk2.R;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,7 +43,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class TemplatesAdapter extends ArrayAdapter<Template> {
+public class BookmarksAdapter extends ArrayAdapter<RosterItem> {
 	Context context;
 	
 	static class ViewHolder {
@@ -46,20 +52,36 @@ public class TemplatesAdapter extends ArrayAdapter<Template> {
 		protected TextView jid;
 	}
 	
-	public TemplatesAdapter(Context context) {
+	public BookmarksAdapter(Context context, String account) {
 		super(context, R.id.name);
 		this.context = context;
-		Cursor cursor = context.getContentResolver().query(JTalkProvider.TEMPLATES_URI, null, null, null, TemplatesDbHelper._ID);
-		if (cursor != null && cursor.getCount() > 0) {
-			cursor.moveToFirst();
-			do {
-				int id = cursor.getInt(cursor.getColumnIndex(TemplatesDbHelper._ID));
-				String message = cursor.getString(cursor.getColumnIndex(TemplatesDbHelper.TEXT));
-				
-				add(new Template(id, message));
-			} while (cursor.moveToNext());
-			cursor.close();
+		
+		try {
+			BookmarkManager bm = BookmarkManager.getBookmarkManager(JTalkService.getInstance().getConnection(account));
+			Collection<BookmarkedConference> collection = bm.getBookmarkedConferences();
+			for (BookmarkedConference bc : collection) {
+				RosterItem item = new RosterItem(account, RosterItem.Type.muc, null);
+				item.setObject(bc);
+				add(item);
+			}
+		} catch (XMPPException e) {
+			XMPPError error = e.getXMPPError();
+			if (error != null) {
+				Intent intent = new Intent(Constants.ERROR);
+				intent.putExtra("error", "[" + error.getCode() + "] " + error.getMessage());
+				context.sendBroadcast(intent);
+			}
 		}
+
+        if (isEmpty()) {    // Add recomendations
+            String[] rooms = context.getResources().getStringArray(R.array.rooms);
+            for (String s : rooms) {
+                BookmarkedConference bc = new BookmarkedConference(s, s, false, account.substring(0, account.indexOf("@")), null);
+                RosterItem item = new RosterItem(account, RosterItem.Type.muc, null);
+                item.setObject(bc);
+                add(item);
+            }
+        }
 	}
 	
 	@Override
@@ -81,21 +103,28 @@ public class TemplatesAdapter extends ArrayAdapter<Template> {
             holder = new ViewHolder();
             holder.icon = (ImageView) convertView.findViewById(R.id.status_icon);
             holder.icon.setVisibility(View.VISIBLE);
-        	holder.icon.setImageBitmap(ip.getMsgBitmap());
+        	holder.icon.setImageBitmap(ip.getMucBitmap());
         	
         	holder.label = (TextView) convertView.findViewById(R.id.name);
         	holder.label.setTextColor(Colors.PRIMARY_TEXT);
             holder.label.setTextSize(fontSize);
         	
             holder.jid = (TextView) convertView.findViewById(R.id.status);
-            holder.jid.setVisibility(View.GONE);
+            holder.jid.setVisibility(View.VISIBLE);
+            holder.jid.setTextColor(Colors.SECONDARY_TEXT);
+            holder.jid.setTextSize(fontSize - 4);
             convertView.setTag(holder);
         } else {
         	holder = (ViewHolder) convertView.getTag();
         }
 
-        Template template = getItem(position);
-        holder.label.setText(template.getText());
+        BookmarkedConference item = (BookmarkedConference) getItem(position).getObject();
+        String name = item.getName();
+        String jid  = item.getJid();
+        String nick = item.getNickname();
+
+        holder.label.setText(name);
+        holder.jid.setText(nick + " in " + jid);
         return convertView;
     }
 }

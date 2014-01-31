@@ -15,7 +15,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/
  */
 
-package net.ustyugov.jtalk.activity;
+package net.ustyugov.jtalk.activity.account;
 
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;

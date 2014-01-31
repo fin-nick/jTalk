@@ -15,7 +15,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/
  */
 
-package net.ustyugov.jtalk.activity;
+package net.ustyugov.jtalk.activity.privacy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ import android.app.Activity;
 import android.view.Menu;
 import android.view.MenuItem;
 import net.ustyugov.jtalk.Colors;
-import net.ustyugov.jtalk.adapter.PrivacyRulesAdapter;
+import net.ustyugov.jtalk.adapter.privacy.PrivacyRulesAdapter;
 import net.ustyugov.jtalk.dialog.PrivacyDialogs;
 import net.ustyugov.jtalk.service.JTalkService;
 

@@ -24,7 +24,7 @@ import android.view.*;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.RosterItem;
-import net.ustyugov.jtalk.adapter.BookmarksAdapter;
+import net.ustyugov.jtalk.adapter.muc.BookmarksAdapter;
 import net.ustyugov.jtalk.adapter.MainPageAdapter;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;

@@ -110,7 +110,7 @@ public class Socks5TransferNegotiatorManager implements FileTransferNegotiatorMa
     private void initProxies() {
         proxies = new ArrayList<String>();
         proxies.add("proxy.miranda.im");
-        proxies.add("proxy.ustyugov.net");
+        proxies.add("proxy.jabber.ru");
 //        ServiceDiscoveryManager manager = ServiceDiscoveryManager.getInstanceFor(connection);
 //        try {
 //            DiscoverItems discoItems = manager.discoverItems(connection.getServiceName());

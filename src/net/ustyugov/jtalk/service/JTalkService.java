@@ -27,6 +27,7 @@ import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.RosterActivity;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
+import net.ustyugov.jtalk.dialog.RosterDialogs;
 import net.ustyugov.jtalk.listener.*;
 
 import net.ustyugov.jtalk.receivers.ChangeConnectionReceiver;
@@ -96,6 +97,7 @@ public class JTalkService extends Service {
     private Hashtable<String, Integer> msgCounter = new Hashtable<String, Integer>();
     private List<MessageItem> unreadMessages = new ArrayList<MessageItem>();
     private Hashtable<String, List<String>> mucHighlightsList = new Hashtable<String, List<String>>();
+    private Hashtable<String, String> passHash = new Hashtable<String, String>();
     private Hashtable<String, String> textHash = new Hashtable<String, String>();
     private Hashtable<String, String> stateHash = new Hashtable<String, String>();
     private Hashtable<String, Hashtable<String, String>> resourceHash = new Hashtable<String, Hashtable<String, String>>();
@@ -128,13 +130,16 @@ public class JTalkService extends Service {
     private WifiManager.WifiLock wifiLock;
     
     private LocationClient locationClient;
-    private Location location;
 
     private IconPicker iconPicker;
 
     private Hashtable<String, Hashtable<String, List<MessageItem>>> messages = new Hashtable<String, Hashtable<String, List<MessageItem>>>();
 
     public static JTalkService getInstance() { return js; }
+
+    public void addPassword(String account, String password) {
+        passHash.put(account, password);
+    }
 
     public void addLocation(String jid, LocationExtension geoloc) {
         if (geoloc != null) locations.put(jid, geoloc);
@@ -687,7 +692,7 @@ public class JTalkService extends Service {
     	prefs = PreferenceManager.getDefaultSharedPreferences(this);
         iconPicker = new IconPicker(this);
 
-        location = new Location();
+        Location location = new Location();
         locationClient = new LocationClient(this, location, location);
 
 //        updateReceiver = new BroadcastReceiver() {
@@ -853,17 +858,26 @@ public class JTalkService extends Service {
 				do {
 					String username = cursor.getString(cursor.getColumnIndex(AccountDbHelper.JID)).trim();
 					String password = cursor.getString(cursor.getColumnIndex(AccountDbHelper.PASS)).trim();
-					String resource = cursor.getString(cursor.getColumnIndex(AccountDbHelper.RESOURCE)).trim();
-					String service = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SERVER));
-					String tls = cursor.getString(cursor.getColumnIndex(AccountDbHelper.TLS));
-                    String sasl = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SASL));
-					String port = cursor.getString(cursor.getColumnIndex(AccountDbHelper.PORT));
 
-                    ConnectionTask task = new ConnectionTask();
-                    if (connectionTasks.containsKey(username)) task = connectionTasks.get(username);
-                    if (task.getStatus() != AsyncTask.Status.RUNNING && task.getStatus() != AsyncTask.Status.FINISHED) {
-                        task.execute(username, password, resource, service, tls, sasl, port);
-                        connectionTasks.put(username, task);
+                    if (password.isEmpty()) {
+                        if (passHash.containsKey(username)) {
+                            password = passHash.get(username);
+
+                            String resource = cursor.getString(cursor.getColumnIndex(AccountDbHelper.RESOURCE)).trim();
+                            String service = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SERVER));
+                            String tls = cursor.getString(cursor.getColumnIndex(AccountDbHelper.TLS));
+                            String sasl = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SASL));
+                            String port = cursor.getString(cursor.getColumnIndex(AccountDbHelper.PORT));
+
+                            ConnectionTask task = new ConnectionTask();
+                            if (connectionTasks.containsKey(username)) task = connectionTasks.get(username);
+                            if (task.getStatus() != AsyncTask.Status.RUNNING && task.getStatus() != AsyncTask.Status.FINISHED) {
+                                task.execute(username, password, resource, service, tls, sasl, port);
+                                connectionTasks.put(username, task);
+                            }
+                        } else {
+                            Notify.passwordNotify(username);
+                        }
                     }
 				} while(cursor.moveToNext());
 				cursor.close();
@@ -888,6 +902,12 @@ public class JTalkService extends Service {
 			String tls = cursor.getString(cursor.getColumnIndex(AccountDbHelper.TLS));
             String sasl = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SASL));
 			String port = cursor.getString(cursor.getColumnIndex(AccountDbHelper.PORT));
+
+            if (password.isEmpty()) {
+                if (passHash.containsKey(username)) {
+                    password = passHash.get(username);
+                }
+            }
 
             ConnectionTask task = new ConnectionTask();
             task.execute(username, password, resource, service, tls, sasl, port);
@@ -1377,6 +1397,7 @@ public class JTalkService extends Service {
   	}
   	
   	public void setPreference(String name, Object value) {
+        if (!started) return;
   		if (prefs == null) prefs = PreferenceManager.getDefaultSharedPreferences(this);
   		SharedPreferences.Editor editor = prefs.edit();
   		if(value instanceof String) editor.putString(name, String.valueOf(value));
@@ -1631,7 +1652,7 @@ public class JTalkService extends Service {
             connecting = false;
             if (username != null) {
                 final XMPPConnection connection = connections.get(username);
-                if (!connection.isAuthenticated()) return;
+                if (!connection.isAuthenticated() || !connection.isConnected()) return;
 
                 int priority = prefs.getInt("currentPriority", 0);
                 String status  = prefs.getString("currentStatus", "");

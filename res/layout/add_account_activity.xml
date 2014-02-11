@@ -34,6 +34,12 @@
                     android:layout_height="wrap_content"
                     android:hint="password"/>
 
+            <CheckBox android:id="@+id/save"
+                      android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:checked="true"
+                      android:text="@string/SavePassword" />
+
             <CheckBox android:id="@+id/options"
                       android:layout_width="fill_parent"
                       android:layout_height="wrap_content"

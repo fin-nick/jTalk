@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012, Igor Ustyugov <igor@ustyugov.net>
+ * Copyright (C) 2014, Igor Ustyugov <igor@ustyugov.net>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import android.content.Context;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.IgnoreList;
 import net.ustyugov.jtalk.MessageItem;
@@ -318,6 +319,31 @@ public class RosterDialogs {
 			builder.create().show();
 		}
 	}
+
+    public static void passwordDialog(final Context context, final String account) {
+        LayoutInflater inflater = (LayoutInflater)context.getSystemService (Context.LAYOUT_INFLATER_SERVICE);
+        View layout = inflater.inflate(R.layout.password_dialog, null);
+
+        final EditText passEdit = (EditText) layout.findViewById(R.id.password_edit);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setView(layout);
+        builder.setTitle(account);
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                String password = passEdit.getText().toString();
+                JTalkService service = JTalkService.getInstance();
+                service.addPassword(account, password);
+                service.connect(account);
+                }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
+    }
 	
 	public static void subscribtionDialog(Activity activity, final String account, final String jid) {
 		final JTalkService service = JTalkService.getInstance();

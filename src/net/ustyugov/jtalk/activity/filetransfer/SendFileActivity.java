@@ -116,13 +116,13 @@ public class SendFileActivity extends Activity implements OnClickListener {
 	}
 
     private void selectFile(Intent intent) {
-        String path = "none";
+        String path = null;
         Uri uri = intent.getData();
+        if (uri == null) return;
         String scheme = uri.getScheme();
 
         if (scheme.equals("file")) {
             path = uri.getPath();
-            if (path == null) path = "none";
         } else if (scheme.equals("content")) {
             try {
                 String[] proj = { MediaStore.Files.FileColumns.DATA };
@@ -132,12 +132,13 @@ public class SendFileActivity extends Activity implements OnClickListener {
                     cursor.moveToFirst();
                     path = cursor.getString(columnIndex);
                 }
-            } catch(Exception e) { path = "none"; }
-
+            } catch(Exception e) { path = null; }
         }
 
-        file = new File(path);
-        select.setText(path);
+        if (path != null) {
+            file = new File(path);
+            select.setText(path);
+        }
     }
 
 	public void onClick(View v) {

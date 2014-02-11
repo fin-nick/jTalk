@@ -119,6 +119,11 @@ public class RosterActivity extends Activity implements OnItemClickListener, OnI
             RosterDialogs.changeStatusDialog(this, null, null);
         }
 
+        if (getIntent().getBooleanExtra("password", false)) {
+            String account = getIntent().getStringExtra("account");
+            RosterDialogs.passwordDialog(this, account);
+        }
+
         File table = new File(Constants.PATH_SMILES + "/default/table.xml");
         if (!table.exists()) {
             new CreateDefaultSmiles().execute();

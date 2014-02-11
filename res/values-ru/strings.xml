@@ -213,6 +213,7 @@
     <string name="SelectResource">Выбор ресурса</string>
     <string name="AcceptFile">Принять файл?</string>
     <string name="Reason">Причина</string>
+    <string name="SavePassword">Сохранить пароль</string>
     
     <!-- vCard -->
     <string name="FullName">Полное имя:</string>

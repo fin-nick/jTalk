@@ -98,26 +98,31 @@ public class ReceiveFileActivity extends Activity implements View.OnClickListene
     @Override
     public void onClick(View view) {
         if (view == ok) {
-            try {
-                File f = new File(path);
-                f.mkdirs();
-                f = new File(path + "/" + request.getFileName());
-
-                IncomingFileTransfer in = request.accept();
-                in.recieveFile(f);
-                String name = request.getFileName();
-
-                while (!in.isDone()) {
-                    FileTransfer.Status status = in.getStatus();
-                    Notify.incomingFileProgress(name, status);
+            new Thread() {
+                @Override
+                public void run() {
                     try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException ex) { }
+                        File f = new File(path);
+                        f.mkdirs();
+                        f = new File(path + "/" + request.getFileName());
+
+                        IncomingFileTransfer in = request.accept();
+                        in.recieveFile(f);
+                        String name = request.getFileName();
+
+                        while (!in.isDone()) {
+                            FileTransfer.Status status = in.getStatus();
+                            Notify.incomingFileProgress(name, status);
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException ex) { }
+                        }
+                        Notify.incomingFileProgress(name, in.getStatus());
+                    } catch (Exception e) {
+                        Notify.incomingFileProgress(request.getFileName(), FileTransfer.Status.error);
+                    }
                 }
-                Notify.incomingFileProgress(name, in.getStatus());
-            } catch (Exception e) {
-                Notify.incomingFileProgress(request.getFileName(), FileTransfer.Status.error);
-            }
+            }.start();
             finish();
         } else if (view == cancel) {
             request.reject();

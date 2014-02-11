@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012, Igor Ustyugov <igor@ustyugov.net>
+ * Copyright (C) 2014, Igor Ustyugov <igor@ustyugov.net>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,9 @@
 package net.ustyugov.jtalk.adapter;
 
 import java.util.Iterator;
+
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import org.jivesoftware.smackx.FormField;
 import com.jtalk2.R;
 import android.content.Context;
@@ -52,8 +55,16 @@ public class OptionsSpinnerAdapter extends ArrayAdapter<FormField.Option> {
 	
 	@Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        int fontSize = Integer.parseInt(context.getResources().getString(R.string.DefaultFontSize));
+        try {
+            fontSize = Integer.parseInt(prefs.getString("FontSize", context.getResources().getString(R.string.DefaultFontSize)));
+        } catch (NumberFormatException ignored) {	}
+
         LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         CheckedTextView tv = (CheckedTextView) vi.inflate(android.R.layout.simple_spinner_dropdown_item, null);
+        tv.setPadding(10, 16, 10, 16);
+        tv.setTextSize(fontSize);
 		tv.setText(getName(position));
         return tv;
     }

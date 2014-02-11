@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012, Igor Ustyugov <igor@ustyugov.net>
+ * Copyright (C) 2014, Igor Ustyugov <igor@ustyugov.net>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -164,19 +164,35 @@ public class Notify {
         ids.remove(key);
     }
     
-    public static void messageNotify(String account, String from, Type type, String text) {
+    public static void messageNotify(String account, String fullJid, Type type, String text) {
         JTalkService service = JTalkService.getInstance();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
+        String currentJid = JTalkService.getInstance().getCurrentJid();
+        String from = fullJid;
+        if (type == Type.Direct) from = StringUtils.parseBareAddress(fullJid);
+
         String ignored = prefs.getString("IgnoreJids","");
         if (ignored.toLowerCase().contains(from.toLowerCase())) return;
 
         int color = Color.GREEN;
         try {
-            color = Integer.parseInt(prefs.getString("lightsColor", "-16711936"));
+            color = Integer.parseInt(prefs.getString("lightsColor", Color.GREEN+""));
         } catch (NumberFormatException nfe) {}
 
 //    	newMessages = true;
     	String nick = from;
+        if (service.getConferencesHash(account).containsKey(from)) {
+            nick = StringUtils.parseName(from);
+        } else if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(from))) {
+            nick = StringUtils.parseResource(from);
+        } else {
+            Roster roster = JTalkService.getInstance().getRoster(account);
+            if (roster != null) {
+                RosterEntry re = roster.getEntry(from);
+                if (re != null && re.getName() != null) nick = re.getName();
+            }
+        }
+
         String ticker = "";
     	boolean include = prefs.getBoolean("MessageInNotification", false);
     	if (include) {
@@ -190,7 +206,6 @@ public class Notify {
         String soundPath = "";
 
     	if (type == Type.Conference) {
-    		String currentJid = JTalkService.getInstance().getCurrentJid();
         	if (!currentJid.equals(from) || currentJid.equals("me")) {
                 if (!prefs.getBoolean("soundDisabled", false)) {
                     if (vibration.equals("1") || vibration.equals("4")) vibrator.vibrate(200);
@@ -199,6 +214,7 @@ public class Notify {
         	}
     		return;
     	} else if (type == Type.Direct) {
+            text = StringUtils.parseResource(fullJid) + ": " + text;
             if (!prefs.getBoolean("soundDisabled", false)) {
                 if (vibration.equals("1") || vibration.equals("3") || vibration.equals("4")) vibro = true;
                 soundPath = prefs.getString("ringtone_direct", "");
@@ -212,22 +228,9 @@ public class Notify {
     	
     	if (soundPath.equals("")) sound = false;
 
-    	String currentJid = JTalkService.getInstance().getCurrentJid();
     	if (!currentJid.equals(from) || currentJid.equals("me")) {
     		if (vibro) vibrator.vibrate(200);
     	
-    		if (service.getConferencesHash(account).containsKey(from)) {
-    			nick = StringUtils.parseName(from);
-    		} else if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(from))) {
-    			nick = StringUtils.parseResource(from);
-    		} else {
-    			Roster roster = JTalkService.getInstance().getRoster(account);
-        		if (roster != null) {
-        			RosterEntry re = roster.getEntry(from);
-        			if (re != null && re.getName() != null) nick = re.getName();
-        		}
-    		}
-
             if (include) {
                 ticker = service.getString(R.string.NewMessageFrom) + " " + nick + ": " + text;
             } else ticker = service.getString(R.string.NewMessageFrom) + " " + nick;
@@ -247,10 +250,11 @@ public class Notify {
             PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
 
             Bitmap largeIcon = BitmapFactory.decodeResource(service.getResources(), R.drawable.stat_msg);
-            File a = new File(Constants.PATH + from.replaceAll("/", "%"));
-            if (a.exists()) largeIcon = BitmapFactory.decodeFile(Constants.PATH + from.replaceAll("/", "%"));
+            String filePath = Constants.PATH + fullJid.replaceAll("/", "%");
+            File a = new File(filePath);
+            if (a.exists()) largeIcon = BitmapFactory.decodeFile(filePath);
             else {
-                if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(from))) {
+                if (type == Type.Direct) {
                     largeIcon = BitmapFactory.decodeResource(service.getResources(), R.drawable.icon_muc);
                 }
             }
@@ -263,6 +267,7 @@ public class Notify {
             mBuilder.setContentText(text);
             mBuilder.setContentIntent(contentIntent);
             mBuilder.setTicker(ticker);
+            mBuilder.setNumber(service.getMessagesCount(account, from));
             mBuilder.setPriority(NotificationCompat.PRIORITY_MAX);
             if (sound) mBuilder.setSound(sound_file);
 
@@ -457,5 +462,29 @@ public class Notify {
         
         NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
         mng.notify(NOTIFICATION_CAPTCHA, mBuilder.build());
+    }
+
+    public static void passwordNotify(String account) {
+        JTalkService service = JTalkService.getInstance();
+        Intent i = new Intent(service, RosterActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        i.putExtra("password", true);
+        i.putExtra("account", account);
+        PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
+
+        String str = "Enter password!";
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
+        mBuilder.setAutoCancel(true);
+        mBuilder.setOngoing(false);
+        mBuilder.setSmallIcon(android.R.drawable.stat_sys_warning);
+        mBuilder.setLights(0xFFFF0000, 2000, 3000);
+        mBuilder.setContentTitle(service.getString(R.string.app_name));
+        mBuilder.setContentText(str);
+        mBuilder.setTicker(str);
+        mBuilder.setContentIntent(contentIntent);
+
+        NotificationManager mng = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
+        mng.notify(Integer.parseInt((System.currentTimeMillis()+"").substring(7)), mBuilder.build());
     }
 }

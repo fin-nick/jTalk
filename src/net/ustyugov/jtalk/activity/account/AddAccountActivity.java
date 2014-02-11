@@ -36,7 +36,7 @@ import net.ustyugov.jtalk.service.JTalkService;
 
 public class AddAccountActivity extends AccountAuthenticatorActivity implements View.OnClickListener {
     private EditText jidEdit, passEdit, resEdit, serEdit, portEdit;
-    private CheckBox enabled, tls, sasl;
+    private CheckBox enabled, savePass, tls, sasl;
     private Button okButton, cancelButton;
     private int id = -1;
 
@@ -56,6 +56,7 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
         enabled = (CheckBox) findViewById(R.id.account_active);
         tls = (CheckBox) findViewById(R.id.account_tls);
         sasl = (CheckBox) findViewById(R.id.account_sasl);
+        savePass = (CheckBox) findViewById(R.id.save);
         okButton = (Button) findViewById(R.id.account_ok);
         cancelButton = (Button) findViewById(R.id.account_cancel);
 
@@ -134,6 +135,11 @@ public class AddAccountActivity extends AccountAuthenticatorActivity implements 
             boolean e = enabled.isChecked();
             boolean t = tls.isChecked();
             boolean s = sasl.isChecked();
+
+            if (!savePass.isChecked()) {
+                JTalkService.getInstance().addPassword(jid, pass);
+                pass = "";
+            }
 
             if (jid.length() < 3 || !jid.contains("@")) {
                 Toast.makeText(this, "Incorrect JID", Toast.LENGTH_LONG).show();

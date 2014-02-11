@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012, Igor Ustyugov <igor@ustyugov.net>
+ * Copyright (C) 2014, Igor Ustyugov <igor@ustyugov.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
  * along with this program. If not, see http://www.gnu.org/licenses/
  */
 
-package net.ustyugov.jtalk.activity;
+package net.ustyugov.jtalk.activity.filetransfer;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -29,7 +29,8 @@ import android.widget.*;
 import com.jtalk2.R;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.RosterItem;
-import net.ustyugov.jtalk.activity.filetransfer.SendFileActivity;
+import net.ustyugov.jtalk.activity.Chat;
+import net.ustyugov.jtalk.activity.RosterActivity;
 import net.ustyugov.jtalk.adapter.SearchAdapter;
 import net.ustyugov.jtalk.service.JTalkService;
 import org.jivesoftware.smack.RosterEntry;
@@ -37,9 +38,6 @@ import org.jivesoftware.smack.RosterEntry;
 public class SendToActivity extends Activity {
     private JTalkService service;
     private SearchAdapter adapter;
-    private TextView tv;
-    private EditText et;
-    private ListView list;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,20 +52,24 @@ public class SendToActivity extends Activity {
         linear.setBackgroundColor(Colors.BACKGROUND);
 
         adapter = new SearchAdapter(this);
-        tv = (TextView) findViewById(R.id.label);
+        TextView tv = (TextView) findViewById(R.id.label);
 
-        et = (EditText) findViewById(R.id.search);
+        final EditText et = (EditText) findViewById(R.id.search);
         et.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) { updateList(s.toString()); }
             public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
             public void onTextChanged(CharSequence s, int start, int before, int count) { }
         });
 
-        list = (ListView) findViewById(R.id.list);
+        ListView list = (ListView) findViewById(R.id.list);
         list.setAdapter(adapter);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Intent intent = getIntent();
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                String type = intent.getType();
+
                 RosterItem item = (RosterItem) adapterView.getItemAtPosition(position);
                 String name = item.getName();
                 String account = item.getAccount();
@@ -84,10 +86,6 @@ public class SendToActivity extends Activity {
                     RosterEntry re = item.getEntry();
                     String jid = re.getUser();
 
-                    Intent intent = getIntent();
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    String type = intent.getType();
-                    Uri data = intent.getParcelableExtra(Intent.EXTRA_STREAM);
                     if (type.equals("text/plain")) {
                         service.setText(jid, intent.getStringExtra(Intent.EXTRA_TEXT));
                         Intent i = new Intent(SendToActivity.this, Chat.class);
@@ -95,6 +93,7 @@ public class SendToActivity extends Activity {
                         i.putExtra("jid", jid);
                         startActivity(i);
                     } else {
+                        Uri data = intent.getParcelableExtra(Intent.EXTRA_STREAM);
                         Intent i = new Intent(SendToActivity.this, SendFileActivity.class);
                         i.putExtra("account", account);
                         i.putExtra("jid", jid);
@@ -104,6 +103,15 @@ public class SendToActivity extends Activity {
                         startActivity(i);
                     }
                     finish();
+                } else if (item.isMuc()) {
+                    if (type.equals("text/plain")) {
+                        service.setText(item.getName(), intent.getStringExtra(Intent.EXTRA_TEXT));
+                        Intent i = new Intent(SendToActivity.this, Chat.class);
+                        i.putExtra("account", account);
+                        i.putExtra("jid", item.getName());
+                        startActivity(i);
+                        finish();
+                    }
                 }
             }
         });

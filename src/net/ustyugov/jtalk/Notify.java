@@ -67,6 +67,9 @@ public class Notify {
         String text = prefs.getString("currentStatus", null);
         String[] statusArray = service.getResources().getStringArray(R.array.statusArray);
 
+        service.setGlobalState(text);
+        service.sendBroadcast(new Intent(Constants.UPDATE));
+
         int icon = R.drawable.stat_online;
         if (mode.equals("available")) {
             icon = R.drawable.stat_online;
@@ -115,7 +118,11 @@ public class Notify {
         i.addCategory(Intent.CATEGORY_LAUNCHER);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, i, 0);
-   		
+
+        JTalkService service = JTalkService.getInstance();
+        service.setGlobalState(state);
+        service.sendBroadcast(new Intent(Constants.UPDATE));
+
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);
         mBuilder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_launcher));
         mBuilder.setSmallIcon(R.drawable.stat_offline);
@@ -137,10 +144,14 @@ public class Notify {
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(service, 0, i, 0);
 
+        String str = service.getString(R.string.Connecting);
+        service.setGlobalState(str + ": " + account);
+        service.sendBroadcast(new Intent(Constants.UPDATE));
+
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(service);
         mBuilder.setLargeIcon(BitmapFactory.decodeResource(service.getResources(), R.drawable.ic_launcher));
         mBuilder.setSmallIcon(R.drawable.stat_offline);
-        mBuilder.setContentTitle(service.getString(R.string.Connecting));
+        mBuilder.setContentTitle(str);
         mBuilder.setContentText(account);
         mBuilder.setContentIntent(contentIntent);
         mBuilder.setPriority(NotificationCompat.PRIORITY_DEFAULT);

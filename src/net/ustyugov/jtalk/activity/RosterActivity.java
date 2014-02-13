@@ -384,9 +384,9 @@ public class RosterActivity extends Activity implements OnItemClickListener, OnI
     private void updateStatus() {
     	if (service.isAuthenticated()) {
    			String status = statusArray[prefs.getInt("currentSelection", 0)];
-   			String substatus = prefs.getString("currentStatus", "");
+//   			String substatus = prefs.getString("currentStatus", "");
    			getActionBar().setTitle(status);
-   			getActionBar().setSubtitle(substatus);
+   			getActionBar().setSubtitle(service.getGlobalState());
    		} else {
    			getActionBar().setTitle(getString(R.string.NotConnected));
    			getActionBar().setSubtitle(service.getGlobalState());

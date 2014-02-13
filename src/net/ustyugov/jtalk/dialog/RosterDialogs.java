@@ -143,7 +143,7 @@ public class RosterDialogs {
 		           			service.sendPresenceTo(account, to, text, mode, priority);
 		           		}
 					} else {
-		           		service.connect(account);
+		           		if (!mode.equals("unavailable")) service.connect(account);
 					}
 				} else {
 					service.setPreference("currentPriority", priority);
@@ -160,7 +160,7 @@ public class RosterDialogs {
 							if (service.isAuthenticated(acc)) {
 								service.sendPresence(acc, text, mode, priority);
 							} else {
-				           		service.connect(acc);
+                                if (!mode.equals("unavailable")) service.connect(acc);
 							}
 						} while(cursor.moveToNext());
 						cursor.close();

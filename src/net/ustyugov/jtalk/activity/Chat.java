@@ -743,6 +743,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     }
 
     private void updateStatus() {
+        if (!service.isAuthenticated()) return;
         chatsSpinnerAdapter.notifyDataSetChanged();
 
         ActionBar ab = getActionBar();

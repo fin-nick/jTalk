@@ -19,6 +19,7 @@ package net.ustyugov.jtalk.adapter;
 
 import java.util.Enumeration;
 
+import android.app.Activity;
 import net.ustyugov.jtalk.Colors;
 import net.ustyugov.jtalk.IconPicker;
 import net.ustyugov.jtalk.RosterItem;
@@ -51,9 +52,11 @@ import android.widget.TextView;
 public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 	private JTalkService service;
 	private boolean isFragment;
+    private Activity activity;
 	
-	public OpenChatsAdapter(Context context, boolean isFragment) {
-		super(context, R.id.name);
+	public OpenChatsAdapter(Activity activity, boolean isFragment) {
+		super(activity, R.id.name);
+        this.activity = activity;
         this.service = JTalkService.getInstance();
         this.isFragment = isFragment;
     }
@@ -62,7 +65,7 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 		clear();
 		add(null);
 
-		Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
+		Cursor cursor = activity.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
 		if (cursor != null && cursor.getCount() > 0) {
 			cursor.moveToFirst();
 			do {
@@ -94,18 +97,18 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {	
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
 		IconPicker ip = service.getIconPicker();
 		boolean minimal = prefs.getBoolean("CompactMode", true);
 		
         View v = convertView;
-        int fontSize = Integer.parseInt(service.getResources().getString(R.string.DefaultFontSize));
+        int fontSize = 14;
 		try {
 			fontSize = Integer.parseInt(prefs.getString("RosterSize", service.getResources().getString(R.string.DefaultFontSize)));
-		} catch (NumberFormatException e) { }
+		} catch (NumberFormatException ignored) { }
 		
         if (v == null) {
-            LayoutInflater vi = (LayoutInflater) service.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater vi = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             v = vi.inflate(R.layout.entry, null);
         }
         
@@ -116,7 +119,7 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 			msg.setVisibility(View.GONE);
 			
 			ImageView icon = (ImageView)v.findViewById(R.id.status_icon);
-	      	if (minimal && service.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+	      	if (minimal && activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
 	      		icon.setVisibility(View.GONE);
 	      	} else {
 	      		icon.setVisibility(View.VISIBLE);

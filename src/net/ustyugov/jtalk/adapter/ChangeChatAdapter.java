@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012, Igor Ustyugov <igor@ustyugov.net>
+ * Copyright (C) 2014, Igor Ustyugov <igor@ustyugov.net>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,9 +104,7 @@ public class ChangeChatAdapter extends ArrayAdapter<RosterItem> {
         TextView label = (TextView) v.findViewById(R.id.item);
         if (service.isHighlight(account, jid)) label.setTextColor(Colors.HIGHLIGHT_TEXT);
         else {
-        	if (Build.VERSION.SDK_INT >= 11) {
-            	label.setTextColor(Colors.PRIMARY_TEXT);
-            } else label.setTextColor(0xFF232323);
+            label.setTextColor(Colors.PRIMARY_TEXT);
         }
         
 		ImageView msg  = (ImageView) v.findViewById(R.id.msg);
@@ -120,8 +118,10 @@ public class ChangeChatAdapter extends ArrayAdapter<RosterItem> {
         	if (service.getJoinedConferences().containsKey(StringUtils.parseBareAddress(jid))) {
         		name = StringUtils.parseResource(jid);
         	} else {
+                RosterEntry re = null;
         		name = jid;
-        		RosterEntry re = JTalkService.getInstance().getRoster(account).getEntry(jid);
+                Roster roster = JTalkService.getInstance().getRoster(account);
+        		if (roster!= null) re = roster.getEntry(jid);
                 if (re != null && re.getName() != null && re.getName().length() > 0) name = re.getName();
         	}
             

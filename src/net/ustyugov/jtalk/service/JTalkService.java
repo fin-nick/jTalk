@@ -603,6 +603,9 @@ public class JTalkService extends Service {
     }
     
     public String getNode(String account, String user) {
+        Roster roster = getRoster(account);
+        if (roster == null) return null;
+
     	if (connections.containsKey(account)) {
     		if (StringUtils.parseResource(user).length() > 0) {
     			String g = StringUtils.parseBareAddress(user);
@@ -614,7 +617,7 @@ public class JTalkService extends Service {
     					else return null;
     				} else return null;
     			} else {
-    				Presence p = getRoster(account).getPresenceResource(user);
+    				Presence p = roster.getPresenceResource(user);
     				if (p != null) {
     					CapsExtension caps = (CapsExtension) p.getExtension(CapsExtension.NODE_NAME, CapsExtension.XMLNS);
     					if (caps != null) return caps.getNode();
@@ -624,7 +627,7 @@ public class JTalkService extends Service {
     		} 
         	
         	List<String> list = new ArrayList<String>();
-        	Iterator<Presence> it = getRoster(account).getPresences(user);
+        	Iterator<Presence> it = roster.getPresences(user);
         	while(it.hasNext()) {
         		Presence presence = it.next();
         		if (presence.getType() != Presence.Type.unavailable) {
@@ -774,7 +777,7 @@ public class JTalkService extends Service {
 				connection.disconnect(presence);
 	    	} else if (connection.isConnected()) connection.disconnect();
             setState(account, getString(R.string.Disconnect));
-            connections.remove(connection);
+            connections.remove(account);
 		}
     }
     
@@ -862,22 +865,23 @@ public class JTalkService extends Service {
                     if (password.isEmpty()) {
                         if (passHash.containsKey(username)) {
                             password = passHash.get(username);
-
-                            String resource = cursor.getString(cursor.getColumnIndex(AccountDbHelper.RESOURCE)).trim();
-                            String service = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SERVER));
-                            String tls = cursor.getString(cursor.getColumnIndex(AccountDbHelper.TLS));
-                            String sasl = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SASL));
-                            String port = cursor.getString(cursor.getColumnIndex(AccountDbHelper.PORT));
-
-                            ConnectionTask task = new ConnectionTask();
-                            if (connectionTasks.containsKey(username)) task = connectionTasks.get(username);
-                            if (task.getStatus() != AsyncTask.Status.RUNNING && task.getStatus() != AsyncTask.Status.FINISHED) {
-                                task.execute(username, password, resource, service, tls, sasl, port);
-                                connectionTasks.put(username, task);
-                            }
                         } else {
                             Notify.passwordNotify(username);
+                            continue;
                         }
+                    }
+
+                    String resource = cursor.getString(cursor.getColumnIndex(AccountDbHelper.RESOURCE)).trim();
+                    String service = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SERVER));
+                    String tls = cursor.getString(cursor.getColumnIndex(AccountDbHelper.TLS));
+                    String sasl = cursor.getString(cursor.getColumnIndex(AccountDbHelper.SASL));
+                    String port = cursor.getString(cursor.getColumnIndex(AccountDbHelper.PORT));
+
+                    ConnectionTask task = new ConnectionTask();
+                    if (connectionTasks.containsKey(username)) task = connectionTasks.get(username);
+                    if (task.getStatus() != AsyncTask.Status.RUNNING && task.getStatus() != AsyncTask.Status.FINISHED) {
+                        task.execute(username, password, resource, service, tls, sasl, port);
+                        connectionTasks.put(username, task);
                     }
 				} while(cursor.moveToNext());
 				cursor.close();
@@ -1217,9 +1221,6 @@ public class JTalkService extends Service {
   	  				
   					Intent i = new Intent(Constants.UPDATE);
   		            sendBroadcast(i);
-  		            	
-  		            i = new Intent(Constants.UPDATE);
-  		            sendBroadcast(i);
   	  			}
   	  		}.start();
   		}
@@ -1263,9 +1264,6 @@ public class JTalkService extends Service {
                     setState(account, state);
   	  				
   					Intent i = new Intent(Constants.UPDATE);
-  		            sendBroadcast(i);
-  		            	
-  		            i = new Intent(Constants.UPDATE);
   		            sendBroadcast(i);
   	  			}
   	  		}.start();

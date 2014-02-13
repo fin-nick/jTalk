@@ -164,6 +164,7 @@
     <string name="DeleteHistory">Удалить историю</string>
     <string name="SelectText">Выбрать текст</string>
     <string name="Close">Закрыть</string>
+    <string name="CloseAll">Закрыть все</string>
     <string name="Subject">Тема</string>
     <string name="ServiceDiscovery">Обзор сервисов</string>
     <string name="PasteSmile">Вставить смайл</string>

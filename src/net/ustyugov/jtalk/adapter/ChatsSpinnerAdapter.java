@@ -64,7 +64,7 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
 	
 	public void update() {
 		clear();
-		Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
+		Cursor cursor = activity.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
 		if (cursor != null && cursor.getCount() > 0) {
 			cursor.moveToFirst();
 			do {
@@ -115,7 +115,7 @@ public class ChatsSpinnerAdapter extends ArrayAdapter<RosterItem> implements Spi
         String s;
 
         if (v == null) {
-            LayoutInflater vi = (LayoutInflater) service.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater vi = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             v = vi.inflate(R.layout.spinner_item, null);
         }
 

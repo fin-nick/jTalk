@@ -173,6 +173,7 @@
     <string name="DeleteHistory">Delete History</string>
     <string name="SelectText">Select text</string>
     <string name="Close">Close</string>
+    <string name="CloseAll">Close all</string>
     <string name="ServiceDiscovery">Service Discovery</string>
     <string name="PasteSmile">Paste smile</string>
     <string name="PasteNick">Paste nick</string>

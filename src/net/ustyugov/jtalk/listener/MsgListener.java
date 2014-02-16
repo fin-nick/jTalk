@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012, Igor Ustyugov <igor@ustyugov.net>
+ * Copyright (C) 2014, Igor Ustyugov <igor@ustyugov.net>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@ import java.util.Date;
 import java.util.List;
 
 import android.database.Cursor;
-import android.util.Log;
 import net.ustyugov.jtalk.Constants;
 import net.ustyugov.jtalk.MessageItem;
 import net.ustyugov.jtalk.MessageLog;
@@ -68,38 +67,33 @@ public class MsgListener implements PacketListener {
 	public void processPacket(Packet packet) {
 		Message msg = (Message) packet;
 		String from = msg.getFrom();
-        String ofrom = from;
 		final String id = msg.getPacketID();
 		String user = StringUtils.parseBareAddress(from).toLowerCase();
 		String type = msg.getType().name();
 		String body = msg.getBody();
 		
-		MultipleAddresses ma = (MultipleAddresses) msg.getExtension("addresses", "http://jabber.org/protocol/address");
-		if (ma != null) {
-			List<MultipleAddresses.Address> list = ma.getAddressesOfType(MultipleAddresses.OFROM);
-			if (!list.isEmpty()) {
-				String jid = list.get(0).getJid();
-                ofrom = jid;
-				user = StringUtils.parseBareAddress(ofrom);
-			}
-		}
-
+        // XEP-0085: Chat State Notifications
         PacketExtension stateExt = msg.getExtension("http://jabber.org/protocol/chatstates");
 		if (stateExt != null && !type.equals("error") && !service.getConferencesHash(account).containsKey(user)) {
 			String state = stateExt.getElementName();
-			if (state.equals(ChatState.composing.name())) {
+			if (state.equals(ChatState.composing.name())) { // User is composing a message
 				updateComposeList(user, true, true);
 			} else {
 				if (body != null && body.length() > 0) updateComposeList(user, false, false);
 				else updateComposeList(user, false, true);
 			}
 		}
-		
+
+        // XEP-0184: Message Delivery Receipts
 		ReceiptExtension receiptExt = (ReceiptExtension) msg.getExtension("urn:xmpp:receipts");
 		if (receiptExt != null && !type.equals("error")) {
 			String receipt = receiptExt.getElementName();
+
+            // message with receipt requested
 			if (receipt.equals("request")) {
 				service.sendReceivedPacket(connection, user, id);
+
+            // message delivery receipt
 			} else if (receipt.equals("received")) {
                 String rid = receiptExt.getId();
                 if (rid == null || rid.isEmpty()) rid = id;
@@ -136,9 +130,9 @@ public class MsgListener implements PacketListener {
                             }
                         }
                     }
+                    cursor.close();
                     return;
                 }
-                cursor.close();
 			}
 		}
 
@@ -156,141 +150,168 @@ public class MsgListener implements PacketListener {
 
 		if (body != null && body.length() > 0) {
 	        if (type.equals("groupchat")) { // Group Chat Message
-                String nick  = StringUtils.parseResource(from);
-                String group = StringUtils.parseBareAddress(from);
-
-	        	Date date = new java.util.Date();
-				DelayInformation delayExt = (DelayInformation) msg.getExtension("jabber:x:delay");
-				if (delayExt != null) date.setTime(delayExt.getStamp().getTime());
-                String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date);
-
-	        	String mynick = context.getResources().getString(R.string.Me);
-	        	if (service.getConferencesHash(account).containsKey(group)) mynick = service.getConferencesHash(account).get(group).getNickname();
-
-                MessageItem item = new MessageItem(account, from);
-                item.setBody(body);
-                item.setId(id);
-                item.setTime(time);
-                item.setReceived(false);
-                item.setName(nick);
-                if (nick == null || nick.length() < 1) item.setType(MessageItem.Type.status);
-
-                if (!service.getCurrentJid().equals(group)) {
-                    service.addMessagesCount(account, group);
-                }
-
-                boolean highlight = false;
-
-                if (body.contains(mynick)) highlight = true;
-                else {
-                    String highString = prefs.getString("Highlights", "");
-                    String[] highArray = highString.split(" ");
-                    for (String light : highArray) {
-                        if (!light.isEmpty() && body.contains(light)) highlight = true;
-                    }
-                }
-
-                if (highlight) {
-                    if (!service.getCurrentJid().equals(group)) {
-                        item.setJid(group);
-                        service.addHighlight(account, group);
-                        service.addUnreadMessage(item);
-                        Notify.messageNotify(account, from, Notify.Type.Direct, body);
-                    }
-                } else {
-                    if (delayExt == null) Notify.messageNotify(account, group, Notify.Type.Conference, body);
-                }
-                MessageLog.writeMucMessage(account, group, nick, item);
+                processGroupchatMessage(msg);
 	        } else if (type.equals("chat") || type.equals("normal") || type.equals("headline")) {
-                // If invite to room
-                PacketExtension extension = msg.getExtension("jabber:x:conference");
-                if (extension != null) return;
-
-	        	ReplaceExtension replace = (ReplaceExtension) msg.getExtension("urn:xmpp:message-correct:0");
-	    		if (replace != null) {
-	    			String rid = replace.getId();
-	    			MessageLog.editMessage(account, user, rid, body);
-                    Notify.messageNotify(account, user, Notify.Type.Chat, body);
-	    		} else {
-		        	String name = null;
-		        	String group = null;
-		        	
-		        	// from room 
-		        	if (service.getConferencesHash(account).containsKey(user)) {
-		        		group = StringUtils.parseBareAddress(from);
-		        		name = StringUtils.parseResource(from);
-
-		        		if (name == null || name.length() <= 0) {
-                            Date date = new java.util.Date();
-                            String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date);
-
-		        			MessageItem mucMsg = new MessageItem(account, from);
-		    				mucMsg.setBody(body);
-		    				mucMsg.setId(id);
-		    				mucMsg.setTime(time);
-		    	            mucMsg.setName(name);
-                            mucMsg.setReceived(false);
-                            if (prefs.getBoolean("CollapseBigMessages", false) && body.length() > 196) mucMsg.setCollapsed(true);
-
-		    	            CaptchaExtension captcha = (CaptchaExtension) msg.getExtension("captcha", "urn:xmpp:captcha");
-			            	if (captcha != null) {
-			            		BobExtension bob = (BobExtension) msg.getExtension("data","urn:xmpp:bob");
-			            		mucMsg.setBob(bob);
-			            		mucMsg.setCaptcha(true);
-			            		mucMsg.setForm(captcha.getForm());
-                                mucMsg.setName(group);
-			            		
-			            		Notify.captchaNotify(account, mucMsg);
-			            	}
-
-		                    if (!service.getCurrentJid().equals(group)) {
-		                    	service.addUnreadMessage(mucMsg);
-		                    }
-
-                            MessageLog.writeMessage(account, group, mucMsg);
-		                    return;
-		        		}
-		        	} else { // from user
-		        		Roster roster = service.getRoster(account);
-		        		if (roster != null) {
-		        			RosterEntry entry = roster.getEntry(user);
-		        			if (entry != null) name = entry.getName();
-		        		}
-		        	}
-		        	
-		            if (name == null || name.equals("")) name = user;
-
-		            Date date = new java.util.Date();
-		            DelayInformation delayExt = (DelayInformation) msg.getExtension("jabber:x:delay");
-					if (delayExt != null) date.setTime(delayExt.getStamp().getTime());
-                    String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date);
-					
-		            MessageItem item = new MessageItem(account, ofrom);
-		            item.setSubject(msg.getSubject());
-					item.setBody(body);
-					item.setId(id);
-					item.setTime(time);
-		            item.setName(name);
-		            
-		            if (prefs.getBoolean("CollapseBigMessages", false) && body.length() > 196) {
-		            	item.setCollapsed(true);
-		            }
-		            
-		            if (group != null && group.length() > 0) user = group + "/" + name; 
-		        	
-		            if (!service.getCurrentJid().equals(user)) {
-                        if (account.equals(user)) service.addMessagesCount(account, from);
-		            	service.addMessagesCount(account, user);
-                        service.addUnreadMessage(item);
-		            }
-		            
-		            updateComposeList(user, false, false);
-                    MessageLog.writeMessage(account, user, item);
-		            if (delayExt == null) Notify.messageNotify(account, user, Notify.Type.Chat, body);
-	    		}
+                processChatMessage(msg);
 	        }
 		}
 	}
+
+    private void processGroupchatMessage(Message msg) {
+        String from = msg.getFrom();
+        String body = msg.getBody();
+        String id = msg.getPacketID();
+        String nick  = StringUtils.parseResource(from);
+        String group = StringUtils.parseBareAddress(from);
+
+        Date date = new java.util.Date();
+        DelayInformation delayExt = (DelayInformation) msg.getExtension("jabber:x:delay");
+        if (delayExt != null) date.setTime(delayExt.getStamp().getTime());
+        String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date);
+
+        String mynick = context.getResources().getString(R.string.Me);
+        if (service.getConferencesHash(account).containsKey(group)) mynick = service.getConferencesHash(account).get(group).getNickname();
+
+        MessageItem item = new MessageItem(account, from);
+        item.setBody(body);
+        item.setId(id);
+        item.setTime(time);
+        item.setReceived(false);
+        item.setName(nick);
+        if (nick == null || nick.length() < 1) item.setType(MessageItem.Type.status);
+
+        if (!service.getCurrentJid().equals(group)) {
+            service.addMessagesCount(account, group);
+        }
+
+        boolean highlight = false;
+
+        if (body.contains(mynick)) highlight = true;
+        else {
+            String highString = prefs.getString("Highlights", "");
+            String[] highArray = highString.split(" ");
+            for (String light : highArray) {
+                if (!light.isEmpty() && body.toLowerCase().contains(light.toLowerCase())) highlight = true;
+            }
+        }
+
+        if (highlight) {
+            if (!service.getCurrentJid().equals(group)) {
+                item.setJid(group);
+                service.addHighlight(account, group);
+                service.addUnreadMessage(item);
+                Notify.messageNotify(account, from, Notify.Type.Direct, body);
+            }
+        } else {
+            if (delayExt == null) Notify.messageNotify(account, group, Notify.Type.Conference, body);
+        }
+        MessageLog.writeMucMessage(account, group, nick, item);
+    }
+
+    private void processChatMessage(Message msg) {
+        String from = msg.getFrom();
+        String body = msg.getBody();
+        String ofrom = from;
+        String user = StringUtils.parseBareAddress(from).toLowerCase();
+        String id = msg.getPacketID();
+
+        // If invite to room
+        PacketExtension extension = msg.getExtension("jabber:x:conference");
+        if (extension != null) return;
+
+        ReplaceExtension replace = (ReplaceExtension) msg.getExtension("urn:xmpp:message-correct:0");
+        if (replace != null) {
+            String rid = replace.getId();
+            MessageLog.editMessage(account, user, rid, body);
+            Notify.messageNotify(account, user, Notify.Type.Chat, body);
+        } else {
+            String name = null;
+            String group = null;
+
+            // from room
+            if (service.getConferencesHash(account).containsKey(user)) {
+                group = StringUtils.parseBareAddress(from);
+                name = StringUtils.parseResource(from);
+
+                if (name == null || name.length() <= 0) {
+                    Date date = new java.util.Date();
+                    String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date);
+
+                    MessageItem mucMsg = new MessageItem(account, from);
+                    mucMsg.setBody(body);
+                    mucMsg.setId(id);
+                    mucMsg.setTime(time);
+                    mucMsg.setName(name);
+                    mucMsg.setReceived(false);
+                    if (prefs.getBoolean("CollapseBigMessages", false) && body.length() > 196) mucMsg.setCollapsed(true);
+
+                    CaptchaExtension captcha = (CaptchaExtension) msg.getExtension("captcha", "urn:xmpp:captcha");
+                    if (captcha != null) {
+                        BobExtension bob = (BobExtension) msg.getExtension("data","urn:xmpp:bob");
+                        mucMsg.setBob(bob);
+                        mucMsg.setCaptcha(true);
+                        mucMsg.setForm(captcha.getForm());
+                        mucMsg.setName(group);
+
+                        Notify.captchaNotify(account, mucMsg);
+                    }
+
+                    if (!service.getCurrentJid().equals(group)) {
+                        service.addUnreadMessage(mucMsg);
+                    }
+
+                    MessageLog.writeMessage(account, group, mucMsg);
+                    return;
+                }
+            } else { // from user
+                Roster roster = service.getRoster(account);
+                if (roster != null) {
+                    RosterEntry entry = roster.getEntry(user);
+                    if (entry != null) name = entry.getName();
+                }
+            }
+
+            if (name == null || name.equals("")) name = user;
+
+            Date date = new java.util.Date();
+            DelayInformation delayExt = (DelayInformation) msg.getExtension("jabber:x:delay");
+            if (delayExt != null) date.setTime(delayExt.getStamp().getTime());
+            String time = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(date);
+
+
+            MultipleAddresses ma = (MultipleAddresses) msg.getExtension("addresses", "http://jabber.org/protocol/address");
+            if (ma != null) {
+                List<MultipleAddresses.Address> list = ma.getAddressesOfType(MultipleAddresses.OFROM);
+                if (!list.isEmpty()) {
+                    ofrom = list.get(0).getJid();
+                    user = StringUtils.parseBareAddress(ofrom);
+                }
+            }
+
+            MessageItem item = new MessageItem(account, ofrom);
+            item.setSubject(msg.getSubject());
+            item.setBody(body);
+            item.setId(id);
+            item.setTime(time);
+            item.setName(name);
+
+            if (prefs.getBoolean("CollapseBigMessages", false) && body.length() > 196) {
+                item.setCollapsed(true);
+            }
+
+            if (group != null && group.length() > 0) user = group + "/" + name;
+
+            if (!service.getCurrentJid().equals(user)) {
+                if (account.equals(user)) service.addMessagesCount(account, from);
+                service.addMessagesCount(account, user);
+                service.addUnreadMessage(item);
+            }
+
+            updateComposeList(user, false, false);
+            MessageLog.writeMessage(account, user, item);
+            if (delayExt == null) Notify.messageNotify(account, user, Notify.Type.Chat, body);
+        }
+    }
 	
 	private void updateComposeList(String jid, boolean add, boolean send) {
 		if (add) {

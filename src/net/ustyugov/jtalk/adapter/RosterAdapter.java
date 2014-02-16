@@ -89,7 +89,7 @@ public class RosterAdapter extends ArrayAdapter<RosterItem> {
                 else while (service.getCollapsedGroups().contains(account)) service.getCollapsedGroups().remove(account);
 
                 Roster roster = service.getRoster(account);
-                if (service != null && roster != null && connection != null && connection.isAuthenticated() && !service.getCollapsedGroups().contains(account)) {
+                if (service != null && roster != null  && !service.getCollapsedGroups().contains(account)) {
 
                     // Self
                     List<Presence> selfPresences= new ArrayList<Presence>();

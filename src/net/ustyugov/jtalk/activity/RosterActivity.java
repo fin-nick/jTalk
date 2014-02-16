@@ -203,8 +203,11 @@ public class RosterActivity extends Activity implements OnItemClickListener, OnI
         if (requestCode == ACTIVITY_PREFERENCES) {
             if (resultCode == RESULT_OK) {
                 Intent intent = getIntent();
+                intent.putExtra("password", false);
                 finish();
                 startActivity(intent);
+
+                service.removeSmiles();
 
                 LocationClient locationClient = service.getLocationClient();
                 if (prefs.getBoolean("Locations", false)) {

@@ -88,7 +88,7 @@ public class NoGroupsAdapter extends ArrayAdapter<RosterItem> {
                 else while (service.getCollapsedGroups().contains(account)) service.getCollapsedGroups().remove(account);
 
                 Roster roster = service.getRoster(account);
-                if (roster != null && connection != null && connection.isAuthenticated() && !service.getCollapsedGroups().contains(account)) {
+                if (roster != null && !service.getCollapsedGroups().contains(account)) {
                     // add self contact
                     Iterator<Presence> it = roster.getPresences(account);
                     if (prefs.getBoolean("SelfContact", true) && it.hasNext() && it.next().isAvailable()) {

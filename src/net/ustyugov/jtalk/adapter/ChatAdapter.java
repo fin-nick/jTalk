@@ -147,7 +147,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
         	
         	if (showtime) {
         		message = time + " " + name + ": " + body;
-        		colorLength = name.length() + time.length() + 1;
+        		colorLength = name.length() + time.length() + 2;
         		boldLength = name.length() + time.length() + subj.length() + 2;
         	}
         	else message = name + ": " + body;
@@ -161,7 +161,7 @@ public class ChatAdapter extends ArrayAdapter<MessageItem> implements TextLinkCl
             	else ssb.setSpan(new ForegroundColorSpan(Colors.PRIMARY_TEXT), 0, colorLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
             
-            if (item.isEdited()) ssb.setSpan(new ForegroundColorSpan(Colors.HIGHLIGHT_TEXT), colorLength + 1, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if (item.isEdited()) ssb.setSpan(new ForegroundColorSpan(Colors.HIGHLIGHT_TEXT), colorLength, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
         // Search highlight

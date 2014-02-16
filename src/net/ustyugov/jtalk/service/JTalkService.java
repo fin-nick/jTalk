@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import android.app.Activity;
 import com.google.android.gms.location.LocationClient;
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.RosterActivity;
@@ -32,6 +33,7 @@ import net.ustyugov.jtalk.listener.*;
 
 import net.ustyugov.jtalk.receivers.ChangeConnectionReceiver;
 import net.ustyugov.jtalk.receivers.ScreenStateReceiver;
+import net.ustyugov.jtalk.smiles.Smiles;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.PacketListener;
@@ -91,6 +93,7 @@ public class JTalkService extends Service {
     private boolean started = false;
     private boolean connecting = false;
 	private static JTalkService js = new JTalkService();
+    private Smiles smiles;
     private List<String> collapsedGroups = new ArrayList<String>();
     private List<String> composeList = new ArrayList<String>();
     private Hashtable<String, List<String>> activeChats = new Hashtable<String, List<String>>();
@@ -136,6 +139,13 @@ public class JTalkService extends Service {
     private Hashtable<String, Hashtable<String, List<MessageItem>>> messages = new Hashtable<String, Hashtable<String, List<MessageItem>>>();
 
     public static JTalkService getInstance() { return js; }
+
+    public Smiles getSmiles(Activity activity) {
+        if (smiles != null) return smiles;
+        else return new Smiles(activity);
+    }
+
+    public void removeSmiles() { smiles = null; }
 
     public void addPassword(String account, String password) {
         passHash.put(account, password);
@@ -1228,10 +1238,9 @@ public class JTalkService extends Service {
   	
   	public void sendPresence(final String account, final String state, final String mode, final int priority) {
   		if (connections.containsKey(account)) {
-  			final XMPPConnection connection = connections.get(account);
-  			
   			new Thread() {
   	  			public void run() {
+                    XMPPConnection connection = connections.get(account);
   	  				if (connection.isAuthenticated()) {
   	  					String account = StringUtils.parseBareAddress(connection.getUser());
   	  					if (!mode.equals("unavailable")) {
@@ -1312,8 +1321,8 @@ public class JTalkService extends Service {
                             sb.append("<pubsub xmlns='http://jabber.org/protocol/pubsub'>");
                             sb.append("<publish node='http://jabber.org/protocol/geoloc'>");
                             sb.append("<item><geoloc xmlns='http://jabber.org/protocol/geoloc'>");
-                            sb.append("<lat>" + lat + "</lat>");
-                            sb.append("<lon>" + lon + "</lon>");
+                            sb.append("<lat>").append(lat).append("</lat>");
+                            sb.append("<lon>").append(lon).append("</lon>");
                             sb.append("</geoloc></item></publish></pubsub>");
                             return sb.toString();
                         }
@@ -1361,9 +1370,9 @@ public class JTalkService extends Service {
                         sb.append("<pubsub xmlns='http://jabber.org/protocol/pubsub'>");
                         sb.append("<publish node='http://jabber.org/protocol/tune'>");
                         sb.append("<item><tune xmlns='http://jabber.org/protocol/tune'>");
-                        if (artist != null) sb.append("<artist>" + StringUtils.escapeForXML(artist) + "</artist>");
-                        if (title != null) sb.append("<title>" + StringUtils.escapeForXML(title) + "</title>");
-                        if (source != null) sb.append("<source>" + StringUtils.escapeForXML(source) + "</source>");
+                        if (artist != null) sb.append("<artist>").append(StringUtils.escapeForXML(artist)).append("</artist>");
+                        if (title != null) sb.append("<title>").append(StringUtils.escapeForXML(title)).append("</title>");
+                        if (source != null) sb.append("<source>").append(StringUtils.escapeForXML(source)).append("</source>");
                         sb.append("</tune></item></publish></pubsub>");
                         return sb.toString();
                     }

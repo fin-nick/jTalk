@@ -37,8 +37,6 @@ import java.util.ArrayList;
 public class ChangeChatDialog {
 	public static void show(final Activity activity) {
 		final JTalkService service = JTalkService.getInstance();
-        if (!service.isAuthenticated()) return;
-
 		final ChangeChatAdapter adapter = new ChangeChatAdapter(service);
 		if (adapter.getCount() < 1) return;
 

@@ -147,7 +147,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         LinearLayout linear = (LinearLayout) findViewById(R.id.chat_linear);
         linear.setBackgroundColor(Colors.BACKGROUND);
 
-        smiles = new Smiles(this);
+        smiles = service.getSmiles(this);
 
         sidebar = (LinearLayout) findViewById(R.id.sidebar);
 
@@ -343,7 +343,7 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                             service.setChatState(account, jid, ChatState.composing);
                         }
                     }
-                    sendButton.setEnabled(true);
+                    sendButton.setEnabled(service.isAuthenticated(account));
                 } else {
                     if (!isMuc) {
                         if (compose) {
@@ -743,13 +743,16 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     }
 
     private void updateStatus() {
-        if (!service.isAuthenticated()) return;
         chatsSpinnerAdapter.notifyDataSetChanged();
-
-        ActionBar ab = getActionBar();
-        ab.setDisplayUseLogoEnabled(true);
-        if (isMuc) ab.setLogo(service.getIconPicker().getMucDrawable());
-        else ab.setLogo(service.getIconPicker().getDrawableByPresence(service.getPresence(account, jid)));
+        if (service != null) {
+            IconPicker ip = service.getIconPicker();
+            if (ip != null) {
+                ActionBar ab = getActionBar();
+                ab.setDisplayUseLogoEnabled(true);
+                if (isMuc) ab.setLogo(ip.getMucDrawable());
+                else ab.setLogo(ip.getDrawableByPresence(service.getPresence(account, jid)));
+            }
+        }
     }
 
     private void registerReceivers() {

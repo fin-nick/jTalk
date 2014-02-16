@@ -96,28 +96,28 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 	}
 	
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {	
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+	public View getView(int position, View convertView, ViewGroup parent) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
 		IconPicker ip = service.getIconPicker();
 		boolean minimal = prefs.getBoolean("CompactMode", true);
-		
+
         View v = convertView;
         int fontSize = 14;
 		try {
 			fontSize = Integer.parseInt(prefs.getString("RosterSize", service.getResources().getString(R.string.DefaultFontSize)));
 		} catch (NumberFormatException ignored) { }
-		
+
         if (v == null) {
             LayoutInflater vi = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             v = vi.inflate(R.layout.entry, null);
         }
-        
+
         if (position == 0) {
 			TextView counter = (TextView) v.findViewById(R.id.msg_counter);
 			counter.setVisibility(View.GONE);
 			ImageView msg  = (ImageView) v.findViewById(R.id.msg);
 			msg.setVisibility(View.GONE);
-			
+
 			ImageView icon = (ImageView)v.findViewById(R.id.status_icon);
 	      	if (minimal && activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
 	      		icon.setVisibility(View.GONE);
@@ -125,7 +125,7 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 	      		icon.setVisibility(View.VISIBLE);
 	      		icon.setImageBitmap(ip.getMsgBitmap());
 	      	}
-			
+
 			TextView label = (TextView) v.findViewById(R.id.name);
 			label.setTypeface(Typeface.DEFAULT_BOLD);
 	       	label.setTextSize(fontSize);
@@ -139,7 +139,7 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
             if (ri.isEntry() || ri.isSelf()) jid = ri.getEntry().getUser();
             else if (ri.isMuc()) jid = ri.getName();
             String name = ri.getName();
-            
+
         	if (service.getJoinedConferences().containsKey(jid)) {
             	name = StringUtils.parseName(jid);
             } else if (service.getJoinedConferences().containsKey(StringUtils.parseBareAddress(jid))) {
@@ -149,14 +149,14 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
                 if (re != null) name = re.getName();
                 if (name == null || name.equals("")) name = jid;
             }
-            
+
             TextView label = (TextView) v.findViewById(R.id.name);
            	label.setTextSize(fontSize);
             label.setText(name);
            	if (service.getComposeList().contains(jid)) label.setTextColor(Colors.HIGHLIGHT_TEXT);
            	else if (service.isHighlight(account, jid)) label.setTextColor(Colors.HIGHLIGHT_TEXT);
     		else label.setTextColor(Colors.PRIMARY_TEXT);
-           	
+
             ImageView icon = (ImageView)v.findViewById(R.id.status_icon);
             if (minimal && service.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT && !isFragment) {
             	icon.setVisibility(View.GONE);
@@ -169,10 +169,10 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
                 	icon.setImageBitmap(ip.getIconByPresence(presence));
                 }
             }
-        	
+
             ImageView msg  = (ImageView) v.findViewById(R.id.msg);
             msg.setImageBitmap(ip.getMsgBitmap());
-            
+
             TextView counter = (TextView) v.findViewById(R.id.msg_counter);
     		counter.setTextSize(fontSize);
             int count = service.getMessagesCount(account, jid);
@@ -184,7 +184,7 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
     			msg.setVisibility(View.GONE);
     			counter.setVisibility(View.GONE);
     		}
-            
+
             if (jid.equals(service.getCurrentJid())) {
             	label.setTypeface(Typeface.DEFAULT_BOLD);
                 label.setTextColor(Colors.PRIMARY_TEXT);

@@ -139,9 +139,10 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
         String message = "";
         if (type == MessageItem.Type.status) message = name + " " + body;
         else {
-            if (body.length() > 4 && body.substring(0, 3).equals("/me")) {
-                if (showtime && time.length() > 2) message = time + " * " + n + " " + body.substring(3);
-                else message = " * " + n + " " + body.substring(3);
+            if (body.length() > 4 && body.startsWith("/me")) {
+                String meBody = body.substring(3);
+                if (showtime && time.length() > 2) message = time + " * " + n + " " + meBody;
+                else message = " * " + n + " " + meBody;
             } else {
                 message = name + ": " + body;
             }
@@ -165,7 +166,8 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
                 if (nick != null && message.contains(nick)) highlight = true;
                 else {
                     for (String light : highArray) {
-                        if (!light.isEmpty() && body.contains(light)) highlight = true;
+                        String searchString = body.toLowerCase();
+                        if (!light.isEmpty() && searchString.contains(light.toLowerCase())) highlight = true;
                     }
                 }
                 if (highlight) {

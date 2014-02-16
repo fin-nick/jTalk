@@ -449,17 +449,17 @@ public class XMPPConnection extends Connection {
 
         shutdown(unavailablePresence);
 
-        if (roster != null) {
-            roster.cleanup();
-            roster = null;
-        }
+//        if (roster != null) {
+//            roster.cleanup();
+//            roster = null;
+//        }
 
-        wasAuthenticated = false;
-
-        packetWriter.cleanup();
-        packetWriter = null;
-        packetReader.cleanup();
-        packetReader = null;
+//        wasAuthenticated = false;
+//
+//        packetWriter.cleanup();
+//        packetWriter = null;
+//        packetReader.cleanup();
+//        packetReader = null;
     }
 
     public void sendPacket(Packet packet) {

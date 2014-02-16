@@ -121,7 +121,7 @@ public class Notify {
 
         JTalkService service = JTalkService.getInstance();
         service.setGlobalState(state);
-        service.sendBroadcast(new Intent(Constants.UPDATE));
+        context.sendBroadcast(new Intent(Constants.UPDATE));
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);
         mBuilder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_launcher));

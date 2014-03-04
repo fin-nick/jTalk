@@ -279,6 +279,7 @@ public class Bookmarks implements PrivateData {
     private static BookmarkedConference getConferenceStorage(XmlPullParser parser) throws Exception {
         String name = parser.getAttributeValue("", "name");
         String autojoin = parser.getAttributeValue("", "autojoin");
+        if (autojoin != null && autojoin.equals("1")) autojoin = "true";
         String jid = parser.getAttributeValue("", "jid");
 
         BookmarkedConference conf = new BookmarkedConference(jid);

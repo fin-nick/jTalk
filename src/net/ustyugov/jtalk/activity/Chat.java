@@ -522,7 +522,9 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.imgur:
-                Intent fIntent = new Intent(Intent.ACTION_GET_CONTENT, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                Intent fIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                fIntent.setType("image/*");
+                fIntent.addCategory(Intent.CATEGORY_OPENABLE);
                 startActivityForResult(Intent.createChooser(fIntent, getString(R.string.SelectFile)), REQUEST_FILE);
                 break;
             case android.R.id.home:

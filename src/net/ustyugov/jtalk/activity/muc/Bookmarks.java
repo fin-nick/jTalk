@@ -205,21 +205,24 @@ public class Bookmarks extends Activity {
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+        String acc = (String) mPages.get(mPager.getCurrentItem()).getTag();
 		switch (item.getItemId()) {
 			case android.R.id.home:
 				finish();
 				break;
   	    	case R.id.join:
-                String account = (String) mPages.get(mPager.getCurrentItem()).getTag();
-  	    		MucDialogs.joinDialog(this, account, null, null);
+  	    		MucDialogs.joinDialog(this, acc, null, null);
   	    		break;
   	    	case R.id.chats:
   	    		ChangeChatDialog.show(this);
   	    		break;
   	    	case R.id.add:
-                String acc = (String) mPages.get(mPager.getCurrentItem()).getTag();
   	    		BookmarksDialogs.AddDialog(this, acc, null, null);
   	    		break;
+            case R.id.search:
+                Intent sIntent = new Intent(this, MucSearch.class);
+                sIntent.putExtra("account", acc);
+                startActivity(sIntent);
   	    	default:
   	    		return false;
 		}

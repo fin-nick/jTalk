@@ -62,6 +62,7 @@ public class MucSearch extends Activity implements OnClickListener, OnItemClickL
 	@Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        account = getIntent().getStringExtra("account");
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         setTheme(Colors.isLight ? R.style.AppThemeLight : R.style.AppThemeDark);
         setContentView(R.layout.muc_search);

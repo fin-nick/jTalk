@@ -11,4 +11,7 @@
     <item android:id="@+id/join"
           android:title="@string/Join"
           android:showAsAction="never"/>
+    <item android:id="@+id/search"
+          android:title="@android:string/search_go"
+          android:showAsAction="never"/>
 </menu>

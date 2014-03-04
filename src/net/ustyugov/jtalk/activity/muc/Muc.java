@@ -38,7 +38,6 @@ import net.ustyugov.jtalk.service.JTalkService;
 import org.jivesoftware.smack.RosterEntry;
 
 import android.os.Bundle;
-import android.view.View.OnKeyListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -51,7 +50,7 @@ import org.jivesoftware.smack.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Muc extends Activity implements OnKeyListener {
+public class Muc extends Activity {
     List<MucRosterAdapter> adapters = new ArrayList<MucRosterAdapter>();
     private BroadcastReceiver updateReceiver;
     private BroadcastReceiver messageReceiver;
@@ -194,13 +193,13 @@ public class Muc extends Activity implements OnKeyListener {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        String acc = (String) mPages.get(mPager.getCurrentItem()).getTag();
         switch (item.getItemId()) {
             case android.R.id.home:
                 finish();
                 break;
             case R.id.join:
-                String account = (String) mPages.get(mPager.getCurrentItem()).getTag();
-                MucDialogs.joinDialog(this, account, null, null);
+                MucDialogs.joinDialog(this, acc, null, null);
                 break;
             case R.id.bookmarks:
                 startActivity(new Intent(this, Bookmarks.class));
@@ -208,6 +207,10 @@ public class Muc extends Activity implements OnKeyListener {
             case R.id.chats:
                 ChangeChatDialog.show(this);
                 break;
+            case R.id.search:
+                Intent sIntent = new Intent(this, MucSearch.class);
+                sIntent.putExtra("account", acc);
+                startActivity(sIntent);
             default:
                 return false;
         }
@@ -219,13 +222,5 @@ public class Muc extends Activity implements OnKeyListener {
             adapter.update();
             adapter.notifyDataSetChanged();
         }
-    }
-
-    public boolean onKey(View view, int code, KeyEvent event) {
-        if (KeyEvent.KEYCODE_SEARCH == code) {
-            Intent sIntent = new Intent(this, MucSearch.class);
-            startActivity(sIntent);
-        }
-        return false;
     }
 }

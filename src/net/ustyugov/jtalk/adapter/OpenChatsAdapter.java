@@ -53,12 +53,16 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 	private JTalkService service;
 	private boolean isFragment;
     private Activity activity;
+    private SharedPreferences prefs;
+    private IconPicker ip;
 	
 	public OpenChatsAdapter(Activity activity, boolean isFragment) {
 		super(activity, R.id.name);
         this.activity = activity;
         this.service = JTalkService.getInstance();
         this.isFragment = isFragment;
+        this.prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+        this.ip = service.getIconPicker();
     }
 	
 	public void update() {
@@ -96,15 +100,12 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 	}
 	
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(service);
-		IconPicker ip = service.getIconPicker();
+	public View getView(int position, View v, ViewGroup parent) {
 		boolean minimal = prefs.getBoolean("CompactMode", true);
 
-        View v = convertView;
         int fontSize = 14;
 		try {
-			fontSize = Integer.parseInt(prefs.getString("RosterSize", service.getResources().getString(R.string.DefaultFontSize)));
+			fontSize = Integer.parseInt(prefs.getString("RosterSize", activity.getResources().getString(R.string.DefaultFontSize)));
 		} catch (NumberFormatException ignored) { }
 
         if (v == null) {
@@ -129,7 +130,7 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
 			TextView label = (TextView) v.findViewById(R.id.name);
 			label.setTypeface(Typeface.DEFAULT_BOLD);
 	       	label.setTextSize(fontSize);
-	        label.setText(service.getString(R.string.Chats) + ": " + (getCount()-1));
+	        label.setText(activity.getString(R.string.Chats) + ": " + (getCount()-1));
             label.setTextColor(Colors.PRIMARY_TEXT);
             v.setBackgroundColor(Colors.GROUP_BACKGROUND);
         } else {
@@ -158,7 +159,7 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
     		else label.setTextColor(Colors.PRIMARY_TEXT);
 
             ImageView icon = (ImageView)v.findViewById(R.id.status_icon);
-            if (minimal && service.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT && !isFragment) {
+            if (minimal && activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT && !isFragment) {
             	icon.setVisibility(View.GONE);
             } else {
             	icon.setVisibility(View.VISIBLE);

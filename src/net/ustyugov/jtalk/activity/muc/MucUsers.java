@@ -192,7 +192,7 @@ public class MucUsers extends Activity {
 	   View layout = inflater.inflate(R.layout.set_affiliate_dialog, (ViewGroup) findViewById(R.id.set_affiliate_linear));
 	   
 	   final EditText jidEdit = (EditText) layout.findViewById(R.id.jid);
-	   jidEdit.setEnabled(newJid);
+	   jidEdit.setEnabled(true);
 	   jidEdit.setText(editedJid);
 	    
 	    String[] affiliations = new String[4];
@@ -215,7 +215,8 @@ public class MucUsers extends Activity {
 				String aff = (String) spinner.getSelectedItem();
 				
 				MUCAdmin.Item i = new MUCAdmin.Item(aff, null);
-				i.setJid(jidEdit.getText().toString());
+				if (newJid) i.setJid(jidEdit.getText().toString());
+                else i.setJid(editedJid);
 						
 				MUCAdmin admin = new MUCAdmin();
 				admin.setType(IQ.Type.SET);

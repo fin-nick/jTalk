@@ -84,10 +84,12 @@ public class VCardActivity extends Activity {
 
         if (service.getConferencesHash(account).containsKey(StringUtils.parseBareAddress(jid))) {
             Presence p = service.getConferencesHash(account).get(StringUtils.parseBareAddress(jid)).getOccupantPresence(jid);
-            MUCUser mucUser = (MUCUser) p.getExtension("x", "http://jabber.org/protocol/muc#user");
-            if (mucUser != null) {
-                String j = mucUser.getItem().getJid();
-                if (j != null && j.length() > 3) getActionBar().setSubtitle(j);
+            if (p != null) {
+                MUCUser mucUser = (MUCUser) p.getExtension("x", "http://jabber.org/protocol/muc#user");
+                if (mucUser != null) {
+                    String j = mucUser.getItem().getJid();
+                    if (j != null && j.length() > 3) getActionBar().setSubtitle(j);
+                }
             }
         }
 
@@ -185,13 +187,14 @@ public class VCardActivity extends Activity {
 	    mTitleIndicator.setTextColor(0xFF555555);
 	    mTitleIndicator.setViewPager(mPager);
 	    mTitleIndicator.setCurrentItem(0);
+
+        new LoadTask().execute();
 	}
-	
-	@Override
-	public void onResume() {
-		super.onResume();
-		new LoadTask().execute();
-	}
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
 	
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -216,7 +219,7 @@ public class VCardActivity extends Activity {
 				finish();
 				break;
 			case R.id.refresh:
-				onResume();
+                new LoadTask().execute();
 				break;
             case R.id.map:
                 Intent intent = new Intent(Intent.ACTION_VIEW);

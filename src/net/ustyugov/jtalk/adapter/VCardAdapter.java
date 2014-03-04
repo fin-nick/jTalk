@@ -31,7 +31,6 @@ public class VCardAdapter extends ArrayAdapter<View> {
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {	
-		View v = getItem(position);
-        return v;
+        return getItem(position);
     }
 }

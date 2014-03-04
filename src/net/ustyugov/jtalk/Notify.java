@@ -112,6 +112,7 @@ public class Notify {
     }
     
     public static void offlineNotify(Context context, String state) {
+        if (state == null) state = "";
 //    	newMessages = false;
         Intent i = new Intent(context, RosterActivity.class);
         i.setAction(Intent.ACTION_MAIN);

@@ -283,7 +283,7 @@ public class Bookmarks implements PrivateData {
 
         BookmarkedConference conf = new BookmarkedConference(jid);
         conf.setName(name);
-        conf.setAutoJoin(Boolean.valueOf(autojoin).booleanValue());
+        conf.setAutoJoin(Boolean.parseBoolean(autojoin));
 
         // Check for nickname
         boolean done = false;

@@ -23,7 +23,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import android.app.Activity;
-import com.google.android.gms.location.LocationClient;
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.RosterActivity;
 import net.ustyugov.jtalk.db.AccountDbHelper;
@@ -132,8 +131,6 @@ public class JTalkService extends Service {
 
     private WifiManager.WifiLock wifiLock;
     
-    private LocationClient locationClient;
-
     private IconPicker iconPicker;
 
     private Hashtable<String, Hashtable<String, List<MessageItem>>> messages = new Hashtable<String, Hashtable<String, List<MessageItem>>>();
@@ -158,10 +155,6 @@ public class JTalkService extends Service {
     public LocationExtension getLocation(String jid) {
         if (locations.containsKey(jid)) return locations.get(jid);
         else return null;
-    }
-
-    public LocationClient getLocationClient() {
-        return locationClient;
     }
 
     public void addTunes(String jid, TunesExtension tune) {
@@ -328,7 +321,7 @@ public class JTalkService extends Service {
     }
     public List<String> getCollapsedGroups() { return collapsedGroups; }
     public List<String> getComposeList() { return composeList; }
-    
+
     public Hashtable<String, Hashtable<String, MultiUserChat>> getConferences() {return conferences;}
     public Hashtable<String, MultiUserChat> getConferencesHash(String account) { 
     	if (conferences.containsKey(account)) return conferences.get(account); 
@@ -705,9 +698,6 @@ public class JTalkService extends Service {
     	prefs = PreferenceManager.getDefaultSharedPreferences(this);
         iconPicker = new IconPicker(this);
 
-        Location location = new Location();
-        locationClient = new LocationClient(this, location, location);
-
 //        updateReceiver = new BroadcastReceiver() {
 //			@Override
 //			public void onReceive(Context arg0, Intent arg1) {
@@ -771,7 +761,6 @@ public class JTalkService extends Service {
     public void disconnect() {
         if (!started) return;
         if (wifiLock != null && wifiLock.isHeld()) wifiLock.release();
-    	if (locationClient.isConnected()) locationClient.disconnect();
     	Collection<XMPPConnection> con = getAllConnections();
 		for (XMPPConnection connection: con) {
 			String account = StringUtils.parseBareAddress(connection.getUser());
@@ -933,7 +922,7 @@ public class JTalkService extends Service {
     public void joinRoom(final String account, final String group, final String nick, final String password) {
         if (connections.containsKey(account)) {
             final XMPPConnection connection = connections.get(account);
-            if (!connection.isAuthenticated()) return;
+            if (!connection.isConnected() || !connection.isAuthenticated()) return;
 
             new Thread() {
                 @Override
@@ -1047,7 +1036,7 @@ public class JTalkService extends Service {
     		Roster roster = getRoster(account);
     		if (roster != null) {
     			RosterEntry entry = roster.getEntry(jid);
-        		roster.removeEntry(entry);
+        		if (entry != null) roster.removeEntry(entry);
     		}
     		
 //    		getContentResolver().delete(JTalkProvider.CONTENT_URI, "jid = '" + jid + "'", null);
@@ -1302,63 +1291,6 @@ public class JTalkService extends Service {
   	  		}.start();
   		}
   	}
-
-    public void sendLocation() {
-        sendLocation(locationClient.getLastLocation());
-    }
-
-    public void sendLocation(final android.location.Location location) {
-        if (location != null) {
-            Collection<XMPPConnection> collection = connections.values();
-            for (XMPPConnection connection : collection) {
-                if (connection.isAuthenticated()) {
-                    IQ iq = new IQ() {
-                        public String getChildElementXML() {
-                            double lat = location.getLatitude();
-                            double lon = location.getLongitude();
-
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("<pubsub xmlns='http://jabber.org/protocol/pubsub'>");
-                            sb.append("<publish node='http://jabber.org/protocol/geoloc'>");
-                            sb.append("<item><geoloc xmlns='http://jabber.org/protocol/geoloc'>");
-                            sb.append("<lat>").append(lat).append("</lat>");
-                            sb.append("<lon>").append(lon).append("</lon>");
-                            sb.append("</geoloc></item></publish></pubsub>");
-                            return sb.toString();
-                        }
-                    };
-
-                    iq.setPacketID(System.currentTimeMillis()+"");
-                    iq.setType(IQ.Type.SET);
-                    iq.setTo(connection.getHost());
-                    connection.sendPacket(iq);
-                }
-            }
-        }
-    }
-
-    public void sendEmptyLocation() {
-        Collection<XMPPConnection> collection = connections.values();
-        for (XMPPConnection connection : collection) {
-            if (connection.isAuthenticated()) {
-                IQ iq = new IQ() {
-                    public String getChildElementXML() {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("<pubsub xmlns='http://jabber.org/protocol/pubsub'>");
-                        sb.append("<publish node='http://jabber.org/protocol/geoloc'>");
-                        sb.append("<item><geoloc xmlns='http://jabber.org/protocol/geoloc'>");
-                        sb.append("</geoloc></item></publish></pubsub>");
-                        return sb.toString();
-                    }
-                };
-
-                iq.setPacketID(System.currentTimeMillis()+"");
-                iq.setType(IQ.Type.SET);
-                iq.setTo(connection.getHost());
-                connection.sendPacket(iq);
-            }
-        }
-    }
 
     public void sendTunes(final String artist, final String title, final String source) {
         Collection<XMPPConnection> collection = connections.values();
@@ -1702,14 +1634,6 @@ public class JTalkService extends Service {
                         }
                     }
                 }.start();
-
-                if (prefs.getBoolean("Locations", false)) {
-                    if (!locationClient.isConnected() && !locationClient.isConnecting()) {
-                        locationClient.connect();
-                    }
-                } else {
-                    sendEmptyLocation();
-                }
 
                 if (prefs.getBoolean("Ping", false)) {
                     int timeout = 60000;

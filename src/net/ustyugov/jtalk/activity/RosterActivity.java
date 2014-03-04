@@ -26,7 +26,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.*;
-import com.google.android.gms.location.LocationClient;
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.account.Accounts;
 import net.ustyugov.jtalk.activity.muc.Bookmarks;
@@ -208,14 +207,6 @@ public class RosterActivity extends Activity implements OnItemClickListener, OnI
                 startActivity(intent);
 
                 service.removeSmiles();
-
-                LocationClient locationClient = service.getLocationClient();
-                if (prefs.getBoolean("Locations", false)) {
-                    if (!locationClient.isConnected()) locationClient.connect();
-                } else {
-                	if (locationClient.isConnected()) locationClient.disconnect();
-                    service.sendEmptyLocation();
-                }
             }
         }
     }

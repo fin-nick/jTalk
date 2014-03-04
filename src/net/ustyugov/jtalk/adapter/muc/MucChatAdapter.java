@@ -278,23 +278,19 @@ public class MucChatAdapter extends ArrayAdapter<MessageItem> implements TextLin
     }
 
     public void onTextLinkClick(View textView, String s) {
-        if (s.length() > 1) {
-            int idx = s.indexOf(":");
-            if (idx > 0) {
-                Uri uri = Uri.parse(s);
-                if (uri != null) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(uri);
-                    context.startActivity(intent);
-                }
-            } else {
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-                String separator = prefs.getString("nickSeparator", ", ");
+        if (s == null || s.length() < 1) return;
+        Uri uri = Uri.parse(s);
+        if (uri != null && uri.getScheme() != null && uri.getScheme().contains("http")) {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(uri);
+            context.startActivity(intent);
+        } else {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            String separator = prefs.getString("nickSeparator", ", ");
 
-                Intent intent = new Intent(Constants.PASTE_TEXT);
-                intent.putExtra("text", s + separator);
-                context.sendBroadcast(intent);
-            }
+            Intent intent = new Intent(Constants.PASTE_TEXT);
+            intent.putExtra("text", s + separator);
+            context.sendBroadcast(intent);
         }
     }
 

@@ -92,9 +92,7 @@ public class UsersAdapter extends ArrayAdapter<RosterItem> {
         
         TextView label = (TextView) v.findViewById(R.id.item);
         label.setText(nick);
-        if (Build.VERSION.SDK_INT >= 11) {
-        	label.setTextColor(Colors.PRIMARY_TEXT);
-        } else label.setTextColor(Colors.PRIMARY_TEXT);
+        label.setTextColor(Colors.PRIMARY_TEXT);
         
 		Presence presence = service.getRoster(account).getPresenceResource(group + "/" + nick);
       	ImageView icon = (ImageView)v.findViewById(R.id.status);

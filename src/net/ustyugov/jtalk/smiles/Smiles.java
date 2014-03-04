@@ -40,7 +40,6 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 
 public class Smiles implements DialogInterface.OnClickListener {
-    private SharedPreferences prefs;
 	private Hashtable<String, List<String>> table;
 	private Hashtable<String, String> smiles = new Hashtable<String, String>();
 	private String path;
@@ -49,7 +48,7 @@ public class Smiles implements DialogInterface.OnClickListener {
 	private int columns = 3;
 
 	public Smiles(Activity activity) {
-		prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
 		String pack = prefs.getString("SmilesPack", "default");
 		table = new Hashtable<String, List<String>>();
 		path = Constants.PATH_SMILES + pack;

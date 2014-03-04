@@ -296,10 +296,6 @@
                 android:key="WifiLock"
                 android:defaultValue="false"/>
         <CheckBoxPreference
-                android:title="@string/Locations"
-                android:key="Locations"
-                android:defaultValue="false"/>
-        <CheckBoxPreference
                 android:title="Send Tunes"
                 android:key="PlayingNow"
                 android:defaultValue="false"/>

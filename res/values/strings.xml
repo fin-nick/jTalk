@@ -205,6 +205,7 @@
     <string name="ShowOfflineContacts">Show offline contacts</string>
     <string name="SelectMessage">Select messages</string>
     <string name="Finish">Finish</string>
+    <string name="SendPhoto">Send photo</string>
 
     <!-- Dialogs -->
     <string name="Room">Room</string>

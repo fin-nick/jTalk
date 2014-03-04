@@ -24,6 +24,7 @@ import java.util.List;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.*;
+import android.net.Uri;
 import android.view.*;
 import android.widget.*;
 import net.ustyugov.jtalk.*;
@@ -36,6 +37,7 @@ import net.ustyugov.jtalk.adapter.muc.MucUserAdapter;
 import net.ustyugov.jtalk.db.JTalkProvider;
 import net.ustyugov.jtalk.db.MessageDbHelper;
 import net.ustyugov.jtalk.dialog.*;
+import net.ustyugov.jtalk.imgur.ImgurUploadTask;
 import net.ustyugov.jtalk.listener.DragAndDropListener;
 import net.ustyugov.jtalk.service.JTalkService;
 import net.ustyugov.jtalk.smiles.Smiles;
@@ -63,6 +65,7 @@ import com.jtalk2.R;
 
 public class Chat extends Activity implements View.OnClickListener, OnScrollListener {
     public static final int REQUEST_TEMPLATES = 1;
+    public static final int REQUEST_FILE = 2;
 
     private boolean isMuc = false;
     private boolean isPrivate = false;
@@ -518,6 +521,10 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.imgur:
+                Intent fIntent = new Intent(Intent.ACTION_GET_CONTENT, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(Intent.createChooser(fIntent, getString(R.string.SelectFile)), REQUEST_FILE);
+                break;
             case android.R.id.home:
                 startActivity(new Intent(this, RosterActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
                 finish();
@@ -652,11 +659,14 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK && requestCode == REQUEST_TEMPLATES) {
+        if (resultCode != RESULT_OK) return;
+        if (requestCode == REQUEST_TEMPLATES) {
             String text = data.getStringExtra("text");
             String oldtext = service.getText(jid);
             if (oldtext.length() > 0) text = oldtext + " " + text;
             service.setText(jid, text);
+        } else if (requestCode == REQUEST_FILE) {
+            uploadPhoto(data);
         }
     }
 
@@ -673,6 +683,15 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 }
             }
         }
+    }
+
+    private void uploadPhoto(Intent intent) {
+        Uri uri = intent.getData();
+        if (uri == null) return;
+        String j = jid;
+        if (isPrivate) j = jid;
+        else if (resource != null && resource.length() > 0) j = jid + "/" + resource;
+        new ImgurUploadTask(uri, this, account, j, muc).execute();
     }
 
 //    private void updateMessage(String id, String body) {

@@ -27,7 +27,6 @@ import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.RosterActivity;
 import net.ustyugov.jtalk.db.AccountDbHelper;
 import net.ustyugov.jtalk.db.JTalkProvider;
-import net.ustyugov.jtalk.dialog.RosterDialogs;
 import net.ustyugov.jtalk.listener.*;
 
 import net.ustyugov.jtalk.receivers.ChangeConnectionReceiver;

@@ -21,6 +21,9 @@ import android.os.Environment;
 import android.provider.BaseColumns;
 
 public final class Constants implements BaseColumns {
+    public static final String MY_IMGUR_CLIENT_ID = "816a42fd55c7b08";
+    public static final String MY_IMGUR_CLIENT_SECRET = "9e360b7d6435f52fdd1010fdd4314fb8329618b6";
+
 	public static final String JUICK = "juick@juick.com";
 	public static final String JUBO  = "jubo@nologin.ru";
 	public static final String PSTO  = "psto@psto.net";

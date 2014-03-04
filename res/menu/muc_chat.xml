@@ -23,6 +23,9 @@
     <item android:id="@+id/select"
           android:title="@string/SelectMessage"
           android:showAsAction="never"/>
+    <item android:id="@+id/imgur"
+          android:title="@string/SendPhoto"
+          android:showAsAction="never"/>
     <item android:id="@+id/search"
           android:title="@android:string/search_go"
           android:actionViewClass="android.widget.SearchView"

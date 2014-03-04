@@ -171,8 +171,8 @@ public class OpenChatsAdapter extends ArrayAdapter<RosterItem> {
                 }
             }
 
-            ImageView msg  = (ImageView) v.findViewById(R.id.msg);
-            msg.setImageBitmap(ip.getMsgBitmap());
+            ImageView msg = (ImageView) v.findViewById(R.id.msg);
+            if (ip != null) msg.setImageBitmap(ip.getMsgBitmap());
 
             TextView counter = (TextView) v.findViewById(R.id.msg_counter);
     		counter.setTextSize(fontSize);

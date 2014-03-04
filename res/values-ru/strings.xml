@@ -198,6 +198,7 @@
     <string name="ShowOfflineContacts">Показать отключенных</string>
     <string name="SelectMessage">Выбрать сообщения</string>
     <string name="Finish">Готово</string>
+    <string name="SendPhoto">Отправить фото</string>
 
     <!-- Dialogs -->
     <string name="Room">Комната</string>

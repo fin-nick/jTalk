@@ -89,7 +89,6 @@
     <string name="EnableCollapseMessages">Разрешить сворачивание сообщений</string>
     <string name="CollapseBigMessages">Автосворачивание сообщений</string>
     <string name="LoadAvatars">Показывать аватарки</string>
-    <string name="SendOnEnter">Отправка по \"Enter\"</string>
     <string name="ShowSmiles">Показывать смайлики</string>
     <string name="Autoscroll">Автопрокрутка</string>
     <string name="ShowClientsIcons">Иконки клиентов</string>

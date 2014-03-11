@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">jTalk</string>
     <string name="version">0.48</string>
-    <string name="build">403</string>
+    <string name="build">404</string>
     
     <string name="Connect">Connect</string>
     <string name="Disconnect">Disconnect</string>
@@ -97,7 +97,6 @@
     <string name="EnableCollapseMessages">Enable collapse messages</string>
     <string name="CollapseBigMessages">Auto collapse big messages</string>
     <string name="LoadAvatars">Show avatars</string>
-    <string name="SendOnEnter">Send on \"Enter\"</string>
     <string name="ShowSmiles">Show smiles</string>
     <string name="Autoscroll">Autoscroll</string>
     <string name="ShowClientsIcons">Show clients icons</string>

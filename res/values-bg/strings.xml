@@ -87,7 +87,6 @@
     <string name="EnableCollapseMessages">Позволи намалението на съобщенията</string>
     <string name="CollapseBigMessages">Автоматично намаление на съобщенията</string>
     <string name="LoadAvatars">Показвай аватарите</string>
-    <string name="SendOnEnter">Изпращане с \"Enter\"</string>
     <string name="ShowSmiles">Показвай емотикони</string>
     <string name="Autoscroll">Автоматично превъртане</string>
     <string name="ShowClientsIcons">Клиент икони</string>

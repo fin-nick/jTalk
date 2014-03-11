@@ -92,7 +92,6 @@
     <string name="EnableCollapseMessages">Compactar mensajes</string>
     <string name="CollapseBigMessages">Autocompactar mensajes largos</string>
     <string name="LoadAvatars">Mostrar avatares</string>
-    <string name="SendOnEnter">Enviar al pulsar \"Enter\"</string>
     <string name="ShowSmiles">Mostrar emoticonos</string>
     <string name="Autoscroll">Autoscroll</string>
     <string name="ShowClientsIcons">Mostrar iconos de cliente</string>

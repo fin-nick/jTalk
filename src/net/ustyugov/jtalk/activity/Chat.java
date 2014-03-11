@@ -325,24 +325,13 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         messageInput.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
                 if (s != null && s.length() > 0) {
-
-                    // Send on Enter
-                    String ch = s.charAt(s.length()-1) + "";
-                    if (ch.equals("\n")) {
-                        if (prefs.getBoolean("SendOnEnter", false)) {
-                            Editable sendText = s.delete(s.length() - 1, s.length());
-                            messageInput.setText(sendText);
-                            onClick(sendButton);
+                    if (!isMuc) {
+                        if (!compose) {
+                            compose = true;
+                            service.setChatState(account, jid, ChatState.composing);
                         }
-                    } else {
-                        if (!isMuc) {
-                            if (!compose) {
-                                compose = true;
-                                service.setChatState(account, jid, ChatState.composing);
-                            }
-                        }
-                        sendButton.setEnabled(service.isAuthenticated(account));
                     }
+                    sendButton.setEnabled(service.isAuthenticated(account));
                 } else {
                     if (!isMuc) {
                         if (compose) {
@@ -441,8 +430,6 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
         if (key == KeyEvent.KEYCODE_SEARCH) {
             MenuItem item = menu.findItem(R.id.search);
             item.expandActionView();
-        } else if (key == KeyEvent.KEYCODE_ENTER) {
-            onClick(sendButton);
         }
         return super.onKeyUp(key, event);
     }

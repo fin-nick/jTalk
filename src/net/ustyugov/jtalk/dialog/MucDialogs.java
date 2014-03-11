@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012, Igor Ustyugov <igor@ustyugov.net>
+ * Copyright (C) 2014, Igor Ustyugov <igor@ustyugov.net>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -330,46 +330,6 @@ public class MucDialogs {
 			}
 		});
         builder.create().show();
-	}
-	
-	public static void subjectDialog(final Activity activity, String account, final String group) {
-		final JTalkService service = JTalkService.getInstance();
-		if (service.getConferencesHash(account).containsKey(group)) {
-			final MultiUserChat muc = service.getConferencesHash(account).get(group);
-			if (muc.isJoined()) {
-				String subj = muc.getSubject();
-				if (subj == null) subj = "";
-				
-				LayoutInflater inflater = activity.getLayoutInflater();
-				View layout = inflater.inflate(R.layout.set_nick_dialog, (ViewGroup) activity.findViewById(R.id.set_nick_linear));
-				
-				final EditText edit = (EditText) layout.findViewById(R.id.nick_edit);
-				edit.setLines(6);
-			    edit.setText(subj);
-			    
-			    AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-				builder.setView(layout);
-				builder.setTitle(activity.getString(R.string.Subject));
-				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						String s = edit.getText().toString();
-						if(s != null && s.length() > 0) {
-							try {
-								muc.changeSubject(s);
-							} catch(XMPPException e) {
-								Toast.makeText(activity, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-							}
-						}
-					}
-				});
-				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.dismiss();
-					}
-				});
-				builder.create().show();
-			}
-		}
 	}
 	
 	public static void showUsersDialog(final Activity activity, final String account, final BookmarkedConference bc) {

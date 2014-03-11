@@ -135,7 +135,7 @@ public class SendToActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                Intent i = new Intent(service, RosterActivity.class);
+                Intent i = new Intent(this, RosterActivity.class);
                 i.setAction(Intent.ACTION_MAIN);
                 i.addCategory(Intent.CATEGORY_LAUNCHER);
                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

@@ -73,7 +73,8 @@ public class SearchAdapter extends ArrayAdapter<RosterItem> {
 		this.service = JTalkService.getInstance();
 		this.iconPicker = service.getIconPicker();
 		clear();
-		
+		if (!service.isAuthenticated()) return;
+
 		Cursor cursor = service.getContentResolver().query(JTalkProvider.ACCOUNT_URI, null, AccountDbHelper.ENABLED + " = '" + 1 + "'", null, null);
 		if (cursor != null && cursor.getCount() > 0) {
 			cursor.moveToFirst();

@@ -29,6 +29,7 @@ import android.view.*;
 import android.widget.*;
 import net.ustyugov.jtalk.*;
 import net.ustyugov.jtalk.activity.filetransfer.SendFileActivity;
+import net.ustyugov.jtalk.activity.muc.SubjectActivity;
 import net.ustyugov.jtalk.activity.note.TemplatesActivity;
 import net.ustyugov.jtalk.activity.vcard.VCardActivity;
 import net.ustyugov.jtalk.adapter.*;
@@ -539,7 +540,10 @@ public class Chat extends Activity implements View.OnClickListener, OnScrollList
                 builder.create().show();
                 break;
             case R.id.subj:
-                MucDialogs.subjectDialog(this, account, jid);
+                Intent sIntent = new Intent(this, SubjectActivity.class);
+                sIntent.putExtra("account", account);
+                sIntent.putExtra("jid", jid);
+                startActivity(sIntent);
                 break;
             case R.id.templates:
                 startActivityForResult(new Intent(this, TemplatesActivity.class), REQUEST_TEMPLATES);

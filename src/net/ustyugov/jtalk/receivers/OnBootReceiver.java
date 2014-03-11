@@ -31,10 +31,7 @@ public class OnBootReceiver extends BroadcastReceiver {
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
             if (prefs.getBoolean("AUTOSTART", false)) {
-            	int activeAccount = prefs.getInt("Account", 0);
-                if (activeAccount >= 1) {
-                	context.startService(new Intent(context, JTalkService.class));
-                }
+                context.startService(new Intent(context, JTalkService.class));
             }
         }
     }
